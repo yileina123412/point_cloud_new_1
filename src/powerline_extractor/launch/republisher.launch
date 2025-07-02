@@ -1,0 +1,11 @@
+<launch>
+    <node name="data_republisher" pkg="powerline_extractor" type="data_republisher_node" output="screen">
+        <param name="powerline_input_topic" value="/powerline_extractor/fine_extractor_cloud" />
+        <param name="powerline_output_topic" value="/republished_powerline" />
+        <param name="env_input_topic" value="/powerline_extractor/preprocessor_cloud" />
+        <param name="env_output_topic" value="/republished_env" />
+        <param name="markers_input_topic" value="/obb_marker" />
+        <param name="markers_output_topic" value="/republished_markers" />
+        <param name="republish_rate" value="1.0" />
+    </node>
+</launch>

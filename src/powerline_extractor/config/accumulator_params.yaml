@@ -1,0 +1,78 @@
+
+preprocessor:    #1
+  cube_size: 70.0          # 立方体边长（米）
+  octree_resolution: 0.1   # Octree 分辨率（米）
+  voxel_leaf_size: 0.11     # 降采样体素大小（米）
+
+
+power_line_coarse_extractor_s:      #1
+  linearity_threshold: 0.7    # 线型度阈值
+  curvature_threshold: 0.3    # 曲率阈值
+  planarity_threshold: 0.1    # 平面度阈值（可选）
+  use_planarity: false        # 是否启用平面度检查
+  cluster_tolerance: 0.3      # 聚类距离阈值（米）
+  min_cluster_size: 10        # 最小点数
+  variance_threshold: 0.1   # 法向量方差阈值
+  search_radius: 0.3    # 邻域搜索半径（米）
+  min_cluster_length: 0.3 # 最小簇长度（米）
+
+
+
+
+fineextract:                    #1
+  # 电力线精细提取参数
+  line_distance_threshold: 0.08      # 直线内点的距离阈值（米）
+  line_min_points: 20              # 形成一条直线的最小点数
+  max_lines: 10                     # 检测的最大直线数量
+  vertical_slice_width: 0.3         # 垂直切片宽度（米）
+  parabola_distance_threshold: 0.1  # 抛物线内点的距离阈值（米）
+  parabola_min_points: 15           # 拟合一条抛物线的最小点数
+  power_line_distance_threshold: 0.15 # 最终电力线点距离阈值（米）
+  angle_threshold: 0.99   #方向夹角阈值 默认 0.99（约 8 度）
+  distance_threshold: 3.0   #直线间距离阈值
+  min_parallel_lines: 1   #最小平行直线数量
+  min_line_length: 0.3   #最小直线长度
+  dbscan_epsilon: 0.5    #DBSCAN 邻域半径
+  dbscan_min_points: 10   #DBSCAN 最小邻域点数
+  cluster_min_points: 15   #聚类簇最小点数
+
+
+
+obstacle_analyze:              #1
+  cluster_tolerance: 0.3        # 聚类距离(m)
+  cluster_min_size: 30          # 最小点数
+  cluster_max_size: 50000       # 最大点数
+  distance_search_step: 0.05    # 冗余，可以不用
+
+
+# 电力线重构模块参数配置文件
+
+reconstruction:
+  # 片段分离参数
+  separation_distance: 0.5          # 片段分离距离阈值 (米)
+  min_segment_points: 3             # 片段最小点数
+  
+  # 连接性判断参数
+
+  max_connection_distance: 1.5       # 连接最大距离 (米) - 主要指主方向
+  max_perpendicular_distance: 0.5    # 垂直方向最大距离 (米)
+  direction_angle_threshold: 0.85    # 方向角度阈值 (余弦值，0.85约对应32度)
+  parallel_threshold: 0.9            # 平行线判断阈值 (余弦值)
+  
+  # 连接评分权重
+  connection_weight_distance: 0.6    # 距离权重
+  connection_weight_angle: 0.4       # 角度权重
+  
+  # 线重建参数
+  min_line_length: 3.0               # 最小线长度 (米)
+  spline_resolution: 0.1             # 样条拟合分辨率 (米)
+  
+  # 可视化参数
+  enable_visualization: true         # 是否启用最终结果可视化
+  enable_separation_visualization: true  # 是否启用片段分离可视化
+  visualization_duration: 1.0      # 可视化标记持续时间（秒，0表示永久）
+  frame_id: "map"             # 坐标系ID
+
+
+
+

@@ -1,0 +1,127 @@
+preprocessing:
+  # 降采样配置
+  downsampling:
+    enable: true              # 是否启用降采样
+    leaf_size: 0.1           # 体素网格大小(m)，越小保留更多细节，越大运行更快
+  
+  # 点云裁剪配置
+  cropping:
+    enable: true              # 是否启用点云裁剪
+    cube_size: 70.0          # 立方体边长(m)
+    center_x: 0.0            # 立方体中心X坐标(m)
+    center_y: 0.0            # 立方体中心Y坐标(m)
+    center_z: 0.0            # 立方体中心Z坐标(m)
+  
+  # CSF地面滤波配置（可选）
+  csf:
+    enable: false             # 是否启用地面滤波，默认关闭
+    classification_threshold: 0.4    # 地面分类阈值
+    max_iterations: 500              # 最大迭代次数
+    cloth_resolution: 0.1            # 布料分辨率
+    rigidness: 3                     # 布料刚性（1-3）
+    time_step: 1.65                  # 时间步长
+  
+  # 强度滤波配置（可选）
+  intensity:
+    enable: false             # 是否启用强度滤波，默认关闭
+    use_statistical_filtering: true  # 使用统计滤波（true）还是固定阈值（false）
+    iqr_factor: 1.5          # IQR倍数，用于统计滤波
+    min_intensity: 8200.0    # 最小强度阈值（固定阈值模式）
+    max_intensity: 9000.0    # 最大强度阈值（固定阈值模式）
+  
+  # 高程滤波配置（可选）
+  elevation:
+    enable: false             # 是否启用高程滤波，默认关闭
+    min_elevation_threshold: 10.0    # 最小高程阈值(m)
+    max_elevation_threshold: 80.0    # 最大高程阈值(m)
+    relative_to_ground: false        # 是否相对于地面高度
+  
+  # 通用配置
+  build_kdtree: true          # 是否构建KD树索引
+  verbose: true               # 是否输出详细处理信息
+
+  
+
+# 不同场景的预设配置
+scenarios:
+  # 城市密集区域
+  dense_urban:
+    preprocessing:
+      downsampling:
+        enable: true
+        leaf_size: 0.05       # 更精细的采样
+      cropping:
+        enable: true
+        cube_size: 50.0       # 较小的处理范围
+      csf:
+        enable: true          # 启用地面滤波
+        classification_threshold: 0.3
+      intensity:
+        enable: true          # 启用强度滤波
+        use_statistical_filtering: true
+        iqr_factor: 1.2       # 更严格的滤波
+      elevation:
+        enable: true          # 启用高程滤波
+        min_elevation_threshold: 15.0
+        max_elevation_threshold: 60.0
+      verbose: true
+  
+  # 郊区开阔地带
+  suburban:
+    preprocessing:
+      downsampling:
+        enable: true
+        leaf_size: 0.15       # 粗一些的采样
+      cropping:
+        enable: true
+        cube_size: 100.0      # 更大的处理范围
+      csf:
+        enable: false         # 地面相对平坦，可不用地面滤波
+      intensity:
+        enable: false         # 环境较简单，可不用强度滤波
+      elevation:
+        enable: true
+        min_elevation_threshold: 5.0
+        max_elevation_threshold: 100.0
+      verbose: true
+  
+  # 高噪声环境
+  high_noise:
+    preprocessing:
+      downsampling:
+        enable: true
+        leaf_size: 0.08       # 适中的采样以保留信息
+      cropping:
+        enable: true
+        cube_size: 70.0
+      csf:
+        enable: true          # 启用地面滤波去除噪声
+        classification_threshold: 0.5
+        max_iterations: 800   # 更多迭代
+      intensity:
+        enable: true          # 启用强度滤波
+        use_statistical_filtering: true
+        iqr_factor: 1.0       # 更严格的异常值检测
+      elevation:
+        enable: true
+        min_elevation_threshold: 12.0
+        max_elevation_threshold: 75.0
+      verbose: true
+  
+  # 最小处理（仅基本功能）
+  minimal:
+    preprocessing:
+      downsampling:
+        enable: true
+        leaf_size: 0.2        # 快速处理
+      cropping:
+        enable: true
+        cube_size: 70.0
+      csf:
+        enable: false         # 关闭所有可选滤波
+      intensity:
+        enable: false
+      elevation:
+        enable: false
+      build_kdtree: true
+      verbose: false

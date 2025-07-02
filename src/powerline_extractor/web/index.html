@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ROS 3D Viewer</title>
+    <script src="https://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+    <script src="https://static.robotwebtools.org/ros3djs/current/ros3d.min.js"></script>
+    <style>
+        body { margin: 0; }
+        #viewer { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="viewer"></div>
+    <script>
+        // 连接到rosbridge_server
+        var ros = new ROSLIB.Ros({ url: 'ws://10.21.230.8:9090' });
+        ros.on('connection', function() { console.log('Connected to websocket server.'); });
+        ros.on('error', function(error) { console.log('Error connecting to websocket server: ', error); });
+        ros.on('close', function() { console.log('Connection to websocket server closed.'); });
+        ros.on('connection', function() { alert('Connected to ROS'); });
+        ros.on('error', function(error) { alert('Error: ' + error); });
+
+        // 创建3D查看器
+        var viewer = new ROS3D.Viewer({
+            divID: 'viewer',
+            width: window.innerWidth,
+            height: window.innerHeight,
+            antialias: true
+        });
+
+        // 添加网格作为参考
+        var grid = new ROS3D.Grid();
+        viewer.addObject(grid);
+
+        // 订阅点云话题
+        var cloudClient = new ROS3D.PointCloud2({
+            ros: ros,
+            tfClient: new ROSLIB.TFClient({ ros: ros, fixedFrame: 'base_link', angularThres: 0.01, transThres: 0.01 }),
+            rootObject: viewer.scene,
+            topic: '/powerline_extractor/original_cloud',
+            material: { color: 0xaaaaaa }  // 灰色点云
+        });
+
+        // 订阅电力线标记
+        var powerLinesClient = new ROS3D.MarkerClient({
+            ros: ros,
+            tfClient: new ROSLIB.TFClient({ ros: ros, fixedFrame: 'base_link', angularThres: 0.01, transThres: 0.01 }),
+            topic: '/powerline_extractor/fine_extractor_cloud',
+            rootObject: viewer.scene
+        });
+
+        // 订阅物体标记（边界框和距离标签）
+        var objectMarkersClient = new ROS3D.MarkerClient({
+            ros: ros,
+            tfClient: new ROSLIB.TFClient({ ros: ros, fixedFrame: 'base_link', angularThres: 0.01, transThres: 0.01 }),
+            topic: '/obb_marker',
+            rootObject: viewer.scene
+        });
+    </script>
+</body>
+</html>

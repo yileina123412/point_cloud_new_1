@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <!-- 雷达相关参数 -->
+  
+  <arg name="lidar_topic" default="/livox/lidar"/>   <!--/livox/lidar   /rslidar_points  -->
+  <arg name="lidar_frame" default="livox_frame"/><!--livox_frame    rslidar -->
+  <arg name="target_frame" default="map"/>
+  
+  <!-- 预处理参数 -->
+  <arg name="voxel_size" default="0.1"/>
+  <arg name="min_range" default="0.8"/>
+  <arg name="max_range" default="100.0"/>
+  <arg name="min_height" default="-5.0"/>
+  <arg name="max_height" default="50.0"/>
+  
+  <!-- PCA电力线粗提取参数 -->
+  <arg name="pca_radius" default="0.5"/>
+  <arg name="linearity_threshold" default="0.6"/>
+  
+  <!-- 聚类参数 -->
+  <arg name="cluster_tolerance" default="2.0"/>
+  <arg name="min_cluster_size" default="15"/>
+  <arg name="max_cluster_size" default="100000"/>
+  
+  <!-- 离群点移除参数 -->
+  <arg name="outlier_mean_k" default="50"/>
+  <arg name="outlier_std_thresh" default="1.0"/>
+  
+  <!-- 处理频率 -->
+  <arg name="process_frequency" default="2.0"/>
+  <!-- 加载参数文件 -->
+  <rosparam command="load" file="$(find powerline_extractor)/config/accumulator_params.yaml" />
+  <rosparam command="load" file="$(find powerline_extractor)/config/preprocessing_config.yaml" />
+  
+  <!-- 启动电力线提取节点 -->
+  <node name="powerline_extractor" pkg="powerline_extractor" type="powerline_extractor_node" output="screen">
+    <!-- 雷达参数 -->
+    <param name="lidar_topic" value="$(arg lidar_topic)"/>
+    <param name="lidar_frame" value="$(arg lidar_frame)"/>
+    <param name="target_frame" value="$(arg target_frame)"/>
+    
+    <!-- 预处理参数 -->
+    <param name="voxel_size" value="$(arg voxel_size)"/>
+    <param name="min_range" value="$(arg min_range)"/>
+    <param name="max_range" value="$(arg max_range)"/>
+    <param name="min_height" value="$(arg min_height)"/>
+    <param name="max_height" value="$(arg max_height)"/>
+    
+    <!-- PCA粗提取参数 -->
+    <param name="pca_radius" value="$(arg pca_radius)"/>
+    <param name="linearity_threshold" value="$(arg linearity_threshold)"/>
+    
+    <!-- 聚类参数 -->
+    <param name="cluster_tolerance" value="$(arg cluster_tolerance)"/>
+    <param name="min_cluster_size" value="$(arg min_cluster_size)"/>
+    <param name="max_cluster_size" value="$(arg max_cluster_size)"/>
+    
+    <!-- 离群点移除参数 -->
+    <param name="outlier_mean_k" value="$(arg outlier_mean_k)"/>
+    <param name="outlier_std_thresh" value="$(arg outlier_std_thresh)"/>
+    
+    <!-- 处理频率 -->
+    <param name="process_frequency" value="$(arg process_frequency)"/>
+  </node>
+  
+  <!-- TF静态变换（如果需要的话） -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="lidar_to_map_broadcaster"
+        args="0 0 0 0 -1.5708 0 $(arg target_frame) $(arg lidar_frame)" />   <!--args="0 0 0 0 -1.5708 0 $(arg target_frame) $(arg lidar_frame)"-->
+ 
+  <!-- RViz可视化 -->
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find powerline_extractor)/rvizs/powerlines_extractor.rviz"  />
+  
+</launch>
