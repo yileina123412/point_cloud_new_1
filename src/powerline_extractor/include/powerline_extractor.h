@@ -25,6 +25,8 @@
 #include "power_line_fine_extraction.h"
 #include "obstacle_analyzer.h"
 #include "power_line_reconstruction.h"
+#include "building_edge_filter.h"
+
 
 //================= 融合多技术的现代电力线提取完整解决方案 =================
 #include "powerline_extraction/core/data_structures.h"
@@ -113,6 +115,10 @@ private:
     std::unique_ptr<PowerLineReconstructor> reconstruction_;
     std::vector<ReconstructedPowerLine> power_lines_;
     pcl::PointCloud<pcl::PointXYZI>::Ptr reconstruction_output_cloud_;
+
+    //过滤
+    std::unique_ptr<BuildingEdgeFilter> building_edge_filter_;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr building_edge_filter_output_cloud_;
 
 
     //================= 融合多技术的现代电力线提取完整解决方案 =================

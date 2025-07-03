@@ -1445,6 +1445,30 @@ data_republisher_node/fast:
 	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/data_republisher_node.dir/build.make powerline_extractor/CMakeFiles/data_republisher_node.dir/build
 .PHONY : data_republisher_node/fast
 
+src/building_edge_filter.o: src/building_edge_filter.cpp.o
+.PHONY : src/building_edge_filter.o
+
+# target to build an object file
+src/building_edge_filter.cpp.o:
+	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/building_edge_filter.cpp.o
+.PHONY : src/building_edge_filter.cpp.o
+
+src/building_edge_filter.i: src/building_edge_filter.cpp.i
+.PHONY : src/building_edge_filter.i
+
+# target to preprocess a source file
+src/building_edge_filter.cpp.i:
+	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/building_edge_filter.cpp.i
+.PHONY : src/building_edge_filter.cpp.i
+
+src/building_edge_filter.s: src/building_edge_filter.cpp.s
+.PHONY : src/building_edge_filter.s
+
+# target to generate assembly for a file
+src/building_edge_filter.cpp.s:
+	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/building_edge_filter.cpp.s
+.PHONY : src/building_edge_filter.cpp.s
+
 src/obstacle_analyzer.o: src/obstacle_analyzer.cpp.o
 .PHONY : src/obstacle_analyzer.o
 
@@ -1789,6 +1813,9 @@ help:
 	@echo "... data_republisher_node"
 	@echo "... powerline_extractor"
 	@echo "... powerline_extractor_node"
+	@echo "... src/building_edge_filter.o"
+	@echo "... src/building_edge_filter.i"
+	@echo "... src/building_edge_filter.s"
 	@echo "... src/obstacle_analyzer.o"
 	@echo "... src/obstacle_analyzer.i"
 	@echo "... src/obstacle_analyzer.s"

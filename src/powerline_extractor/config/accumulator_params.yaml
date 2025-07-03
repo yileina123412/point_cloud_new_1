@@ -10,10 +10,10 @@ power_line_coarse_extractor_s:      #1
   curvature_threshold: 0.3    # 曲率阈值
   planarity_threshold: 0.1    # 平面度阈值（可选）
   use_planarity: false        # 是否启用平面度检查
-  cluster_tolerance: 0.3      # 聚类距离阈值（米）
+  cluster_tolerance: 0.5      # 聚类距离阈值（米）
   min_cluster_size: 10        # 最小点数
   variance_threshold: 0.1   # 法向量方差阈值
-  search_radius: 0.3    # 邻域搜索半径（米）
+  search_radius: 0.5    # 邻域搜索半径（米）
   min_cluster_length: 0.3 # 最小簇长度（米）
 
 
@@ -49,13 +49,13 @@ obstacle_analyze:              #1
 
 reconstruction:
   # 片段分离参数
-  separation_distance: 0.5          # 片段分离距离阈值 (米)
+  separation_distance: 0.3          # 片段分离距离阈值 (米)
   min_segment_points: 3             # 片段最小点数
   
   # 连接性判断参数
 
-  max_connection_distance: 1.5       # 连接最大距离 (米) - 主要指主方向
-  max_perpendicular_distance: 0.5    # 垂直方向最大距离 (米)
+  max_connection_distance: 5.0       # 连接最大距离 (米) - 主要指主方向
+  max_perpendicular_distance: 0.3    # 垂直方向最大距离 (米)
   direction_angle_threshold: 0.85    # 方向角度阈值 (余弦值，0.85约对应32度)
   parallel_threshold: 0.9            # 平行线判断阈值 (余弦值)
   
@@ -72,6 +72,55 @@ reconstruction:
   enable_separation_visualization: true  # 是否启用片段分离可视化
   visualization_duration: 1.0      # 可视化标记持续时间（秒，0表示永久）
   frame_id: "map"             # 坐标系ID
+
+
+# 建筑物边缘过滤参数配置
+
+building_edge_filter:
+  # 圆柱形搜索区域半径 (单位: 米)
+  # 定义电力线周围的搜索半径，用于检测附近的点云
+  cylinder_radius: 0.2
+
+  # 头尾排除距离 (单位: 米)
+  # 排除电力线头尾指定距离内的区域，避免电线杆等连接结构的干扰
+  end_exclusion_distance: 0.3
+
+  # 最小平面面积阈值 (单位: 平方米)
+  # 当检测到的平面面积超过此阈值时，认为可能是建筑物边缘
+  min_plane_area: 0.2
+
+  # 最小平面密度阈值 (单位: 点数/平方米)
+  # 当平面上的点密度超过此阈值时，认为是实际的建筑物表面
+  min_plane_density: 10.0
+
+  # 平面拟合距离阈值 (单位: 米)
+  # RANSAC平面拟合时的内点距离阈值
+  plane_distance_threshold: 0.05
+
+  # 平面最小点数
+  # 构成有效平面所需的最小点数
+  min_plane_points: 10
+
+  # 坐标匹配容差 (单位: 米)
+  # 判断两个点是否为同一个点的距离容差
+  coordinate_tolerance: 0.01
+
+  # 启用调试输出
+  # 是否输出详细的调试信息
+  enable_debug_output: true
+
+  # 启用可视化
+  # 是否在RViz中显示过滤结果
+  enable_visualization: true
+
+  # 坐标系ID
+  # 可视化消息的坐标系
+  frame_id: "map"
+
+  # 可视化持续时间 (单位: 秒)
+  # 标记在RViz中的显示时间
+  visualization_duration: 1.0
+
 
 
 

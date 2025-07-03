@@ -27,6 +27,8 @@ PowerLineReconstructor::PowerLineReconstructor(ros::NodeHandle& nh) : nh_(nh) {
     reconstructed_lines_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("power_line_reconstruction/reconstructed_lines", 1);
     curve_markers_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("power_line_reconstruction/curve_markers", 1);
     segment_info_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("power_line_reconstruction/segment_info", 1);
+    segment_endpoints_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("power_line_reconstruction/segment_endpoints", 1);
+    segment_endpoint_lines_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("power_line_reconstruction/segment_endpoint_lines", 1);
 
     ROS_INFO("PowerLineReconstructor 初始化参数如下：");
     ROS_INFO("片段分离距离阈值: %f", separation_distance_);
@@ -74,6 +76,9 @@ void PowerLineReconstructor::reconstructPowerLines(const pcl::PointCloud<pcl::Po
     
     // 第二步：创建片段结构体
     createSegmentStructures(segments);
+
+    // 发布片段端点用于检查
+    publishSegmentEndpoints(segments);
     
     // 第三步：判断连接性
     std::vector<std::vector<int>> connected_groups;
@@ -271,12 +276,12 @@ bool PowerLineReconstructor::isConnectable(const PowerLineSegment& seg1, const P
     // 计算聚类体主方向与中心连线方向的夹角（防止两线段首尾相平平行）
     float angle_dir1_center = std::acos(seg1.overall_direction.dot(center_line_dir)) * 180.0 / M_PI;
     float angle_dir2_center = std::acos(seg2.overall_direction.dot(center_line_dir)) * 180.0 / M_PI;
-    float max_angle_diff_degree_ = 10.0f;
+    float max_angle_diff_degree_ = 45.0f;
     // 设置一个阈值，防止平行线段连接（比如大于某个角度认为不是平行）
-    if (std::abs(angle_dir1_center) < max_angle_diff_degree_ || std::abs(angle_dir2_center) < max_angle_diff_degree_) {
-        // 表示两条线段整体方向与中心线方向过于平行，不连接
-        return false;
-    }
+    // if (std::abs(angle_dir1_center) > max_angle_diff_degree_ || std::abs(angle_dir2_center) > max_angle_diff_degree_) {
+    //     // 表示两条线段整体方向与中心线方向过于平行，不连接
+    //     return false;
+    // }
     
     // // 2. 计算两个片段主方向的角度差（余弦值）
     // float direction_cos = std::abs(seg1.overall_direction.dot(seg2.overall_direction));
@@ -821,4 +826,113 @@ void PowerLineReconstructor::visualizeSeparationResults(const pcl::PointCloud<pc
     } catch (const std::exception& e) {
         ROS_ERROR("片段分离可视化发布失败: %s", e.what());
     }
+}
+void PowerLineReconstructor::publishSegmentEndpoints(const std::vector<PowerLineSegment>& segments) {
+    // 1. 发布端点点云
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr endpoints_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
+    
+    for (size_t i = 0; i < segments.size(); ++i) {
+        const auto& segment = segments[i];
+        
+        // 起始点 - 绿色
+        pcl::PointXYZRGB start_pt;
+        start_pt.x = segment.start_point[0];
+        start_pt.y = segment.start_point[1];
+        start_pt.z = segment.start_point[2];
+        start_pt.r = 0;
+        start_pt.g = 255;
+        start_pt.b = 0;
+        endpoints_cloud->push_back(start_pt);
+        
+        // 终点 - 红色
+        pcl::PointXYZRGB end_pt;
+        end_pt.x = segment.end_point[0];
+        end_pt.y = segment.end_point[1];
+        end_pt.z = segment.end_point[2];
+        end_pt.r = 255;
+        end_pt.g = 0;
+        end_pt.b = 0;
+        endpoints_cloud->push_back(end_pt);
+    }
+    
+    // 发布端点点云
+    sensor_msgs::PointCloud2 endpoints_msg;
+    pcl::toROSMsg(*endpoints_cloud, endpoints_msg);
+    endpoints_msg.header.frame_id = frame_id_;
+    endpoints_msg.header.stamp = ros::Time::now();
+    segment_endpoints_pub_.publish(endpoints_msg);
+    
+    // 2. 发布连线标记
+    visualization_msgs::MarkerArray marker_array;
+    std::vector<Eigen::Vector3f> colors = generateColorPalette(segments.size());
+    
+    for (size_t i = 0; i < segments.size(); ++i) {
+        const auto& segment = segments[i];
+        const auto& color = colors[i];
+        
+        // 创建连线标记
+        visualization_msgs::Marker line_marker;
+        line_marker.header.frame_id = frame_id_;
+        line_marker.header.stamp = ros::Time::now();
+        line_marker.ns = "segment_endpoint_lines";
+        line_marker.id = static_cast<int>(i);
+        line_marker.type = visualization_msgs::Marker::LINE_STRIP;
+        line_marker.action = visualization_msgs::Marker::ADD;
+        line_marker.pose.orientation.w = 1.0;
+        
+        // 设置线条属性
+        line_marker.scale.x = 0.03;  // 线宽，稍细一些
+        line_marker.color = eigenToColorRGBA(color, 0.8f);  // 稍透明
+        line_marker.lifetime = ros::Duration(visualization_duration_);
+        
+        // 添加起点和终点
+        geometry_msgs::Point start_point, end_point;
+        start_point.x = segment.start_point[0];
+        start_point.y = segment.start_point[1];
+        start_point.z = segment.start_point[2];
+        end_point.x = segment.end_point[0];
+        end_point.y = segment.end_point[1];
+        end_point.z = segment.end_point[2];
+        
+        line_marker.points.push_back(start_point);
+        line_marker.points.push_back(end_point);
+        
+        marker_array.markers.push_back(line_marker);
+        
+        // 添加片段ID文本标记（在线的中点）
+        visualization_msgs::Marker text_marker;
+        text_marker.header.frame_id = frame_id_;
+        text_marker.header.stamp = ros::Time::now();
+        text_marker.ns = "segment_endpoint_text";
+        text_marker.id = static_cast<int>(i);
+        text_marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+        text_marker.action = visualization_msgs::Marker::ADD;
+        
+        // 文本位置（线段中点）
+        Eigen::Vector3f mid_point = (segment.start_point + segment.end_point) / 2.0f;
+        text_marker.pose.position.x = mid_point[0];
+        text_marker.pose.position.y = mid_point[1];
+        text_marker.pose.position.z = mid_point[2] + 0.1;  // 稍微抬高
+        text_marker.pose.orientation.w = 1.0;
+        
+        // 设置文本属性
+        text_marker.scale.z = 0.2;  // 文本大小
+        text_marker.color.r = 1.0;
+        text_marker.color.g = 1.0;
+        text_marker.color.b = 1.0;
+        text_marker.color.a = 1.0;
+        text_marker.lifetime = ros::Duration(visualization_duration_);
+        
+        // 文本内容
+        std::ostringstream ss;
+        ss << "S" << i << "\n" << std::fixed << std::setprecision(2) << segment.length << "m";
+        text_marker.text = ss.str();
+        
+        marker_array.markers.push_back(text_marker);
+    }
+    
+    // 发布连线标记到专门的话题
+    segment_endpoint_lines_pub_.publish(marker_array);
+    
+    ROS_INFO("已发布 %zu 个片段的端点和连线（绿色=起点，红色=终点，彩色线条=片段范围）", segments.size());
 }

@@ -179,6 +179,7 @@ add_library(${PROJECT_NAME}
   src/power_line_coarse_extractor_s.cpp
   src/obstacle_analyzer.cpp
   src/power_line_reconstruction.cpp
+  src/building_edge_filter.cpp
   ${SOURCES}
   
 

@@ -13,7 +13,8 @@ PowerlineExtractor::PowerlineExtractor(ros::NodeHandle& nh, ros::NodeHandle& pri
       clustered_powerline_cloud_(new pcl::PointCloud<pcl::PointXYZI>()),
       fine_extract_cloud_(new pcl::PointCloud<pcl::PointXYZI>()),
       filtered_pc_(new pcl::PointCloud<pcl::PointXYZI>()),
-      reconstruction_output_cloud_(new pcl::PointCloud<pcl::PointXYZI>()) {
+      reconstruction_output_cloud_(new pcl::PointCloud<pcl::PointXYZI>()),
+      building_edge_filter_output_cloud_(new pcl::PointCloud<pcl::PointXYZI>()) {
     
     // 初始化TF
     tf_buffer_ = std::make_unique<tf2_ros::Buffer>();
@@ -89,6 +90,7 @@ void PowerlineExtractor::initializeFineExtractor(){
 
     fine_extractor_ = std::make_unique<PowerLineFineExtractor>(nh_);
     reconstruction_.reset(new PowerLineReconstructor(nh_));
+    building_edge_filter_.reset(new BuildingEdgeFilter(nh_));
 
     ROS_INFO("Fine extractor initialized successfully");
 
@@ -136,9 +138,20 @@ void PowerlineExtractor::initializeSubscribers() {
 
 void PowerlineExtractor::process_first_method(const std_msgs::Header& header){
 
-    preprocessor_->processPointCloud(original_cloud_);
+    auto pre_start = std::chrono::high_resolution_clock::now();
+    preprocessor_->processPointCloud(original_cloud_);  //0.04
+    auto pre_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> pre_duration = pre_end - pre_start;
+    ROS_INFO("预处理电力线 执行时间: %f 秒", pre_duration.count());
+
+
     preprocessor__output_cloud_ = preprocessor_->getProcessedCloud();
-    extractor_s_->extractPowerLinesByPoints(preprocessor_);
+    auto extractor_start = std::chrono::high_resolution_clock::now();
+    extractor_s_->extractPowerLinesByPoints(preprocessor_);    //0.3
+    auto extractor_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> extractor_duration = extractor_end - extractor_start;
+    ROS_INFO("粗提取电力线 执行时间: %f 秒", extractor_duration.count());
+
     extractor_s__output_cloud_ = extractor_s_->getExtractedCloud();
     ROS_INFO("extractor_s__output_cloud_ 粗提取_s: %ld",extractor_s__output_cloud_->size());
     
@@ -147,14 +160,24 @@ void PowerlineExtractor::process_first_method(const std_msgs::Header& header){
                         clustered_powerline_cloud_, header);
     
     // 精提取
-    fine_extractor_->extractPowerLines(extractor_s__output_cloud_,fine_extract_cloud_);
+    fine_extractor_->extractPowerLines(extractor_s__output_cloud_,fine_extract_cloud_); //0.09s
 
-    reconstruction_->reconstructPowerLines(fine_extract_cloud_,reconstruction_output_cloud_,power_lines_);
 
-    analyzer_->analyzeObstacles(preprocessor__output_cloud_, fine_extract_cloud_, obbs_);
-        //发布距离可视化
-    analyzer_->publishObbMarkers(obbs_, obb_marker_pub, "map");
-    analyzer_->publishPowerlineDistanceMarkers(fine_extract_cloud_,powerlines_distance_cloud_pub_,"map");
+
+  
+    reconstruction_->reconstructPowerLines(fine_extract_cloud_,reconstruction_output_cloud_,power_lines_);//0.2s
+   
+    building_edge_filter_->filterBuildingEdges(preprocessor__output_cloud_,power_lines_,building_edge_filter_output_cloud_);
+    
+    // auto analy_star = std::chrono::high_resolution_clock::now();
+    // analyzer_->analyzeObstacles(preprocessor__output_cloud_, fine_extract_cloud_, obbs_); //0.4
+    // auto analy_end = std::chrono::high_resolution_clock::now();
+    // std::chrono::duration<double> analy_duration = analy_end - analy_star;
+    // ROS_INFO("障碍物检测 执行时间: %f 秒", analy_duration.count());
+    // //发布距离可视化
+    // analyzer_->publishObbMarkers(obbs_, obb_marker_pub, "map");
+    // analyzer_->publishPowerlineDistanceMarkers(fine_extract_cloud_,powerlines_distance_cloud_pub_,"map");
+
 }
 
 
@@ -194,7 +217,7 @@ void PowerlineExtractor::pointCloudCallback(const sensor_msgs::PointCloud2::Cons
         process_first_method(transformed_msg.header);
         auto end_time = std::chrono::high_resolution_clock::now();
         double all_time = std::chrono::duration<double, std::milli>(end_time - start_time).count();
-        ROS_INFO("[PreProcessor] Total processing time: %.3f ms", 
+        ROS_INFO("整个过程总共运行时间: %.3f ms", 
                      all_time);
 
                      

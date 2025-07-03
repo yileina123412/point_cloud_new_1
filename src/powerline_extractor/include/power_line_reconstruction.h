@@ -62,6 +62,9 @@ private:
     ros::Publisher reconstructed_lines_pub_;      // 重构电力线发布器
     ros::Publisher curve_markers_pub_;            // 拟合曲线标记发布器
     ros::Publisher segment_info_pub_;             // 片段信息标记发布器
+    ros::Publisher segment_endpoints_pub_;        // 片段端点发布器
+    ros::Publisher segment_endpoint_lines_pub_;   // 片段端点连线发布器
+
     // 参数变量
     double separation_distance_;        // 片段分离距离阈值
     double min_segment_points_;        // 片段最小点数
@@ -140,6 +143,8 @@ private:
     float pointDistance(const Eigen::Vector3f &p1, const Eigen::Vector3f &p2) {
         return (p1 - p2).norm();
     }
+    //发布端点的函数
+    void publishSegmentEndpoints(const std::vector<PowerLineSegment>& segments);
 };
 
 #endif // POWER_LINE_RECONSTRUCTION_H
