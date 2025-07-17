@@ -17,6 +17,7 @@ debug_cloud((new pcl::PointCloud<pcl::PointXYZRGB>())) {
     nh.param("building_edge_filter/enable_visualization", enable_visualization_, true);
     nh.param("building_edge_filter/frame_id", frame_id_, std::string("base_link"));
     nh.param("building_edge_filter/visualization_duration", visualization_duration_, 10.0);
+    nh.param("building_edge_filter/powerline_expansion_radius", powerline_expansion_radius_, 0.05f);
 
     // 初始化ROS发布器
     filtered_lines_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("building_edge_filter/filtered_lines", 1);
@@ -37,6 +38,7 @@ debug_cloud((new pcl::PointCloud<pcl::PointXYZRGB>())) {
     ROS_INFO("启用可视化: %s", enable_visualization_ ? "是" : "否");
     ROS_INFO("坐标系ID: %s", frame_id_.c_str());
     ROS_INFO("可视化持续时间: %.1f 秒", visualization_duration_);
+    ROS_INFO("电力线扩展搜索半径: %.3f m", powerline_expansion_radius_);
 }
 
 bool BuildingEdgeFilter::filterBuildingEdges(
@@ -178,9 +180,12 @@ bool BuildingEdgeFilter::checkSinglePowerLine(
     }
 
     ROS_INFO("电力线 %d 圆柱区域找到 %zu 个点", power_line.line_id, cylinder_cloud->size());
+    // 扩展电力线点云
+    pcl::PointCloud<pcl::PointXYZI>::Ptr expanded_powerline = 
+        expandPowerLinePoints(environment_cloud, power_line, powerline_expansion_radius_);
 
     // 移除电力线自身的点
-    removePowerLinePoints(cylinder_cloud, power_line);
+    removePowerLinePoints(cylinder_cloud, expanded_powerline);
 
     ROS_INFO("电力线 %d 移除自身点后剩余 %zu 个点", power_line.line_id, cylinder_cloud->size());
 
@@ -269,9 +274,9 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr BuildingEdgeFilter::createCylinderRegion(
 
 void BuildingEdgeFilter::removePowerLinePoints(
     pcl::PointCloud<pcl::PointXYZI>::Ptr& cylinder_cloud,
-    const ReconstructedPowerLine& power_line) {
+    const pcl::PointCloud<pcl::PointXYZI>::Ptr& powerline_cloud) {
     
-    if (cylinder_cloud->empty() || power_line.points->empty()) {
+    if (cylinder_cloud->empty() || powerline_cloud->empty()) {
         return;
     }
 
@@ -283,7 +288,7 @@ void BuildingEdgeFilter::removePowerLinePoints(
         bool is_powerline_point = false;
 
         // 检查是否与电力线中的任何点匹配
-        for (const auto& pl_point : power_line.points->points) {
+        for (const auto& pl_point : powerline_cloud->points) {
             if (arePointsClose(cyl_point, pl_point, coordinate_tolerance_)) {
                 is_powerline_point = true;
                 break;
@@ -723,4 +728,53 @@ void BuildingEdgeFilter::validatePowerLinesIntegrity(
     ROS_INFO("  - 空电力线数: %d", empty_lines);
     ROS_INFO("  - 总点数: %d", total_points);
     ROS_INFO("=== 验证完成 ===");
+}
+
+
+pcl::PointCloud<pcl::PointXYZI>::Ptr BuildingEdgeFilter::expandPowerLinePoints(
+    const pcl::PointCloud<pcl::PointXYZI>::Ptr& environment_cloud,
+    const ReconstructedPowerLine& power_line,
+    float search_radius) {
+    
+    pcl::PointCloud<pcl::PointXYZI>::Ptr expanded_cloud(new pcl::PointCloud<pcl::PointXYZI>);
+    
+    if (power_line.points->empty() || environment_cloud->empty()) {
+        return expanded_cloud;
+    }
+    
+    // 创建KdTree用于搜索
+    pcl::search::KdTree<pcl::PointXYZI>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZI>);
+    kdtree->setInputCloud(environment_cloud);
+    
+    // 用set去重
+    std::set<std::tuple<float, float, float>> unique_points;
+    
+    // 对每个电力线点进行半径搜索
+    for (const auto& pl_point : power_line.points->points) {
+        std::vector<int> indices;
+        std::vector<float> distances;
+        
+        if (kdtree->radiusSearch(pl_point, search_radius, indices, distances) > 0) {
+            for (int idx : indices) {
+                const auto& env_point = environment_cloud->points[idx];
+                // 使用坐标作为key去重
+                unique_points.insert(std::make_tuple(env_point.x, env_point.y, env_point.z));
+            }
+        }
+    }
+    
+    // 将去重后的点添加到扩展点云
+    for (const auto& point_tuple : unique_points) {
+        pcl::PointXYZI point;
+        point.x = std::get<0>(point_tuple);
+        point.y = std::get<1>(point_tuple);
+        point.z = std::get<2>(point_tuple);
+        point.intensity = 0;
+        expanded_cloud->push_back(point);
+    }
+    
+    ROS_INFO("电力线 %d 扩展：原始点数 %zu，扩展后点数 %zu", 
+             power_line.line_id, power_line.points->size(), expanded_cloud->size());
+    
+    return expanded_cloud;
 }

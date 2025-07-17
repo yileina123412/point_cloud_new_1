@@ -6,5 +6,5 @@ CXX_DEFINES = -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKA
 
 CXX_INCLUDES = -I/usr/include/vtk-7.1 -I/usr/include/freetype2 -I/home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I/usr/include/eigen3 -I/usr/include/pcl-1.10 -I/usr/include/ni -I/usr/include/openni2 -I/usr/include/opencv4
 
-CXX_FLAGS = -O3 -DNDEBUG -std=gnu++14
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17
 

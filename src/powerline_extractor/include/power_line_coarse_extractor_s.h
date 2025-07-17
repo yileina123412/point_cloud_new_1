@@ -15,9 +15,10 @@
 class PowerLineCoarseExtractor {
 public:
     PowerLineCoarseExtractor(ros::NodeHandle& nh);
-    void extractPowerLines(const std::unique_ptr<PointCloudPreprocessor>& preprocessor);
-    void extractPowerLinesByPoints(const std::unique_ptr<PointCloudPreprocessor>& preprocessor_ptr);
+
+    void extractPowerLinesByPoints(const pcl::PointCloud<pcl::PointXYZI>::Ptr& input_cloud);
     pcl::PointCloud<pcl::PointXYZI>::Ptr getExtractedCloud() const;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr getEnvWithoutPowerCloud() const;
 
     // 新增可视化函数
     void visualizeParameters(const std::unique_ptr<PointCloudPreprocessor>& preprocessor_ptr);
@@ -38,12 +39,21 @@ private:
         std::vector<pcl::PointIndices>& cluster_indices,
         double min_length);
 
+    // 新增函数：边沿过滤
+    void filterEdgePoints(const pcl::PointCloud<pcl::PointXYZI>::Ptr& input_cloud,
+                         const pcl::PointCloud<pcl::PointXYZI>::Ptr& original_cloud,
+                         const pcl::PointCloud<pcl::Normal>::Ptr& normals);
 
+    
     //pub
     ros::Publisher pub_linearity_;
     ros::Publisher pub_curvature_;
     ros::Publisher pub_variance_;
-    // 参数
+
+    // 在现有pub后面添加 建筑物边沿检测
+    ros::Publisher pub_qualified_;
+    ros::Publisher pub_unqualified_;
+    // 参数 
     double linearity_threshold_;
     double curvature_threshold_;
     double planarity_threshold_;
@@ -58,6 +68,15 @@ private:
     // 新增参数
     double min_cluster_length_;
 
+   
+    // 在现有参数后面添加  建筑物边沿检测
+    double edge_check_radius_;        // 边沿检查半径
+    int max_unqualified_neighbors_;   // 最大不合格邻居点数量
+
+   
+
+
+
 
     // PCL 对象
     pcl::NormalEstimation<pcl::PointXYZI, pcl::Normal> normal_estimation_;
@@ -65,6 +84,8 @@ private:
 
     // 提取后的点云
     pcl::PointCloud<pcl::PointXYZI>::Ptr extracted_cloud_;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr env_without_powerline_cloud_;
+
     // ROS NodeHandle 用于发布
     ros::NodeHandle& nh_;
 };

@@ -961,6 +961,7 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
   /usr/include/c++/9/bits/cpp_type_traits.h \
   /usr/include/c++/9/bits/cxxabi_forced.h \
   /usr/include/c++/9/bits/cxxabi_init_exception.h \
+  /usr/include/c++/9/bits/enable_special_members.h \
   /usr/include/c++/9/bits/erase_if.h \
   /usr/include/c++/9/bits/exception.h \
   /usr/include/c++/9/bits/exception_defines.h \
@@ -968,6 +969,8 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
   /usr/include/c++/9/bits/functexcept.h \
   /usr/include/c++/9/bits/functional_hash.h \
   /usr/include/c++/9/bits/hash_bytes.h \
+  /usr/include/c++/9/bits/hashtable.h \
+  /usr/include/c++/9/bits/hashtable_policy.h \
   /usr/include/c++/9/bits/invoke.h \
   /usr/include/c++/9/bits/ios_base.h \
   /usr/include/c++/9/bits/istream.tcc \
@@ -983,6 +986,7 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
   /usr/include/c++/9/bits/memoryfwd.h \
   /usr/include/c++/9/bits/move.h \
   /usr/include/c++/9/bits/nested_exception.h \
+  /usr/include/c++/9/bits/node_handle.h \
   /usr/include/c++/9/bits/ostream.tcc \
   /usr/include/c++/9/bits/ostream_insert.h \
   /usr/include/c++/9/bits/parse_numbers.h \
@@ -995,6 +999,7 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
   /usr/include/c++/9/bits/shared_ptr.h \
   /usr/include/c++/9/bits/shared_ptr_atomic.h \
   /usr/include/c++/9/bits/shared_ptr_base.h \
+  /usr/include/c++/9/bits/specfun.h \
   /usr/include/c++/9/bits/sstream.tcc \
   /usr/include/c++/9/bits/std_abs.h \
   /usr/include/c++/9/bits/std_function.h \
@@ -1023,10 +1028,12 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
   /usr/include/c++/9/bits/stream_iterator.h \
   /usr/include/c++/9/bits/streambuf.tcc \
   /usr/include/c++/9/bits/streambuf_iterator.h \
+  /usr/include/c++/9/bits/string_view.tcc \
   /usr/include/c++/9/bits/stringfwd.h \
   /usr/include/c++/9/bits/uniform_int_dist.h \
   /usr/include/c++/9/bits/unique_lock.h \
   /usr/include/c++/9/bits/unique_ptr.h \
+  /usr/include/c++/9/bits/unordered_map.h \
   /usr/include/c++/9/bits/uses_allocator.h \
   /usr/include/c++/9/bits/vector.tcc \
   /usr/include/c++/9/cassert \
@@ -1075,7 +1082,12 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
   /usr/include/c++/9/memory \
   /usr/include/c++/9/mutex \
   /usr/include/c++/9/new \
+  /usr/include/c++/9/optional \
   /usr/include/c++/9/ostream \
+  /usr/include/c++/9/pstl/execution_defs.h \
+  /usr/include/c++/9/pstl/glue_algorithm_defs.h \
+  /usr/include/c++/9/pstl/glue_memory_defs.h \
+  /usr/include/c++/9/pstl/pstl_config.h \
   /usr/include/c++/9/ratio \
   /usr/include/c++/9/set \
   /usr/include/c++/9/sstream \
@@ -1083,10 +1095,24 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
   /usr/include/c++/9/stdlib.h \
   /usr/include/c++/9/streambuf \
   /usr/include/c++/9/string \
+  /usr/include/c++/9/string_view \
   /usr/include/c++/9/system_error \
+  /usr/include/c++/9/tr1/bessel_function.tcc \
+  /usr/include/c++/9/tr1/beta_function.tcc \
+  /usr/include/c++/9/tr1/ell_integral.tcc \
+  /usr/include/c++/9/tr1/exp_integral.tcc \
+  /usr/include/c++/9/tr1/gamma.tcc \
+  /usr/include/c++/9/tr1/hypergeometric.tcc \
+  /usr/include/c++/9/tr1/legendre_function.tcc \
+  /usr/include/c++/9/tr1/modified_bessel_func.tcc \
+  /usr/include/c++/9/tr1/poly_hermite.tcc \
+  /usr/include/c++/9/tr1/poly_laguerre.tcc \
+  /usr/include/c++/9/tr1/riemann_zeta.tcc \
+  /usr/include/c++/9/tr1/special_function_util.h \
   /usr/include/c++/9/tuple \
   /usr/include/c++/9/type_traits \
   /usr/include/c++/9/typeinfo \
+  /usr/include/c++/9/unordered_map \
   /usr/include/c++/9/utility \
   /usr/include/c++/9/vector \
   /usr/include/ctype.h \
@@ -2197,6 +2223,7 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
   /usr/include/c++/9/bits/cpp_type_traits.h \
   /usr/include/c++/9/bits/cxxabi_forced.h \
   /usr/include/c++/9/bits/cxxabi_init_exception.h \
+  /usr/include/c++/9/bits/enable_special_members.h \
   /usr/include/c++/9/bits/erase_if.h \
   /usr/include/c++/9/bits/exception.h \
   /usr/include/c++/9/bits/exception_defines.h \
@@ -2204,6 +2231,8 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
   /usr/include/c++/9/bits/functexcept.h \
   /usr/include/c++/9/bits/functional_hash.h \
   /usr/include/c++/9/bits/hash_bytes.h \
+  /usr/include/c++/9/bits/hashtable.h \
+  /usr/include/c++/9/bits/hashtable_policy.h \
   /usr/include/c++/9/bits/invoke.h \
   /usr/include/c++/9/bits/ios_base.h \
   /usr/include/c++/9/bits/istream.tcc \
@@ -2219,6 +2248,7 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
   /usr/include/c++/9/bits/memoryfwd.h \
   /usr/include/c++/9/bits/move.h \
   /usr/include/c++/9/bits/nested_exception.h \
+  /usr/include/c++/9/bits/node_handle.h \
   /usr/include/c++/9/bits/ostream.tcc \
   /usr/include/c++/9/bits/ostream_insert.h \
   /usr/include/c++/9/bits/parse_numbers.h \
@@ -2231,6 +2261,7 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
   /usr/include/c++/9/bits/shared_ptr.h \
   /usr/include/c++/9/bits/shared_ptr_atomic.h \
   /usr/include/c++/9/bits/shared_ptr_base.h \
+  /usr/include/c++/9/bits/specfun.h \
   /usr/include/c++/9/bits/sstream.tcc \
   /usr/include/c++/9/bits/std_abs.h \
   /usr/include/c++/9/bits/std_function.h \
@@ -2259,10 +2290,12 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
   /usr/include/c++/9/bits/stream_iterator.h \
   /usr/include/c++/9/bits/streambuf.tcc \
   /usr/include/c++/9/bits/streambuf_iterator.h \
+  /usr/include/c++/9/bits/string_view.tcc \
   /usr/include/c++/9/bits/stringfwd.h \
   /usr/include/c++/9/bits/uniform_int_dist.h \
   /usr/include/c++/9/bits/unique_lock.h \
   /usr/include/c++/9/bits/unique_ptr.h \
+  /usr/include/c++/9/bits/unordered_map.h \
   /usr/include/c++/9/bits/uses_allocator.h \
   /usr/include/c++/9/bits/vector.tcc \
   /usr/include/c++/9/cassert \
@@ -2311,7 +2344,12 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
   /usr/include/c++/9/memory \
   /usr/include/c++/9/mutex \
   /usr/include/c++/9/new \
+  /usr/include/c++/9/optional \
   /usr/include/c++/9/ostream \
+  /usr/include/c++/9/pstl/execution_defs.h \
+  /usr/include/c++/9/pstl/glue_algorithm_defs.h \
+  /usr/include/c++/9/pstl/glue_memory_defs.h \
+  /usr/include/c++/9/pstl/pstl_config.h \
   /usr/include/c++/9/ratio \
   /usr/include/c++/9/set \
   /usr/include/c++/9/sstream \
@@ -2319,10 +2357,24 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
   /usr/include/c++/9/stdlib.h \
   /usr/include/c++/9/streambuf \
   /usr/include/c++/9/string \
+  /usr/include/c++/9/string_view \
   /usr/include/c++/9/system_error \
+  /usr/include/c++/9/tr1/bessel_function.tcc \
+  /usr/include/c++/9/tr1/beta_function.tcc \
+  /usr/include/c++/9/tr1/ell_integral.tcc \
+  /usr/include/c++/9/tr1/exp_integral.tcc \
+  /usr/include/c++/9/tr1/gamma.tcc \
+  /usr/include/c++/9/tr1/hypergeometric.tcc \
+  /usr/include/c++/9/tr1/legendre_function.tcc \
+  /usr/include/c++/9/tr1/modified_bessel_func.tcc \
+  /usr/include/c++/9/tr1/poly_hermite.tcc \
+  /usr/include/c++/9/tr1/poly_laguerre.tcc \
+  /usr/include/c++/9/tr1/riemann_zeta.tcc \
+  /usr/include/c++/9/tr1/special_function_util.h \
   /usr/include/c++/9/tuple \
   /usr/include/c++/9/type_traits \
   /usr/include/c++/9/typeinfo \
+  /usr/include/c++/9/unordered_map \
   /usr/include/c++/9/utility \
   /usr/include/c++/9/vector \
   /usr/include/ctype.h \
@@ -2628,6 +2680,38 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/stdio.h:
 
+/usr/include/log4cxx/log4cxx.h:
+
+/usr/include/log4cxx/level.h:
+
+/usr/include/log4cxx/helpers/transcoder.h:
+
+/usr/include/log4cxx/helpers/objectptr.h:
+
+/usr/include/log4cxx/helpers/objectimpl.h:
+
+/usr/include/log4cxx/helpers/classregistration.h:
+
+/usr/include/log4cxx/helpers/class.h:
+
+/usr/include/locale.h:
+
+/usr/include/linux/limits.h:
+
+/usr/include/linux/errno.h:
+
+/usr/include/limits.h:
+
+/usr/include/features.h:
+
+/usr/include/errno.h:
+
+/usr/include/ctype.h:
+
+/usr/include/c++/9/utility:
+
+/usr/include/c++/9/unordered_map:
+
 /usr/include/boost/numeric/conversion/int_float_mixture_enum.hpp:
 
 /usr/include/boost/numeric/conversion/detail/udt_builtin_mixture.hpp:
@@ -2655,8 +2739,6 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 /usr/include/boost/type_traits/add_lvalue_reference.hpp:
 
 /usr/include/boost/mpl/vector/vector20.hpp:
-
-/usr/include/boost/mpl/bool.hpp:
 
 /usr/include/boost/mpl/vector/aux_/push_front.hpp:
 
@@ -2704,6 +2786,10 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/boost/mpl/plus.hpp:
 
+/usr/include/sched.h:
+
+/usr/include/boost/mpl/times.hpp:
+
 /usr/include/boost/mpl/multiplies.hpp:
 
 /usr/include/boost/function.hpp:
@@ -2730,8 +2816,6 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/boost/smart_ptr/allocate_shared_array.hpp:
 
-/usr/include/limits.h:
-
 /usr/include/boost/mpl/list/list20.hpp:
 
 /usr/include/boost/predef/os/bsd/net.h:
@@ -2741,8 +2825,6 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 /usr/include/boost/mpl/deref.hpp:
 
 /usr/include/boost/mpl/aux_/preprocessed/gcc/bind.hpp:
-
-/usr/include/boost/mpl/limits/list.hpp:
 
 /usr/include/boost/core/ignore_unused.hpp:
 
@@ -2775,6 +2857,8 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 /opt/ros/noetic/include/ros/node_handle.h:
 
 /usr/include/c++/9/clocale:
+
+/usr/include/c++/9/tr1/special_function_util.h:
 
 /usr/include/boost/mpl/identity.hpp:
 
@@ -2813,8 +2897,6 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 /usr/include/boost/mpl/bool_fwd.hpp:
 
 /usr/include/boost/mpl/begin_end_fwd.hpp:
-
-/usr/include/c++/9/bits/cxxabi_init_exception.h:
 
 /usr/include/boost/mpl/aux_/traits_lambda_spec.hpp:
 
@@ -2870,11 +2952,21 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/c++/9/bits/exception_defines.h:
 
-/usr/include/boost/mpl/aux_/preprocessed/gcc/less.hpp:
+/usr/include/endian.h:
+
+/usr/include/boost/mpl/minus.hpp:
+
+/usr/include/boost/mpl/aux_/preprocessed/gcc/iter_fold_impl.hpp:
 
 /usr/include/boost/core/ref.hpp:
 
 /opt/ros/noetic/include/ros/wall_timer_options.h:
+
+/usr/include/x86_64-linux-gnu/bits/long-double.h:
+
+/usr/include/libintl.h:
+
+/usr/include/boost/mpl/aux_/preprocessed/gcc/greater.hpp:
 
 /usr/include/boost/math/special_functions/detail/fp_traits.hpp:
 
@@ -3048,8 +3140,6 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/c++/9/math.h:
 
-/usr/include/linux/limits.h:
-
 /usr/include/boost/mpl/O1_size_fwd.hpp:
 
 /usr/include/boost/preprocessor/tuple/elem.hpp:
@@ -3100,10 +3190,6 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/boost/predef/compiler/sunpro.h:
 
-/usr/include/boost/mpl/limits/arity.hpp:
-
-/usr/include/boost/mpl/same_as.hpp:
-
 /usr/include/boost/config/detail/select_platform_config.hpp:
 
 /usr/include/c++/9/debug/debug.h:
@@ -3140,13 +3226,15 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/boost/numeric/conversion/bounds.hpp:
 
+/usr/include/log4cxx/helpers/object.h:
+
+/opt/ros/noetic/include/ros/exception.h:
+
 /usr/include/boost/mpl/aux_/config/integral.hpp:
 
 /usr/include/x86_64-linux-gnu/c++/9/bits/messages_members.h:
 
 /usr/include/c++/9/bits/stl_map.h:
-
-/usr/include/boost/concept/detail/concept_undef.hpp:
 
 /usr/include/boost/math/policies/policy.hpp:
 
@@ -3185,6 +3273,10 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 /usr/include/boost/preprocessor/list/fold_left.hpp:
 
 /usr/include/boost/chrono/config.hpp:
+
+/usr/include/math.h:
+
+/usr/include/c++/9/streambuf:
 
 /usr/include/boost/numeric/conversion/converter.hpp:
 
@@ -3258,6 +3350,10 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/boost/mpl/aux_/common_name_wknd.hpp:
 
+/usr/include/c++/9/type_traits:
+
+/usr/include/alloca.h:
+
 /usr/include/boost/lexical_cast/bad_lexical_cast.hpp:
 
 /usr/include/boost/mpl/aux_/has_apply.hpp:
@@ -3292,13 +3388,11 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/c++/9/bits/shared_ptr_atomic.h:
 
-/usr/include/alloca.h:
-
-/usr/include/c++/9/type_traits:
-
 /usr/include/boost/bind/bind.hpp:
 
 /usr/include/boost/mpl/sequence_tag_fwd.hpp:
+
+/usr/include/c++/9/tr1/hypergeometric.tcc:
 
 /usr/include/boost/predef/os/haiku.h:
 
@@ -3392,8 +3486,6 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/boost/preprocessor/seq/size.hpp:
 
-/usr/include/boost/mpl/list/aux_/pop_front.hpp:
-
 /opt/ros/noetic/include/ros/console_backend.h:
 
 /opt/ros/noetic/include/visualization_msgs/MarkerArray.h:
@@ -3464,8 +3556,6 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/boost/mpl/aux_/preprocessed/gcc/placeholders.hpp:
 
-/opt/ros/noetic/include/geometry_msgs/Pose.h:
-
 /usr/include/boost/mpl/aux_/na.hpp:
 
 /opt/ros/noetic/include/ros/wall_timer.h:
@@ -3485,8 +3575,6 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 /usr/include/boost/config/stdlib/libstdcpp3.hpp:
 
 /usr/include/boost/date_time/posix_time/ptime.hpp:
-
-/usr/include/boost/bind/mem_fn_cc.hpp:
 
 /usr/include/boost/mpl/greater.hpp:
 
@@ -3552,6 +3640,8 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/boost/mpl/vector/aux_/iterator.hpp:
 
+/usr/include/c++/9/pstl/glue_memory_defs.h:
+
 /usr/include/boost/lexical_cast.hpp:
 
 /usr/include/boost/mpl/list/aux_/push_front.hpp:
@@ -3606,6 +3696,8 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/boost/chrono/detail/static_assert.hpp:
 
+/usr/include/c++/9/bits/node_handle.h:
+
 /usr/include/boost/mpl/list/aux_/item.hpp:
 
 /usr/include/boost/mpl/bind_fwd.hpp:
@@ -3649,6 +3741,8 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 /usr/include/boost/preprocessor/slot/slot.hpp:
 
 /usr/include/boost/type_traits/has_plus_assign.hpp:
+
+/usr/include/c++/9/pstl/pstl_config.h:
 
 /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h:
 
@@ -3732,8 +3826,6 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/boost/mpl/distance_fwd.hpp:
 
-/usr/include/boost/predef/architecture/sys370.h:
-
 /usr/include/boost/mpl/aux_/config/arrays.hpp:
 
 /usr/include/boost/date_time/constrained_value.hpp:
@@ -3796,6 +3888,12 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/boost/date_time/gregorian/greg_date.hpp:
 
+/usr/include/boost/mpl/limits/arity.hpp:
+
+/usr/include/boost/mpl/same_as.hpp:
+
+/usr/include/c++/9/string_view:
+
 /opt/ros/noetic/include/ros/advertise_service_options.h:
 
 /usr/include/boost/mpl/assert.hpp:
@@ -3807,6 +3905,10 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 /usr/include/boost/current_function.hpp:
 
 /usr/include/boost/date_time/gregorian/greg_month.hpp:
+
+/usr/include/log4cxx/logstring.h:
+
+/usr/include/boost/date_time/special_defs.hpp:
 
 /usr/include/boost/thread/detail/platform.hpp:
 
@@ -3906,8 +4008,6 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/boost/mpl/aux_/preprocessed/gcc/quote.hpp:
 
-/usr/include/linux/errno.h:
-
 /usr/include/boost/config/detail/posix_features.hpp:
 
 /usr/include/boost/preprocessor/arithmetic/add.hpp:
@@ -3944,13 +4044,15 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/boost/exception/exception.hpp:
 
-/usr/include/boost/mpl/not.hpp:
-
 /usr/include/boost/predef/compiler/microtec.h:
 
 /usr/include/boost/mpl/aux_/numeric_op.hpp:
 
 /usr/include/boost/function_equal.hpp:
+
+/opt/ros/noetic/include/geometry_msgs/Pose.h:
+
+/usr/include/c++/9/pstl/glue_algorithm_defs.h:
 
 /usr/include/boost/preprocessor/stringize.hpp:
 
@@ -4023,10 +4125,6 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 /usr/include/boost/config/auto_link.hpp:
 
 /opt/ros/noetic/include/ros/service_callback_helper.h:
-
-/usr/include/c++/9/streambuf:
-
-/usr/include/math.h:
 
 /usr/include/x86_64-linux-gnu/sys/time.h:
 
@@ -4226,8 +4324,6 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/boost/type_traits/remove_extent.hpp:
 
-/usr/include/log4cxx/helpers/class.h:
-
 /usr/include/boost/predef/library/c/vms.h:
 
 /usr/include/boost/predef/library/c/zos.h:
@@ -4237,8 +4333,6 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 /usr/include/boost/predef/library/std.h:
 
 /usr/include/boost/predef/library/std/libcomo.h:
-
-/usr/include/log4cxx/helpers/objectptr.h:
 
 /usr/include/boost/mpl/aux_/inserter_algorithm.hpp:
 
@@ -4286,6 +4380,8 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/boost/predef/os/bsd.h:
 
+/usr/include/c++/9/tr1/poly_hermite.tcc:
+
 /usr/include/boost/predef/os/bsd/bsdi.h:
 
 /usr/include/c++/9/ext/string_conversions.h:
@@ -4298,15 +4394,15 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/boost/predef/os/macos.h:
 
-/opt/ros/noetic/include/ros/exception.h:
-
-/usr/include/log4cxx/helpers/object.h:
-
 /usr/include/c++/9/bits/postypes.h:
 
 /usr/include/boost/predef/os/qnxnto.h:
 
 /usr/include/boost/predef/os/solaris.h:
+
+/usr/include/boost/mpl/not.hpp:
+
+/usr/include/c++/9/tr1/ell_integral.tcc:
 
 /usr/include/boost/predef/os/unix.h:
 
@@ -4319,8 +4415,6 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 /usr/include/boost/predef/other.h:
 
 /usr/include/boost/utility/base_from_member.hpp:
-
-/usr/include/boost/predef/platform/android.h:
 
 /usr/include/boost/predef/platform/cloudabi.h:
 
@@ -4341,6 +4435,10 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 /usr/include/boost/predef/platform/windows_system.h:
 
 /usr/include/boost/thread/exceptions.hpp:
+
+/usr/include/c++/9/vector:
+
+/usr/include/boost/predef/version_number.h:
 
 /usr/include/boost/preprocessor/arithmetic/dec.hpp:
 
@@ -4378,9 +4476,15 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/boost/preprocessor/debug/error.hpp:
 
+/usr/include/c++/9/typeinfo:
+
+/usr/include/boost/preprocessor/detail/check.hpp:
+
 /usr/include/c++/9/bits/std_function.h:
 
 /usr/include/boost/preprocessor/detail/is_binary.hpp:
+
+/usr/include/c++/9/tr1/modified_bessel_func.tcc:
 
 /usr/include/boost/preprocessor/empty.hpp:
 
@@ -4405,8 +4509,6 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 /usr/include/boost/predef/other/endian.h:
 
 /usr/include/boost/preprocessor/iteration/detail/bounds/upper1.hpp:
-
-/usr/include/features.h:
 
 /usr/include/boost/preprocessor/iteration/iterate.hpp:
 
@@ -4460,8 +4562,6 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/boost/range/algorithm/equal.hpp:
 
-/usr/include/log4cxx/log4cxx.h:
-
 /usr/include/boost/predef/platform/windows_uwp.h:
 
 /usr/include/boost/range/begin.hpp:
@@ -4483,6 +4583,8 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 /usr/include/c++/9/cstdarg:
 
 /usr/include/boost/range/detail/sfinae.hpp:
+
+/usr/include/c++/9/bits/specfun.h:
 
 /usr/include/boost/range/difference_type.hpp:
 
@@ -4569,12 +4671,6 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 /usr/include/boost/system/system_error.hpp:
 
 /usr/include/boost/thread/detail/move.hpp:
-
-/usr/include/boost/mpl/minus.hpp:
-
-/usr/include/boost/mpl/aux_/preprocessed/gcc/iter_fold_impl.hpp:
-
-/usr/include/endian.h:
 
 /usr/include/boost/thread/detail/platform_time.hpp:
 
@@ -4686,6 +4782,10 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/boost/type_traits/is_bounded_array.hpp:
 
+/usr/include/c++/9/bits/cxxabi_init_exception.h:
+
+/usr/include/c++/9/tr1/legendre_function.tcc:
+
 /usr/include/boost/lexical_cast/detail/widest_char.hpp:
 
 /usr/include/boost/predef/platform/windows_phone.h:
@@ -4764,15 +4864,27 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/c++/9/bits/concept_check.h:
 
+/usr/include/boost/bind/mem_fn_cc.hpp:
+
+/usr/include/c++/9/pstl/execution_defs.h:
+
+/usr/include/c++/9/bits/enable_special_members.h:
+
 /usr/include/boost/smart_ptr/detail/sp_disable_deprecated.hpp:
 
 /usr/include/c++/9/bits/exception_ptr.h:
 
-/usr/include/log4cxx/helpers/transcoder.h:
-
 /usr/include/boost/mpl/fold.hpp:
 
 /usr/include/c++/9/bits/hash_bytes.h:
+
+/usr/include/boost/mpl/limits/list.hpp:
+
+/usr/include/c++/9/bits/hashtable.h:
+
+/usr/include/boost/mpl/list/aux_/pop_front.hpp:
+
+/usr/include/c++/9/bits/hashtable_policy.h:
 
 /opt/ros/noetic/include/ros/service_server.h:
 
@@ -4812,6 +4924,10 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/c++/9/bits/stl_construct.h:
 
+/usr/include/boost/predef/platform/android.h:
+
+/usr/include/c++/9/tr1/bessel_function.tcc:
+
 /usr/include/c++/9/bits/stl_function.h:
 
 /usr/include/c++/9/bits/stl_iterator_base_funcs.h:
@@ -4846,23 +4962,31 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/c++/9/bits/streambuf_iterator.h:
 
-/usr/include/c++/9/bits/uniform_int_dist.h:
+/usr/include/boost/mpl/aux_/preprocessed/gcc/less.hpp:
 
-/usr/include/boost/mpl/iter_fold.hpp:
-
-/usr/include/c++/9/bits/unique_ptr.h:
-
-/usr/include/c++/9/bits/uses_allocator.h:
-
-/usr/include/c++/9/cassert:
-
-/usr/include/c++/9/utility:
+/usr/include/c++/9/bits/string_view.tcc:
 
 /usr/include/x86_64-linux-gnu/bits/uio_lim.h:
 
 /usr/include/boost/type_index.hpp:
 
 /usr/include/c++/9/cerrno:
+
+/usr/include/c++/9/bits/uniform_int_dist.h:
+
+/usr/include/boost/mpl/iter_fold.hpp:
+
+/usr/include/c++/9/bits/unique_ptr.h:
+
+/usr/include/c++/9/bits/unordered_map.h:
+
+/usr/include/boost/mpl/list/aux_/iterator.hpp:
+
+/usr/include/c++/9/ext/numeric_traits.h:
+
+/usr/include/c++/9/bits/uses_allocator.h:
+
+/usr/include/c++/9/cassert:
 
 /usr/include/boost/iterator/iterator_facade.hpp:
 
@@ -4884,10 +5008,6 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/c++/9/ext/concurrence.h:
 
-/usr/include/boost/mpl/list/aux_/iterator.hpp:
-
-/usr/include/c++/9/ext/numeric_traits.h:
-
 /usr/include/c++/9/functional:
 
 /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h:
@@ -4895,6 +5015,10 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 /usr/include/c++/9/iosfwd:
 
 /usr/include/c++/9/new:
+
+/usr/include/boost/concept/detail/concept_undef.hpp:
+
+/usr/include/c++/9/optional:
 
 /usr/include/boost/mpl/apply_fwd.hpp:
 
@@ -4906,42 +5030,22 @@ powerline_extractor/CMakeFiles/data_republisher_node.dir/src/web_pub/data_republ
 
 /usr/include/c++/9/system_error:
 
-/usr/include/c++/9/tuple:
-
-/usr/include/boost/preprocessor/detail/check.hpp:
-
-/usr/include/c++/9/typeinfo:
-
-/usr/include/boost/predef/version_number.h:
-
-/usr/include/c++/9/vector:
-
-/usr/include/ctype.h:
-
-/usr/include/errno.h:
-
-/usr/include/x86_64-linux-gnu/bits/long-double.h:
-
-/usr/include/boost/mpl/aux_/preprocessed/gcc/greater.hpp:
-
-/usr/include/libintl.h:
-
-/usr/include/locale.h:
-
-/usr/include/log4cxx/helpers/classregistration.h:
-
-/usr/include/log4cxx/helpers/objectimpl.h:
-
-/usr/include/log4cxx/level.h:
-
-/usr/include/boost/date_time/special_defs.hpp:
-
-/usr/include/log4cxx/logstring.h:
-
-/usr/include/boost/date_time/period.hpp:
+/usr/include/c++/9/tr1/beta_function.tcc:
 
 /usr/include/pthread.h:
 
-/usr/include/boost/mpl/times.hpp:
+/usr/include/boost/date_time/period.hpp:
 
-/usr/include/sched.h:
+/usr/include/c++/9/tr1/exp_integral.tcc:
+
+/usr/include/boost/mpl/bool.hpp:
+
+/usr/include/c++/9/tr1/gamma.tcc:
+
+/usr/include/c++/9/tr1/poly_laguerre.tcc:
+
+/usr/include/boost/predef/architecture/sys370.h:
+
+/usr/include/c++/9/tr1/riemann_zeta.tcc:
+
+/usr/include/c++/9/tuple:

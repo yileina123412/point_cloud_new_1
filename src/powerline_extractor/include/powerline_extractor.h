@@ -26,6 +26,13 @@
 #include "obstacle_analyzer.h"
 #include "power_line_reconstruction.h"
 #include "building_edge_filter.h"
+#include "advanced_obstacle_analyzer.h"
+// #include "power_line_probability_map.h"
+#include "power_line_probability_map.h"
+#include "power_line_tracker.h"
+
+
+
 
 
 //================= 融合多技术的现代电力线提取完整解决方案 =================
@@ -69,6 +76,8 @@ private:
 
     void process_first_method(const std_msgs::Header& header);   //第一种方法的执行函数
 
+    void process_second_times(const std_msgs::Header& header);  //第二次及以后
+
 private:
     // ROS 节点句柄
     ros::NodeHandle nh_;
@@ -78,13 +87,16 @@ private:
 
     ros::Publisher preprocessor_cloud_pub_;    //预处理后的点云
     ros::Publisher extractor_s_cloud_pub_;    //粗提取_s后的点云
-    ros::Publisher fine_extractor_cloud_pub_;      // octree累积点云发布器（用于调试）
+    ros::Publisher env_not_power_cloud_pub_;    //粗提取_s后的环境点云点云 
+    ros::Publisher fine_extractor_cloud_pub_;      
     ros::Subscriber point_cloud_sub_;
     ros::Publisher original_cloud_pub_;
     ros::Publisher powerline_cloud_pub_;
     ros::Publisher clustered_powerline_cloud_pub_;
     ros::Publisher obb_marker_pub;  //距离可视化
     ros::Publisher powerlines_distance_cloud_pub_;
+
+    ros::Publisher rol_cloud_pub_;
 
     ros::Publisher second_powerline_preprocessor_cloud_pub_;
 
@@ -103,6 +115,7 @@ private:
     //粗提取_s
     std::unique_ptr<PowerLineCoarseExtractor> extractor_s_; 
     pcl::PointCloud<pcl::PointXYZI>::Ptr extractor_s__output_cloud_;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr env_not_power_cloud_;
 
     //距离可视化
     std::unique_ptr<ObstacleAnalyzer> analyzer_; 
@@ -120,7 +133,25 @@ private:
     std::unique_ptr<BuildingEdgeFilter> building_edge_filter_;
     pcl::PointCloud<pcl::PointXYZI>::Ptr building_edge_filter_output_cloud_;
 
+    //预警
+    // 发布器
+    std::unique_ptr<AdvancedObstacleAnalyzer> obs_analyzer_;
+    std::vector<AdvancedObstacleBox> obstacle_results_;
+    LayeredWarningCloud warning_cloud_;
 
+    //概率地图
+    // std::unique_ptr<PowerLineProbabilityMap> prob_map_;
+    std::unique_ptr<PowerLineProbabilityMap> prob_map_;
+    std::vector<LineROIInfo> line_rois_;  // 2. 获取概率地图的ROI信息
+
+    //ROI管理器
+
+    pcl::PointCloud<pcl::PointXYZI>::Ptr roi_output_cloud_;
+    // 跟踪
+    std::unique_ptr<PowerLineTracker> tracker_;
+    std::vector<ReconstructedPowerLine> complete_result;
+
+ 
     //================= 融合多技术的现代电力线提取完整解决方案 =================
     std::unique_ptr<powerline_extraction::MultiLevelPreprocessor> multi_preprocessor_;  //多层级预处理
     
@@ -130,25 +161,10 @@ private:
     std::string lidar_frame_;
     std::string target_frame_;
     
-    // 预处理参数（传递给粗提取器）
-    double voxel_size_;
-    double min_range_;
-    double max_range_;
-    double min_height_;
-    double max_height_;
-    
-    // PCA参数（传递给粗提取器）
-    double pca_radius_;
-    double linearity_threshold_;
-    
-    // 聚类参数
-    double cluster_tolerance_;
-    int min_cluster_size_;
-    int max_cluster_size_;
-    
-    // 离群点移除参数（传递给粗提取器）
-    int outlier_mean_k_;
-    double outlier_std_thresh_;
+
+
+
+
     
     // 点云对象
 
@@ -157,6 +173,8 @@ private:
     pcl::PointCloud<pcl::PointXYZI>::Ptr non_ground_cloud_;  // 保留用于兼容性，但不使用
     pcl::PointCloud<pcl::PointXYZI>::Ptr powerline_cloud_;
     pcl::PointCloud<pcl::PointXYZI>::Ptr clustered_powerline_cloud_;
+
+
     pcl::PointCloud<pcl::PointXYZI>::Ptr filtered_pc_;
 
     pcl::PointCloud<pcl::PointXYZI>::Ptr fine_extract_cloud_;
@@ -165,6 +183,9 @@ private:
     bool first_cloud_received_;
     ros::Time last_process_time_;
     double process_frequency_;
+    // 状态变量
+    bool is_first_frame_;
+    int frame_count_;
 };
 
 #endif // POWERLINE_EXTRACTOR_H

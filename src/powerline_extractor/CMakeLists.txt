@@ -3,7 +3,7 @@ project(powerline_extractor)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #设置C++标准为14
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_BUILD_TYPE Release) #指定Release 构件时会优化
 
@@ -180,6 +180,11 @@ add_library(${PROJECT_NAME}
   src/obstacle_analyzer.cpp
   src/power_line_reconstruction.cpp
   src/building_edge_filter.cpp
+  src/advanced_obstacle_analyzer.cpp
+  # src/power_line_probability_map.cpp
+  src/power_line_probability_map.cpp
+  src/roi_manager.cpp
+  src/power_line_tracker.cpp
   ${SOURCES}
   
 

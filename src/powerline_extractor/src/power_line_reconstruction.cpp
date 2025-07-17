@@ -205,7 +205,7 @@ void PowerLineReconstructor::computeSegmentProperties(PowerLineSegment& segment)
     float z_angle_deg = std::acos(z_angle_cos) * 180.0 / M_PI;
     
     // 如果与z轴夹角小于20度（即接近垂直），标记为无效
-    if (z_angle_deg < 20.0) {
+    if (z_angle_deg < 45.0) {
         segment.length = 0.0;  // 通过设置长度为0来标记为无效
         ROS_DEBUG("片段 %d 与z轴角度过小 (%.1f度)，已过滤", segment.cluster_id, z_angle_deg);
     }

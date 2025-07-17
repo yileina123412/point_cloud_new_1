@@ -62,6 +62,8 @@ private:
     std::string frame_id_;          // 坐标系ID
     double visualization_duration_;  // 可视化持续时间
 
+    float powerline_expansion_radius_;   // 电力线扩展搜索半径
+
     // 创建带颜色的点云用于可视化
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr debug_cloud;
 
@@ -80,7 +82,7 @@ private:
     // 移除电力线自身的点
     void removePowerLinePoints(
         pcl::PointCloud<pcl::PointXYZI>::Ptr& cylinder_cloud,
-        const ReconstructedPowerLine& power_line
+        const pcl::PointCloud<pcl::PointXYZI>::Ptr& powerline_cloud
     );
 
     // 平面检测和面积计算
@@ -137,6 +139,13 @@ private:
     void validatePowerLinesIntegrity(
         const std::vector<ReconstructedPowerLine>& power_lines,
         const std::string& stage_name
+    );
+
+    // 扩展电力线点云（在其他辅助函数附近添加）
+    pcl::PointCloud<pcl::PointXYZI>::Ptr expandPowerLinePoints(
+        const pcl::PointCloud<pcl::PointXYZI>::Ptr& environment_cloud,
+        const ReconstructedPowerLine& power_line,
+        float search_radius = 0.05f
     );
 };
 

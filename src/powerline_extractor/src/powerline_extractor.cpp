@@ -7,6 +7,7 @@ PowerlineExtractor::PowerlineExtractor(ros::NodeHandle& nh, ros::NodeHandle& pri
       first_cloud_received_(false),
       preprocessor__output_cloud_(new pcl::PointCloud<pcl::PointXYZI>()),
       extractor_s__output_cloud_(new pcl::PointCloud<pcl::PointXYZI>()),
+      env_not_power_cloud_(new pcl::PointCloud<pcl::PointXYZI>()),
       original_cloud_(new pcl::PointCloud<pcl::PointXYZI>()),
       non_ground_cloud_(new pcl::PointCloud<pcl::PointXYZI>()),
       powerline_cloud_(new pcl::PointCloud<pcl::PointXYZI>()),
@@ -14,7 +15,12 @@ PowerlineExtractor::PowerlineExtractor(ros::NodeHandle& nh, ros::NodeHandle& pri
       fine_extract_cloud_(new pcl::PointCloud<pcl::PointXYZI>()),
       filtered_pc_(new pcl::PointCloud<pcl::PointXYZI>()),
       reconstruction_output_cloud_(new pcl::PointCloud<pcl::PointXYZI>()),
+      roi_output_cloud_(new pcl::PointCloud<pcl::PointXYZI>()),
       building_edge_filter_output_cloud_(new pcl::PointCloud<pcl::PointXYZI>()) {
+
+    //
+    is_first_frame_ = 0;
+    frame_count_ = 0;
     
     // 初始化TF
     tf_buffer_ = std::make_unique<tf2_ros::Buffer>();
@@ -46,25 +52,13 @@ void PowerlineExtractor::loadParameters() {
     private_nh_.param<std::string>("lidar_frame", lidar_frame_, "livox_frame");
     private_nh_.param<std::string>("target_frame", target_frame_, "map");
     
-    // 预处理参数
-    private_nh_.param<double>("voxel_size", voxel_size_, 0.05);
-    private_nh_.param<double>("min_range", min_range_, 0.5);
-    private_nh_.param<double>("max_range", max_range_, 100.0);
-    private_nh_.param<double>("min_height", min_height_, -5.0);
-    private_nh_.param<double>("max_height", max_height_, 50.0);
+
     
-    // PCA参数（用于粗提取）
-    private_nh_.param<double>("pca_radius", pca_radius_, 0.5);
-    private_nh_.param<double>("linearity_threshold", linearity_threshold_, 0.7);
+
     
-    // 聚类参数
-    private_nh_.param<double>("cluster_tolerance", cluster_tolerance_, 2.0);
-    private_nh_.param<int>("min_cluster_size", min_cluster_size_, 15);
-    private_nh_.param<int>("max_cluster_size", max_cluster_size_, 100000);
+  
     
-    // 离群点移除参数
-    private_nh_.param<int>("outlier_mean_k", outlier_mean_k_, 50);
-    private_nh_.param<double>("outlier_std_thresh", outlier_std_thresh_, 1.0);
+
     
     // 处理频率
     private_nh_.param<double>("process_frequency", process_frequency_, 2.0);
@@ -74,13 +68,9 @@ void PowerlineExtractor::loadParameters() {
     ROS_INFO("Lidar topic: %s", lidar_topic_.c_str());
     ROS_INFO("Lidar frame: %s", lidar_frame_.c_str());
     ROS_INFO("Target frame: %s", target_frame_.c_str());
-    ROS_INFO("Voxel size: %.3f", voxel_size_);
-    ROS_INFO("Range filter: [%.1f, %.1f]", min_range_, max_range_);
-    ROS_INFO("Height filter: [%.1f, %.1f]", min_height_, max_height_);
-    ROS_INFO("PCA radius: %.3f", pca_radius_);
-    ROS_INFO("Linearity threshold: %.3f", linearity_threshold_);
-    ROS_INFO("Cluster tolerance: %.3f", cluster_tolerance_);
-    ROS_INFO("Cluster size range: [%d, %d]", min_cluster_size_, max_cluster_size_);
+
+
+
     ROS_INFO("Process frequency: %.1f Hz", process_frequency_);
 }
 
@@ -103,6 +93,7 @@ void PowerlineExtractor::initializePublishers() {
     powerlines_distance_cloud_pub_ = private_nh_.advertise<visualization_msgs::MarkerArray>("powerlines_distance_cloud", 1);
 
     extractor_s_cloud_pub_ = private_nh_.advertise<sensor_msgs::PointCloud2>("extractor_s_cloud", 1);
+    env_not_power_cloud_pub_ = private_nh_.advertise<sensor_msgs::PointCloud2>("env_not_power_cloud", 1);
 
     obb_marker_pub = nh_.advertise<visualization_msgs::MarkerArray>("obb_marker", 10);
 
@@ -115,6 +106,7 @@ void PowerlineExtractor::initializePublishers() {
     
 
     fine_extractor_cloud_pub_ = private_nh_.advertise<sensor_msgs::PointCloud2>("fine_extractor_cloud", 1);
+    rol_cloud_pub_ = private_nh_.advertise<sensor_msgs::PointCloud2>("rol_cloud", 1);
     ROS_INFO("Publishers initialized");
 }
 void PowerlineExtractor::initializeAccumulateCloud()
@@ -126,6 +118,12 @@ void PowerlineExtractor::initializeAccumulateCloud()
 
     //可视化距离
     analyzer_.reset(new ObstacleAnalyzer(nh_));
+    obs_analyzer_.reset(new AdvancedObstacleAnalyzer(nh_));
+
+    prob_map_.reset(new PowerLineProbabilityMap(nh_));
+
+    tracker_.reset(new PowerLineTracker(nh_));
+
 
     ROS_INFO("Accumulate Cloud initialized");
 
@@ -140,6 +138,7 @@ void PowerlineExtractor::process_first_method(const std_msgs::Header& header){
 
     auto pre_start = std::chrono::high_resolution_clock::now();
     preprocessor_->processPointCloud(original_cloud_);  //0.04
+    preprocessor_->publishColoredClusters();
     auto pre_end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> pre_duration = pre_end - pre_start;
     ROS_INFO("预处理电力线 执行时间: %f 秒", pre_duration.count());
@@ -147,7 +146,9 @@ void PowerlineExtractor::process_first_method(const std_msgs::Header& header){
 
     preprocessor__output_cloud_ = preprocessor_->getProcessedCloud();
     auto extractor_start = std::chrono::high_resolution_clock::now();
-    extractor_s_->extractPowerLinesByPoints(preprocessor_);    //0.3
+    extractor_s_->extractPowerLinesByPoints(preprocessor__output_cloud_);    //0.3
+    env_not_power_cloud_ = extractor_s_->getEnvWithoutPowerCloud();
+    // extractor_s_->visualizeParameters(preprocessor_);
     auto extractor_end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> extractor_duration = extractor_end - extractor_start;
     ROS_INFO("粗提取电力线 执行时间: %f 秒", extractor_duration.count());
@@ -165,16 +166,74 @@ void PowerlineExtractor::process_first_method(const std_msgs::Header& header){
 
 
   
-    reconstruction_->reconstructPowerLines(fine_extract_cloud_,reconstruction_output_cloud_,power_lines_);//0.2s
+    reconstruction_->reconstructPowerLines(extractor_s__output_cloud_,reconstruction_output_cloud_,power_lines_);//0.2s
    
-    building_edge_filter_->filterBuildingEdges(preprocessor__output_cloud_,power_lines_,building_edge_filter_output_cloud_);
+    // building_edge_filter_->filterBuildingEdges(preprocessor__output_cloud_,power_lines_,building_edge_filter_output_cloud_);
     
-    // auto analy_star = std::chrono::high_resolution_clock::now();
-    // analyzer_->analyzeObstacles(preprocessor__output_cloud_, fine_extract_cloud_, obbs_); //0.4
-    // auto analy_end = std::chrono::high_resolution_clock::now();
-    // std::chrono::duration<double> analy_duration = analy_end - analy_star;
-    // ROS_INFO("障碍物检测 执行时间: %f 秒", analy_duration.count());
-    // //发布距离可视化
+    auto analy_star = std::chrono::high_resolution_clock::now();
+    // analyzer_->analyzeObstacles(env_not_power_cloud_, fine_extract_cloud_, obbs_); //0.4
+    obs_analyzer_->analyzeObstacles(power_lines_,env_not_power_cloud_,obstacle_results_,warning_cloud_);
+    auto analy_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> analy_duration = analy_end - analy_star;
+    ROS_INFO("障碍物检测 执行时间: %f 秒", analy_duration.count());
+    //发布距离可视化
+    // analyzer_->publishObbMarkers(obbs_, obb_marker_pub, "map");
+    // analyzer_->publishPowerlineDistanceMarkers(fine_extract_cloud_,powerlines_distance_cloud_pub_,"map");
+
+}
+
+void PowerlineExtractor::process_second_times(const std_msgs::Header& header){
+    auto pre_start = std::chrono::high_resolution_clock::now();
+    preprocessor_->processPointCloud(original_cloud_);  //0.04
+    preprocessor_->publishColoredClusters();
+    auto pre_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> pre_duration = pre_end - pre_start;
+    ROS_INFO("预处理电力线 执行时间: %f 秒", pre_duration.count());
+    preprocessor__output_cloud_ = preprocessor_->getProcessedCloud();
+    // line_rois_ = prob_map_->getAllLineROIs(0.3f, 0.1f);  // 获取所有电力线的ROI信息
+
+
+
+    roi_output_cloud_ = prob_map_->processEnvironmentPointCloud(preprocessor__output_cloud_);
+    ROS_INFO("roi_output_cloud_ roi提取: %ld",roi_output_cloud_->size());
+
+
+    
+    auto extractor_start = std::chrono::high_resolution_clock::now();
+    extractor_s_->extractPowerLinesByPoints(roi_output_cloud_);    //0.3
+    env_not_power_cloud_ = extractor_s_->getEnvWithoutPowerCloud();
+    // extractor_s_->visualizeParameters(preprocessor_);
+    auto extractor_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> extractor_duration = extractor_end - extractor_start;
+    ROS_INFO("粗提取电力线 执行时间: %f 秒", extractor_duration.count());
+
+    extractor_s__output_cloud_ = extractor_s_->getExtractedCloud();
+    ROS_INFO("extractor_s__output_cloud_ 粗提取_s: %ld",extractor_s__output_cloud_->size());
+    
+    // 发布结果
+    publishPointClouds(original_cloud_, powerline_cloud_, 
+                        clustered_powerline_cloud_, header);
+    
+    // 精提取
+    // fine_extractor_->extractPowerLines(extractor_s__output_cloud_,fine_extract_cloud_); //0.09s
+
+
+
+  
+    reconstruction_->reconstructPowerLines(extractor_s__output_cloud_,reconstruction_output_cloud_,power_lines_);//0.2s
+
+    //跟踪器跟踪
+    complete_result = tracker_->updateTracker(power_lines_, *prob_map_);
+   
+    // building_edge_filter_->filterBuildingEdges(preprocessor__output_cloud_,power_lines_,building_edge_filter_output_cloud_);
+    
+    auto analy_star = std::chrono::high_resolution_clock::now();
+    // analyzer_->analyzeObstacles(env_not_power_cloud_, fine_extract_cloud_, obbs_); //0.4
+    obs_analyzer_->analyzeObstacles(power_lines_,env_not_power_cloud_,obstacle_results_,warning_cloud_);
+    auto analy_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> analy_duration = analy_end - analy_star;
+    ROS_INFO("障碍物检测 执行时间: %f 秒", analy_duration.count());
+    //发布距离可视化
     // analyzer_->publishObbMarkers(obbs_, obb_marker_pub, "map");
     // analyzer_->publishPowerlineDistanceMarkers(fine_extract_cloud_,powerlines_distance_cloud_pub_,"map");
 
@@ -213,12 +272,32 @@ void PowerlineExtractor::pointCloudCallback(const sensor_msgs::PointCloud2::Cons
         }
         run_times ++;
         ROS_INFO("程序运行的第: %d 轮。",run_times);
-        auto start_time = std::chrono::high_resolution_clock::now();
-        process_first_method(transformed_msg.header);
-        auto end_time = std::chrono::high_resolution_clock::now();
-        double all_time = std::chrono::duration<double, std::milli>(end_time - start_time).count();
-        ROS_INFO("整个过程总共运行时间: %.3f ms", 
-                     all_time);
+        if(is_first_frame_ == 0)
+        {
+            auto start_time = std::chrono::high_resolution_clock::now();
+            process_first_method(transformed_msg.header);
+            auto end_time = std::chrono::high_resolution_clock::now();
+            double all_time = std::chrono::duration<double, std::milli>(end_time - start_time).count();
+            ROS_INFO("===================程序运行的第: %d 轮。",run_times);
+            ROS_INFO("整个过程总共运行时间: %.3f ms", 
+                        all_time);
+            is_first_frame_ = 1;
+            prob_map_->initializeProbabilityMap(power_lines_);
+            tracker_->initializeTracker(power_lines_); // 初始化跟踪器
+            
+        }
+        else{
+            auto start_time = std::chrono::high_resolution_clock::now();
+            process_second_times(transformed_msg.header);
+            auto end_time = std::chrono::high_resolution_clock::now();
+            double all_time = std::chrono::duration<double, std::milli>(end_time - start_time).count();
+            ROS_INFO("=================   second  程序运行的第: %d 轮。",run_times);
+            ROS_INFO("整个过程总共运行时间: %.3f ms", 
+                        all_time);
+            prob_map_->updateProbabilityMap(complete_result);
+        }
+
+        
 
                      
     } catch (const std::exception& e) {
@@ -281,6 +360,20 @@ void PowerlineExtractor::publishPointClouds(const pcl::PointCloud<pcl::PointXYZI
         pcl::toROSMsg(*extractor_s__output_cloud_, temp_msg);
         temp_msg.header = header;
         extractor_s_cloud_pub_.publish(temp_msg);
+    }
+
+    if( rol_cloud_pub_.getNumSubscribers() > 0 && !roi_output_cloud_->empty()){
+        sensor_msgs::PointCloud2 temp_msg;
+        pcl::toROSMsg(*roi_output_cloud_, temp_msg);
+        temp_msg.header = header;
+        rol_cloud_pub_.publish(temp_msg);
+    }
+
+    if( env_not_power_cloud_pub_.getNumSubscribers() > 0 && !env_not_power_cloud_->empty()){
+        sensor_msgs::PointCloud2 temp_msg;
+        pcl::toROSMsg(*env_not_power_cloud_, temp_msg);
+        temp_msg.header = header;
+        env_not_power_cloud_pub_.publish(temp_msg);
     }
 
     // 发布电力线点云

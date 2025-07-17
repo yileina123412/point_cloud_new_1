@@ -1445,6 +1445,30 @@ data_republisher_node/fast:
 	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/data_republisher_node.dir/build.make powerline_extractor/CMakeFiles/data_republisher_node.dir/build
 .PHONY : data_republisher_node/fast
 
+src/advanced_obstacle_analyzer.o: src/advanced_obstacle_analyzer.cpp.o
+.PHONY : src/advanced_obstacle_analyzer.o
+
+# target to build an object file
+src/advanced_obstacle_analyzer.cpp.o:
+	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/advanced_obstacle_analyzer.cpp.o
+.PHONY : src/advanced_obstacle_analyzer.cpp.o
+
+src/advanced_obstacle_analyzer.i: src/advanced_obstacle_analyzer.cpp.i
+.PHONY : src/advanced_obstacle_analyzer.i
+
+# target to preprocess a source file
+src/advanced_obstacle_analyzer.cpp.i:
+	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/advanced_obstacle_analyzer.cpp.i
+.PHONY : src/advanced_obstacle_analyzer.cpp.i
+
+src/advanced_obstacle_analyzer.s: src/advanced_obstacle_analyzer.cpp.s
+.PHONY : src/advanced_obstacle_analyzer.s
+
+# target to generate assembly for a file
+src/advanced_obstacle_analyzer.cpp.s:
+	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/advanced_obstacle_analyzer.cpp.s
+.PHONY : src/advanced_obstacle_analyzer.cpp.s
+
 src/building_edge_filter.o: src/building_edge_filter.cpp.o
 .PHONY : src/building_edge_filter.o
 
@@ -1565,6 +1589,30 @@ src/power_line_fine_extraction.cpp.s:
 	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_fine_extraction.cpp.s
 .PHONY : src/power_line_fine_extraction.cpp.s
 
+src/power_line_probability_map.o: src/power_line_probability_map.cpp.o
+.PHONY : src/power_line_probability_map.o
+
+# target to build an object file
+src/power_line_probability_map.cpp.o:
+	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_probability_map.cpp.o
+.PHONY : src/power_line_probability_map.cpp.o
+
+src/power_line_probability_map.i: src/power_line_probability_map.cpp.i
+.PHONY : src/power_line_probability_map.i
+
+# target to preprocess a source file
+src/power_line_probability_map.cpp.i:
+	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_probability_map.cpp.i
+.PHONY : src/power_line_probability_map.cpp.i
+
+src/power_line_probability_map.s: src/power_line_probability_map.cpp.s
+.PHONY : src/power_line_probability_map.s
+
+# target to generate assembly for a file
+src/power_line_probability_map.cpp.s:
+	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_probability_map.cpp.s
+.PHONY : src/power_line_probability_map.cpp.s
+
 src/power_line_reconstruction.o: src/power_line_reconstruction.cpp.o
 .PHONY : src/power_line_reconstruction.o
 
@@ -1588,6 +1636,30 @@ src/power_line_reconstruction.s: src/power_line_reconstruction.cpp.s
 src/power_line_reconstruction.cpp.s:
 	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_reconstruction.cpp.s
 .PHONY : src/power_line_reconstruction.cpp.s
+
+src/power_line_tracker.o: src/power_line_tracker.cpp.o
+.PHONY : src/power_line_tracker.o
+
+# target to build an object file
+src/power_line_tracker.cpp.o:
+	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.o
+.PHONY : src/power_line_tracker.cpp.o
+
+src/power_line_tracker.i: src/power_line_tracker.cpp.i
+.PHONY : src/power_line_tracker.i
+
+# target to preprocess a source file
+src/power_line_tracker.cpp.i:
+	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.i
+.PHONY : src/power_line_tracker.cpp.i
+
+src/power_line_tracker.s: src/power_line_tracker.cpp.s
+.PHONY : src/power_line_tracker.s
+
+# target to generate assembly for a file
+src/power_line_tracker.cpp.s:
+	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.s
+.PHONY : src/power_line_tracker.cpp.s
 
 src/powerline_extractor.o: src/powerline_extractor.cpp.o
 .PHONY : src/powerline_extractor.o
@@ -1660,6 +1732,30 @@ src/preprocessing/multilevel_preprocessor.s: src/preprocessing/multilevel_prepro
 src/preprocessing/multilevel_preprocessor.cpp.s:
 	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/preprocessing/multilevel_preprocessor.cpp.s
 .PHONY : src/preprocessing/multilevel_preprocessor.cpp.s
+
+src/roi_manager.o: src/roi_manager.cpp.o
+.PHONY : src/roi_manager.o
+
+# target to build an object file
+src/roi_manager.cpp.o:
+	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.o
+.PHONY : src/roi_manager.cpp.o
+
+src/roi_manager.i: src/roi_manager.cpp.i
+.PHONY : src/roi_manager.i
+
+# target to preprocess a source file
+src/roi_manager.cpp.i:
+	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.i
+.PHONY : src/roi_manager.cpp.i
+
+src/roi_manager.s: src/roi_manager.cpp.s
+.PHONY : src/roi_manager.s
+
+# target to generate assembly for a file
+src/roi_manager.cpp.s:
+	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.s
+.PHONY : src/roi_manager.cpp.s
 
 src/web_pub/data_republisher.o: src/web_pub/data_republisher.cpp.o
 .PHONY : src/web_pub/data_republisher.o
@@ -1813,6 +1909,9 @@ help:
 	@echo "... data_republisher_node"
 	@echo "... powerline_extractor"
 	@echo "... powerline_extractor_node"
+	@echo "... src/advanced_obstacle_analyzer.o"
+	@echo "... src/advanced_obstacle_analyzer.i"
+	@echo "... src/advanced_obstacle_analyzer.s"
 	@echo "... src/building_edge_filter.o"
 	@echo "... src/building_edge_filter.i"
 	@echo "... src/building_edge_filter.s"
@@ -1828,9 +1927,15 @@ help:
 	@echo "... src/power_line_fine_extraction.o"
 	@echo "... src/power_line_fine_extraction.i"
 	@echo "... src/power_line_fine_extraction.s"
+	@echo "... src/power_line_probability_map.o"
+	@echo "... src/power_line_probability_map.i"
+	@echo "... src/power_line_probability_map.s"
 	@echo "... src/power_line_reconstruction.o"
 	@echo "... src/power_line_reconstruction.i"
 	@echo "... src/power_line_reconstruction.s"
+	@echo "... src/power_line_tracker.o"
+	@echo "... src/power_line_tracker.i"
+	@echo "... src/power_line_tracker.s"
 	@echo "... src/powerline_extractor.o"
 	@echo "... src/powerline_extractor.i"
 	@echo "... src/powerline_extractor.s"
@@ -1840,6 +1945,9 @@ help:
 	@echo "... src/preprocessing/multilevel_preprocessor.o"
 	@echo "... src/preprocessing/multilevel_preprocessor.i"
 	@echo "... src/preprocessing/multilevel_preprocessor.s"
+	@echo "... src/roi_manager.o"
+	@echo "... src/roi_manager.i"
+	@echo "... src/roi_manager.s"
 	@echo "... src/web_pub/data_republisher.o"
 	@echo "... src/web_pub/data_republisher.i"
 	@echo "... src/web_pub/data_republisher.s"

@@ -2,12 +2,16 @@
 preprocessor:    #1
   cube_size: 70.0          # 立方体边长（米）
   octree_resolution: 0.1   # Octree 分辨率（米）
-  voxel_leaf_size: 0.11     # 降采样体素大小（米）
+  voxel_leaf_size: 0.15     # 降采样体素大小（米）
+  cluster_tolerance: 0.3
+  min_cluster_size: 10
+  max_cluster_size: 2500000
+
 
 
 power_line_coarse_extractor_s:      #1
-  linearity_threshold: 0.7    # 线型度阈值
-  curvature_threshold: 0.3    # 曲率阈值
+  linearity_threshold: 0.8    # 线型度阈值
+  curvature_threshold: 0.2    # 曲率阈值
   planarity_threshold: 0.1    # 平面度阈值（可选）
   use_planarity: false        # 是否启用平面度检查
   cluster_tolerance: 0.5      # 聚类距离阈值（米）
@@ -15,20 +19,26 @@ power_line_coarse_extractor_s:      #1
   variance_threshold: 0.1   # 法向量方差阈值
   search_radius: 0.5    # 邻域搜索半径（米）
   min_cluster_length: 0.3 # 最小簇长度（米）
+  perpendicular_search_radius: 0.3 #垂直检查的半径
+  max_unqualified_points: 5  #不合格点的阈值
+
+  edge_check_radius: 0.3
+  max_unqualified_neighbors: 1
+
 
 
 
 
 fineextract:                    #1
   # 电力线精细提取参数
-  line_distance_threshold: 0.08      # 直线内点的距离阈值（米）
+  line_distance_threshold: 0.1      # 直线内点的距离阈值（米）
   line_min_points: 20              # 形成一条直线的最小点数
   max_lines: 10                     # 检测的最大直线数量
   vertical_slice_width: 0.3         # 垂直切片宽度（米）
   parabola_distance_threshold: 0.1  # 抛物线内点的距离阈值（米）
   parabola_min_points: 15           # 拟合一条抛物线的最小点数
   power_line_distance_threshold: 0.15 # 最终电力线点距离阈值（米）
-  angle_threshold: 0.99   #方向夹角阈值 默认 0.99（约 8 度）
+  angle_threshold: 0.9   #方向夹角阈值 默认 0.99（约 8 度）
   distance_threshold: 3.0   #直线间距离阈值
   min_parallel_lines: 1   #最小平行直线数量
   min_line_length: 0.3   #最小直线长度
@@ -54,8 +64,8 @@ reconstruction:
   
   # 连接性判断参数
 
-  max_connection_distance: 5.0       # 连接最大距离 (米) - 主要指主方向
-  max_perpendicular_distance: 0.3    # 垂直方向最大距离 (米)
+  max_connection_distance: 2.0       # 连接最大距离 (米) - 主要指主方向
+  max_perpendicular_distance: 0.2    # 垂直方向最大距离 (米)
   direction_angle_threshold: 0.85    # 方向角度阈值 (余弦值，0.85约对应32度)
   parallel_threshold: 0.9            # 平行线判断阈值 (余弦值)
   
@@ -121,7 +131,237 @@ building_edge_filter:
   # 标记在RViz中的显示时间
   visualization_duration: 1.0
 
+  #电力线扩展半径
+  powerline_expansion_radius: 0.1
+
+# Advanced Obstacle Analyzer Parameters
+# 高级障碍物分析器参数配置
+
+advanced_obstacle:
+  # 聚类参数 (Clustering Parameters)
+  cluster_tolerance: 0.2        # 欧式聚类距离容忍度 (米)
+  cluster_min_size: 5          # 最小聚类点数
+  cluster_max_size: 50000       # 最大聚类点数
+  
+  # 电力线清理参数 (Powerline Cleaning Parameters)
+  powerline_clean_radius: 0.5   # 清理电力线周围点云的半径 (米)
+  powerline_merge_distance: 3.0 # 电力线合并距离阈值 (米)，小于此距离视为一体
+  
+  # 分层预警参数 (Layered Warning Parameters)
+  warning_level1_radius: 3.0    # 第一层预警半径 (米) - 红色危险区
+  warning_level2_radius: 8.0    # 第二层预警半径 (米) - 黄色警告区
+                                # 第三层为8米以外 - 绿色安全区
+  
+  # 端点过滤参数 (End Point Filtering Parameters)
+  end_filter_distance: 0.5      # 端点过滤距离 (米)
+  end_filter_ratio: 0.8         # 端点过滤比例阈值 (0-1)
+                                # 如果80%以上的点靠近电力线端点，则过滤该障碍物
+  
+  # 可视化参数 (Visualization Parameters)
+  obstacle_box_alpha: 0.6       # 障碍物盒子透明度 (0-1)
+  show_powerline_distance: true # 是否显示电力线距离信息
+  show_obstacle_distance: true  # 是否显示障碍物距离信息
+  min_warning_cloud_size: 10     # 预警点云最小点数阈值
+  warning_corridor_width: 00.0    # 预警通道宽度 (米) - 这个参数实际上不再使用
+
+# PowerLine Probability Map Configuration
+# 电力线概率地图配置参数
+
+probability_map:
+  # ==================== 体素化参数 ====================
+  voxel_size: 0.15                    # 体素大小 (m)，影响地图精度和内存消耗
+  expansion_radius: 0.15             # 样条点扩展半径 (m)，考虑电力线物理宽度和扫描精度
+  
+  # ==================== 空间边界参数 ====================
+  # 定义概率地图的有效范围，超出范围的点将被忽略
+  x_min: -35.0                       # X轴最小值 (m)
+  x_max: 35.0                        # X轴最大值 (m)
+  y_min: -35.0                       # Y轴最小值 (m)  
+  y_max: 35.0                        # Y轴最大值 (m)
+  z_min: 0.0                         # Z轴最小值 (m)
+  z_max: 35.0                        # Z轴最大值 (m)
+  
+  # ==================== 初始概率参数 ====================
+  # 控制第一帧初始化时不同区域的概率分配
+  initial_probability_center: 0.9    # 样条中心线附近的初始概率 [0,1]
+  initial_probability_edge: 0.6      # 扩展边缘区域的初始概率 [0,1]
+  background_probability: 0.1        # 背景/未标记区域的默认概率 [0,1]
+  
+  # ==================== 贝叶斯更新参数 ====================
+  # 控制概率地图的动态更新机制
+  hit_likelihood: 0.8                # 检测命中时的似然概率 [0,1]
+  miss_likelihood: 0.2               # 检测丢失时的似然概率 [0,1]
+  decay_rate: 0.98                   # 未观测区域的时间衰减率 [0,1]
+  max_frames_without_observation: 10 # 触发衰减的最大未观测帧数
+  
+  # ==================== 查询参数 ====================
+  # 控制高概率区域查询的阈值条件
+  probability_threshold: 0.7         # 默认概率阈值 [0,1]
+  confidence_threshold: 0.5          # 默认置信度阈值 [0,1]
+  clustering_radius: 1.0             # 相邻区域聚类半径 (m)
+  
+  # ==================== 可视化参数 ====================
+  # 控制RViz中的可视化效果
+  enable_visualization: true         # 是否启用可视化
+  visualization_duration: 5.0        # 可视化标记持续时间 (秒)
+  max_visualization_markers: 5000    # 最大可视化标记数量，防止RViz卡顿
+  frame_id: "map"              # 可视化坐标系ID
+  # =========================== 分线管理参数 ===========================
+  max_inactive_duration: 30.0  # 秒，分线在此时间内未更新则被视为不活跃
+  spatial_overlap_threshold: 0.7f            # 空间重叠阈值
+  min_stable_frames: 3          # 分线稳定所需的最小连续帧数
+  max_line_count: 10          # 最大分线数量，防止过多分线导致性能问题
+
+# ==================== 参数说明 ====================
+# 
+# 体素化参数调优建议：
+# - voxel_size 越小精度越高，但内存消耗越大（0.05-0.2m 范围合理）
+# - expansion_radius 应考虑电力线物理宽度(2-3cm)和激光扫描精度(5-10cm)
+# 
+# 概率参数调优建议：
+# - initial_probability_center 建议 0.8-0.95，表示对初始检测的信任度
+# - hit_likelihood 建议 0.7-0.9，表示检测器的可靠性
+# - miss_likelihood 建议 0.1-0.3，表示检测器的漏检率
+# 
+# 性能优化建议：
+# - 在低性能设备上可以增大 voxel_size 到 0.2m
+# - 减少 max_visualization_markers 到 2000 以提高 RViz 流畅度
+# - 对于静态场景可以降低更新频率，增大 decay_rate 到 0.99
 
 
+# ROI管理器参数配置文件
+# ==================== 扩展参数 ====================
+roi_manager:
+  # 扩展系数 (相对于原尺寸的比例)
+  expansion_factor: 0.5
+  
+  # 最小扩展距离 (米)
+  min_expansion: 1.0
+  
+  # 最大扩展距离 (米)
+  max_expansion: 3.0
+  
+  # ==================== 过滤参数 ====================
+  
+  # 置信度阈值 [0,1]
+  confidence_threshold: 0.1
+  
+  # 每个ROI最小点数
+  min_points_per_roi: 10
+  
+  # 最小ROI体积 (立方米)
+  min_roi_volume: 0.1
+  
+  # 最大ROI体积 (立方米)
+  max_roi_volume: 50.0
+  
+  # ==================== 合并参数 ====================
+  
+  # 是否启用ROI合并
+  enable_merge: true
+  
+  # 合并重叠阈值 [0,1] (重叠体积与较小ROI体积的比例)
+  merge_overlap_threshold: 0.1
+  
+  # 最大ROI数量限制
+  max_roi_count: 10
+  
+  # ==================== 空间边界参数 ====================
+  
+  # X轴边界 (米)
+  x_min: -35.0
+  x_max: 35.0
+  
+  # Y轴边界 (米)
+  y_min: -35.0
+  y_max: 35.0
+  
+  # Z轴边界 (米)
+  z_min: -5.0
+  z_max: 35.0
+  
+  # ==================== 可视化参数 ====================
+  
+  # 是否启用可视化
+  enable_visualization: true
+  
+  # 可视化持续时间 (秒)
+  visualization_duration: 5.0
+  
+  # 坐标系ID
+  frame_id: "map"
+  
+  # ==================== 性能参数 ====================
+  
+  # 是否启用并行处理
+  enable_parallel_processing: false
+  
+  # 最大处理线程数
+  max_processing_threads: 50
 
 
+# 电力线卡尔曼滤波跟踪器参数配置
+tracker:
+  # ==================== 相似度计算参数 ====================
+  
+  # 各特征在相似度计算中的权重
+  spatial_overlap_weight: 0.4      # 空间重叠权重 [0-1]
+  direction_similarity_weight: 0.25 # 方向相似度权重 [0-1]
+  length_similarity_weight: 0.2     # 长度相似度权重 [0-1]
+  shape_similarity_weight: 0.15     # 形状相似度权重 [0-1]
+  
+  # ==================== 数据关联参数 ====================
+  
+  # 关联阈值：相似度低于此值的不进行关联
+  association_threshold: 0.5         # 关联相似度阈值 [0-1]
+  
+  # 最大关联距离：超过此距离的检测结果不考虑关联
+  max_association_distance: 5.0      # 最大关联距离 (米)
+  
+  # ==================== 轨迹生命周期管理参数 ====================
+  
+  # 轨迹失效条件
+  max_consecutive_misses: 5          # 最大连续未匹配次数
+  min_confidence_threshold: 0.3      # 最小置信度阈值 [0-1]
+  
+  # 轨迹确认条件
+  min_hits_for_confirmation: 3       # 确认轨迹所需最小连续匹配次数
+  
+  # 系统容量限制
+  max_track_count: 20                # 最大同时跟踪轨迹数量
+  history_buffer_size: 10            # 每条轨迹保存的历史帧数
+  
+  # ==================== 卡尔曼滤波参数 ====================
+  
+  # 过程噪声（模型不确定性）
+  process_noise_position: 0.01       # 位置过程噪声标准差 (米)
+  process_noise_direction: 0.005     # 方向过程噪声标准差 (弧度)
+  process_noise_length: 0.01         # 长度过程噪声标准差 (米)
+  
+  # 测量噪声（观测不确定性）
+  measurement_noise: 0.05            # 测量噪声标准差 (米)
+  
+  # ==================== 预测和补全参数 ====================
+  
+  # 预测不确定性：随时间增长的不确定性
+  prediction_uncertainty: 0.1        # 预测不确定性增长率
+  
+  # 补全功能开关
+  enable_completion: true            # 是否启用遮挡补全功能
+  
+  # 补全条件
+  completion_confidence_threshold: 0.5  # 执行补全的最小轨迹置信度 [0-1]
+  
+  # ==================== 调试和性能参数 ====================
+  
+  # 日志级别控制
+  enable_debug_output: false         # 是否启用详细调试输出
+  
+  # 性能监控
+  enable_timing_statistics: true     # 是否启用耗时统计
+  
+  # 可视化相关
+  enable_track_visualization: true   # 是否启用轨迹可视化
+  track_visualization_duration: 1.0  # 轨迹可视化持续时间 (秒)
+  # 坐标系
+  frame_id: "map"              # 可视化使用的坐标系

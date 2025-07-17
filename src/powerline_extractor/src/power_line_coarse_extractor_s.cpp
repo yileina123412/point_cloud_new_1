@@ -2,13 +2,17 @@
 #include <Eigen/Dense>
 #include <queue>
 
-PowerLineCoarseExtractor::PowerLineCoarseExtractor(ros::NodeHandle& nh) : nh_(nh),extracted_cloud_(new pcl::PointCloud<pcl::PointXYZI>) {
+PowerLineCoarseExtractor::PowerLineCoarseExtractor(ros::NodeHandle& nh) : nh_(nh),extracted_cloud_(new pcl::PointCloud<pcl::PointXYZI>),
+env_without_powerline_cloud_(new pcl::PointCloud<pcl::PointXYZI>){
     loadParameters(nh);
     normal_estimation_.setRadiusSearch(0.5);
     kdtree_.reset(new pcl::search::KdTree<pcl::PointXYZI>);
     pub_linearity_ = nh_.advertise<sensor_msgs::PointCloud2>("linearity_cloud", 1);
     pub_curvature_ = nh_.advertise<sensor_msgs::PointCloud2>("curvature_cloud", 1);
     pub_variance_ = nh_.advertise<sensor_msgs::PointCloud2>("variance_cloud", 1);
+
+    pub_qualified_ = nh_.advertise<sensor_msgs::PointCloud2>("qualified_cloud", 1);
+    pub_unqualified_ = nh_.advertise<sensor_msgs::PointCloud2>("unqualified_cloud", 1);
 }
 
 void PowerLineCoarseExtractor::loadParameters(ros::NodeHandle& nh) {
@@ -24,6 +28,12 @@ void PowerLineCoarseExtractor::loadParameters(ros::NodeHandle& nh) {
     nh.param("power_line_coarse_extractor_s/search_radius", search_radius_, 0.5);
     // 新增参数
     nh.param("power_line_coarse_extractor_s/min_cluster_length", min_cluster_length_, 5.0); // 单位：米
+
+    // 边沿检查参数
+    nh.param("power_line_coarse_extractor_s/edge_check_radius", edge_check_radius_, 0.1);
+    nh.param("power_line_coarse_extractor_s/max_unqualified_neighbors", max_unqualified_neighbors_, 3);
+    
+    
     ROS_INFO("粗提取_s参数加载完成");
     ROS_INFO("min_cluster_length: %.2f",min_cluster_length_);
 }
@@ -73,14 +83,20 @@ void PowerLineCoarseExtractor::manualClustering(const pcl::PointCloud<pcl::Point
 pcl::PointCloud<pcl::PointXYZI>::Ptr PowerLineCoarseExtractor::getExtractedCloud() const {
     return extracted_cloud_;
 }
+pcl::PointCloud<pcl::PointXYZI>::Ptr PowerLineCoarseExtractor::getEnvWithoutPowerCloud() const
+{
+    return env_without_powerline_cloud_;
+}
 // 新增逐点提取函数
-void PowerLineCoarseExtractor::extractPowerLinesByPoints(const std::unique_ptr<PointCloudPreprocessor>& preprocessor_ptr) {
+void PowerLineCoarseExtractor::extractPowerLinesByPoints(const pcl::PointCloud<pcl::PointXYZI>::Ptr& input_cloud) {
+    
     // 获取预处理后的点云
-    auto cloud = preprocessor_ptr->getProcessedCloud();
+    auto cloud = input_cloud;
     if (cloud->empty()) {
         ROS_WARN("Input point cloud is empty!");
         return;
     }
+    
     kdtree_->setInputCloud(cloud);
 
     // 计算所有点的法向量
@@ -96,10 +112,17 @@ void PowerLineCoarseExtractor::extractPowerLinesByPoints(const std::unique_ptr<P
         if (isPowerLinePoint(cloud, normals, i)) {
             power_lines->points.push_back(cloud->points[i]);
         }
+        else
+        {
+            env_without_powerline_cloud_->points.push_back(cloud->points[i]);
+        }
     }
     power_lines->width = power_lines->points.size();
     power_lines->height = 1;
     power_lines->is_dense = true;
+
+    // 在聚类前添加边沿过滤
+    filterEdgePoints(power_lines, cloud, normals);
 
     // 手动聚类
     std::vector<pcl::PointIndices> cluster_indices;
@@ -121,6 +144,7 @@ void PowerLineCoarseExtractor::extractPowerLinesByPoints(const std::unique_ptr<P
         *extracted_cloud_ += *cluster;
     }
 }
+
 
 // 新增辅助函数：判断单个点是否为电力线点
 bool PowerLineCoarseExtractor::isPowerLinePoint(const pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud,
@@ -169,6 +193,13 @@ bool PowerLineCoarseExtractor::isPowerLinePoint(const pcl::PointCloud<pcl::Point
         variance += diff.squaredNorm();
     }
     variance /= neighbors.size();
+
+    // // 原有筛选条件
+    // bool basic_criteria = linearity > linearity_threshold_ && curvature < curvature_threshold_;
+    // if (!basic_criteria) return false;
+    // // 新增垂直方向孤立性检查
+    // Eigen::Vector3f main_direction = eigen_solver.eigenvectors().col(2); // 主方向是最大特征值对应的特征向量
+    // return checkPerpendicularIsolation(cloud, normals, index, main_direction);
 
     // 筛选条件
     // return linearity > linearity_threshold_ && curvature < curvature_threshold_ && variance > variance_threshold_;
@@ -331,4 +362,66 @@ void PowerLineCoarseExtractor::visualizeParameters(const std::unique_ptr<PointCl
     output.header.frame_id = "map";
     output.header.stamp = ros::Time::now();
     pub_variance_.publish(output);
+}
+
+void PowerLineCoarseExtractor::filterEdgePoints(const pcl::PointCloud<pcl::PointXYZI>::Ptr& input_cloud,
+                                               const pcl::PointCloud<pcl::PointXYZI>::Ptr& original_cloud,
+                                               const pcl::PointCloud<pcl::Normal>::Ptr& normals) {
+    if (input_cloud->empty()) return;
+    
+    // 为原点云建立kdtree用于邻域搜索
+    pcl::search::KdTree<pcl::PointXYZI>::Ptr original_kdtree(new pcl::search::KdTree<pcl::PointXYZI>);
+    original_kdtree->setInputCloud(original_cloud);
+    
+    pcl::PointCloud<pcl::PointXYZI>::Ptr qualified_cloud(new pcl::PointCloud<pcl::PointXYZI>);
+    pcl::PointCloud<pcl::PointXYZI>::Ptr unqualified_cloud(new pcl::PointCloud<pcl::PointXYZI>);
+    pcl::PointCloud<pcl::PointXYZI>::Ptr final_power_lines(new pcl::PointCloud<pcl::PointXYZI>);
+    
+    for (size_t i = 0; i < input_cloud->points.size(); ++i) {
+        // 在原点云中搜索邻域
+        std::vector<int> neighbors;
+        std::vector<float> distances;
+        original_kdtree->radiusSearch(input_cloud->points[i], edge_check_radius_, neighbors, distances);
+        
+        // 统计邻域中不合格的点数量
+        int unqualified_count = 0;
+        for (int neighbor_idx : neighbors) {
+            if (!isPowerLinePoint(original_cloud, normals, neighbor_idx)) {
+                unqualified_count++;
+            }
+        }
+        
+        if (unqualified_count <= max_unqualified_neighbors_) {
+            qualified_cloud->points.push_back(input_cloud->points[i]);
+            final_power_lines->points.push_back(input_cloud->points[i]);
+        } else {
+            unqualified_cloud->points.push_back(input_cloud->points[i]);
+        }
+    }
+    
+    // 设置点云属性
+    qualified_cloud->width = qualified_cloud->points.size();
+    qualified_cloud->height = 1;
+    qualified_cloud->is_dense = true;
+    unqualified_cloud->width = unqualified_cloud->points.size();
+    unqualified_cloud->height = 1;
+    unqualified_cloud->is_dense = true;
+    final_power_lines->width = final_power_lines->points.size();
+    final_power_lines->height = 1;
+    final_power_lines->is_dense = true;
+
+    // 发布可视化点云
+    sensor_msgs::PointCloud2 output;
+    pcl::toROSMsg(*qualified_cloud, output);
+    output.header.frame_id = "map";
+    output.header.stamp = ros::Time::now();
+    pub_qualified_.publish(output);
+
+    pcl::toROSMsg(*unqualified_cloud, output);
+    output.header.frame_id = "map";
+    output.header.stamp = ros::Time::now();
+    pub_unqualified_.publish(output);
+    
+    // 更新输入点云为过滤后的结果
+    *input_cloud = *final_power_lines;
 }
