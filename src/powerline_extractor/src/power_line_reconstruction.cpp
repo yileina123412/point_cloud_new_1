@@ -109,7 +109,7 @@ void PowerLineReconstructor::reconstructPowerLines(const pcl::PointCloud<pcl::Po
     ROS_INFO("电力线重构 执行时间: %f 秒", duration.count());
     ROS_INFO("最终输出点云点数: %zu", output_cloud->size());
 }
-
+// 将输入的点云分离成独立的线性片段
 void PowerLineReconstructor::separateSegments(const pcl::PointCloud<pcl::PointXYZI>::Ptr& input_cloud,
                                              std::vector<PowerLineSegment>& segments) {
     // 使用欧几里得聚类进行片段分离
@@ -154,7 +154,7 @@ void PowerLineReconstructor::createSegmentStructures(std::vector<PowerLineSegmen
     }
     ROS_INFO("片段属性计算完成");
 }
-
+// 计算片段属性
 void PowerLineReconstructor::computeSegmentProperties(PowerLineSegment& segment) {
     if (segment.points->empty()) return;
     
@@ -210,7 +210,7 @@ void PowerLineReconstructor::computeSegmentProperties(PowerLineSegment& segment)
         ROS_DEBUG("片段 %d 与z轴角度过小 (%.1f度)，已过滤", segment.cluster_id, z_angle_deg);
     }
 }
-
+// 判断连接性
 void PowerLineReconstructor::judgeConnectivity(const std::vector<PowerLineSegment>& segments,
                                               std::vector<std::vector<int>>& connected_groups) {
     int n = segments.size();
@@ -240,13 +240,7 @@ void PowerLineReconstructor::judgeConnectivity(const std::vector<PowerLineSegmen
     }
 }
 
-// bool PowerLineReconstructor::isConnectable(const PowerLineSegment& seg1, const PowerLineSegment& seg2) {
-//     // 计算连接分数
-//     double score = calculateConnectionScore(seg1, seg2);
-    
-//     // 简单的阈值判断，可以根据需要调整
-//     return score > 0.5;
-// }
+// 判断两个线段之间是否能连通
 bool PowerLineReconstructor::isConnectable(const PowerLineSegment& seg1, const PowerLineSegment& seg2) {
     // 1. 计算两个片段中心点之间的距离
     // float center_distance = (seg1.center - seg2.center).norm();
@@ -358,7 +352,7 @@ double PowerLineReconstructor::calculateConnectionScore(const PowerLineSegment& 
     
     return best_score;
 }
-
+// 用DFS判断连通性
 void PowerLineReconstructor::dfsConnectivity(int segment_idx,
                                            const std::vector<PowerLineSegment>& segments,
                                            const std::vector<std::vector<bool>>& connectivity_matrix,
@@ -373,7 +367,7 @@ void PowerLineReconstructor::dfsConnectivity(int segment_idx,
         }
     }
 }
-
+// 重构电力线
 void PowerLineReconstructor::reconstructLines(const std::vector<PowerLineSegment>& segments,
                                              const std::vector<std::vector<int>>& connected_groups,
                                              std::vector<ReconstructedPowerLine>& power_lines) {

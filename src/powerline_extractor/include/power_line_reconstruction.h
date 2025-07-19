@@ -26,7 +26,7 @@ struct PowerLineSegment {
     Eigen::Vector3f end_point;
     Eigen::Vector3f local_direction;   // 中心到端点方向
     Eigen::Vector3f overall_direction; // 整体主方向（考虑弯曲）
-    int cluster_id;
+    int cluster_id;   //聚类ID
     double length;
     
     PowerLineSegment() : points(new pcl::PointCloud<pcl::PointXYZI>), cluster_id(-1), length(0.0) {}

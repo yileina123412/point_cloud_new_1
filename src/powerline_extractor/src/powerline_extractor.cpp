@@ -171,11 +171,12 @@ void PowerlineExtractor::process_first_method(const std_msgs::Header& header){
     // building_edge_filter_->filterBuildingEdges(preprocessor__output_cloud_,power_lines_,building_edge_filter_output_cloud_);
     
     auto analy_star = std::chrono::high_resolution_clock::now();
-    // analyzer_->analyzeObstacles(env_not_power_cloud_, fine_extract_cloud_, obbs_); //0.4
-    obs_analyzer_->analyzeObstacles(power_lines_,env_not_power_cloud_,obstacle_results_,warning_cloud_);
-    auto analy_end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> analy_duration = analy_end - analy_star;
-    ROS_INFO("障碍物检测 执行时间: %f 秒", analy_duration.count());
+
+    // obs_analyzer_->analyzeObstacles(power_lines_,env_not_power_cloud_,obstacle_results_,warning_cloud_);
+    // auto analy_end = std::chrono::high_resolution_clock::now();
+    // std::chrono::duration<double> analy_duration = analy_end - analy_star;
+    // ROS_INFO("障碍物检测 执行时间: %f 秒", analy_duration.count());
+
     //发布距离可视化
     // analyzer_->publishObbMarkers(obbs_, obb_marker_pub, "map");
     // analyzer_->publishPowerlineDistanceMarkers(fine_extract_cloud_,powerlines_distance_cloud_pub_,"map");
@@ -272,30 +273,45 @@ void PowerlineExtractor::pointCloudCallback(const sensor_msgs::PointCloud2::Cons
         }
         run_times ++;
         ROS_INFO("程序运行的第: %d 轮。",run_times);
-        if(is_first_frame_ == 0)
-        {
-            auto start_time = std::chrono::high_resolution_clock::now();
-            process_first_method(transformed_msg.header);
-            auto end_time = std::chrono::high_resolution_clock::now();
-            double all_time = std::chrono::duration<double, std::milli>(end_time - start_time).count();
-            ROS_INFO("===================程序运行的第: %d 轮。",run_times);
-            ROS_INFO("整个过程总共运行时间: %.3f ms", 
-                        all_time);
-            is_first_frame_ = 1;
-            prob_map_->initializeProbabilityMap(power_lines_);
-            tracker_->initializeTracker(power_lines_); // 初始化跟踪器
+
+        if(1)
+            {
+                auto start_time = std::chrono::high_resolution_clock::now();
+                process_first_method(transformed_msg.header);
+                auto end_time = std::chrono::high_resolution_clock::now();
+                double all_time = std::chrono::duration<double, std::milli>(end_time - start_time).count();
+                ROS_INFO("===================程序运行的第: %d 轮。",run_times);
+                ROS_INFO("整个过程总共运行时间: %.3f ms", 
+                            all_time);
+
+                
+            }
+
+        
+        // if(is_first_frame_ == 0)
+        // {
+        //     auto start_time = std::chrono::high_resolution_clock::now();
+        //     process_first_method(transformed_msg.header);
+        //     auto end_time = std::chrono::high_resolution_clock::now();
+        //     double all_time = std::chrono::duration<double, std::milli>(end_time - start_time).count();
+        //     ROS_INFO("===================程序运行的第: %d 轮。",run_times);
+        //     ROS_INFO("整个过程总共运行时间: %.3f ms", 
+        //                 all_time);
+        //     is_first_frame_ = 1;
+        //     prob_map_->initializeProbabilityMap(power_lines_);
+        //     tracker_->initializeTracker(power_lines_); // 初始化跟踪器
             
-        }
-        else{
-            auto start_time = std::chrono::high_resolution_clock::now();
-            process_second_times(transformed_msg.header);
-            auto end_time = std::chrono::high_resolution_clock::now();
-            double all_time = std::chrono::duration<double, std::milli>(end_time - start_time).count();
-            ROS_INFO("=================   second  程序运行的第: %d 轮。",run_times);
-            ROS_INFO("整个过程总共运行时间: %.3f ms", 
-                        all_time);
-            prob_map_->updateProbabilityMap(complete_result);
-        }
+        // }
+        // else{
+        //     auto start_time = std::chrono::high_resolution_clock::now();
+        //     process_second_times(transformed_msg.header);
+        //     auto end_time = std::chrono::high_resolution_clock::now();
+        //     double all_time = std::chrono::duration<double, std::milli>(end_time - start_time).count();
+        //     ROS_INFO("=================   second  程序运行的第: %d 轮。",run_times);
+        //     ROS_INFO("整个过程总共运行时间: %.3f ms", 
+        //                 all_time);
+        //     prob_map_->updateProbabilityMap(complete_result);
+        // }
 
         
 

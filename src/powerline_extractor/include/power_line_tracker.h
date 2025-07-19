@@ -83,6 +83,8 @@ public:
     
     // 计算与检测结果的相似度
     float calculateSimilarity(const ReconstructedPowerLine& detection) const;
+
+    Eigen::Vector3f interpolateControlPoint(float t) const;
     
     // 状态管理
     void markAsLost();
@@ -94,7 +96,7 @@ private:
     void initializeKalmanFilter(const ReconstructedPowerLine& initial_detection);
     void stateToVector();
     void vectorToState();
-    Eigen::Vector3f interpolateControlPoint(float t) const;
+    
     void updateHistory(const ReconstructedPowerLine& detection);
     std::vector<Eigen::Vector3f> extractControlPoints(const ReconstructedPowerLine& line) const;
 };
@@ -104,6 +106,23 @@ struct AssociationResult {
     std::vector<std::pair<int, int>> matched_pairs;  // (track_id, detection_id)
     std::vector<int> unmatched_tracks;               // 未匹配的轨迹
     std::vector<int> unmatched_detections;           // 未匹配的检测
+};
+
+// 扩展的数据关联结果（支持1对多匹配）
+struct EnhancedAssociationResult {
+    std::vector<std::pair<int, std::vector<int>>> track_to_fragments;  // 轨迹ID -> 多个检测片段索引
+    std::vector<int> unmatched_tracks;                                 // 未匹配的轨迹
+    std::vector<int> unmatched_detections;                            // 未匹配的检测
+    std::vector<std::vector<int>> fragment_clusters;                  // 预聚类的片段组
+};
+
+// 片段连续性评估结果
+struct ContinuityScore {
+    float spatial_continuity;    // 空间连续性 [0,1]
+    float direction_continuity;  // 方向连续性 [0,1]
+    float overall_score;         // 综合评分 [0,1]
+    
+    ContinuityScore() : spatial_continuity(0.0f), direction_continuity(0.0f), overall_score(0.0f) {}
 };
 
 // 主跟踪器类
@@ -207,7 +226,12 @@ private:
     bool enable_track_visualization_;
     float track_visualization_duration_;
     std::string frame_id_;
-        
+
+    // 片段处理参数
+    float fragment_continuity_threshold_;     // 片段连续性阈值
+    float max_fragment_gap_distance_;         // 最大片段间隙距离
+    float direction_consistency_threshold_;   // 方向一致性阈值
+    float fragment_merge_confidence_;         // 片段合并置信度阈值
     // ==================== 内部函数 ====================
     
     // 参数读取
@@ -239,7 +263,9 @@ private:
                                   const ReconstructedPowerLine& detection) const;
     
     // 轨迹生命周期管理
-    void processAssociationResults(const AssociationResult& results,
+    // void processAssociationResults(const AssociationResult& results,
+    //                               const std::vector<ReconstructedPowerLine>& detections);
+    void processAssociationResults(const EnhancedAssociationResult& results,
                                   const std::vector<ReconstructedPowerLine>& detections);
     
     void createNewTracks(const std::vector<int>& unmatched_detections,
@@ -276,6 +302,42 @@ private:
     void publishTrackStatistics();
     visualization_msgs::Marker createTrackMarker(const TrackedPowerLine& track, int marker_id) const;
     std_msgs::ColorRGBA getTrackStatusColor(TrackStatus status) const;
+
+
+    // ==================== 片段处理相关函数 ====================
+
+    // 片段连续性检测
+    ContinuityScore evaluateContinuity(const ReconstructedPowerLine& seg1, 
+                                    const ReconstructedPowerLine& seg2) const;
+
+    bool areContinuousSegments(const ReconstructedPowerLine& seg1, 
+                            const ReconstructedPowerLine& seg2,
+                            float threshold = 0.6f) const;
+
+    // 片段聚类
+    std::vector<std::vector<int>> clusterDetectionSegments(
+        const std::vector<ReconstructedPowerLine>& detections) const;
+
+    // 扩展的数据关联
+    EnhancedAssociationResult associateWithFragmentMerging(
+        const std::vector<ReconstructedPowerLine>& detections,
+        const PowerLineProbabilityMap* prob_map = nullptr) const;
+
+    // 多片段相似度计算
+    float calculateTrackToFragmentsSimilarity(
+        const TrackedPowerLine& track,
+        const std::vector<int>& fragment_indices,
+        const std::vector<ReconstructedPowerLine>& detections) const;
+
+    // 片段融合
+    ReconstructedPowerLine mergeFragmentsToCompleteLine(
+        const std::vector<ReconstructedPowerLine>& fragments,
+        const TrackedPowerLine& historical_track) const;
+
+    // 多片段轨迹更新
+    void updateTrackWithFragments(TrackedPowerLine& track,
+                                const std::vector<int>& fragment_indices,
+                                const std::vector<ReconstructedPowerLine>& detections);
 };
 
 #endif // POWER_LINE_TRACKER_H
