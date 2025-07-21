@@ -20,6 +20,8 @@ PowerLineReconstructor::PowerLineReconstructor(ros::NodeHandle& nh) : nh_(nh) {
     nh.param("reconstruction/connection_weight_angle", connection_weight_angle_, 0.4);
     nh.param("reconstruction/visualization_duration", visualization_duration_, 5.0);
     nh.param("reconstruction/frame_id", frame_id_, std::string("base_link"));
+    nh.param("reconstruction/density_radius", density_radius, 0.3f);
+    nh.param("reconstruction/min_neighbors", min_neighbors, 5);
 
     // 初始化ROS发布器
     original_cloud_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("power_line_reconstruction/original_cloud", 1);
@@ -45,6 +47,8 @@ PowerLineReconstructor::PowerLineReconstructor(ros::NodeHandle& nh) : nh_(nh) {
     ROS_INFO("平行线判断阈值: %f", parallel_threshold_);
     ROS_INFO("连接判断距离权重: %f", connection_weight_distance_);
     ROS_INFO("连接判断角度权重: %f", connection_weight_angle_);
+    ROS_INFO("密度计算半径: %f", density_radius);
+    ROS_INFO("密度计算最小邻居数: %d", min_neighbors);
 }
 
 void PowerLineReconstructor::reconstructPowerLines(const pcl::PointCloud<pcl::PointXYZI>::Ptr& input_cloud,
@@ -405,12 +409,114 @@ void PowerLineReconstructor::reconstructLines(const std::vector<PowerLineSegment
         // 计算主方向（所有片段方向的平均）
         Eigen::Vector3f avg_direction = Eigen::Vector3f::Zero();
         for (int idx : group) {
-            avg_direction += segments[idx].overall_direction;
+            avg_direction += segments[idx].overall_direction* segments[idx].length;
         }
-        power_line.main_direction = avg_direction.normalized();
+        power_line.main_direction = (avg_direction / power_line.total_length).normalized();
+
+     
+
+        
+
+
+
         
         // 过滤长度太短的线
         if (power_line.total_length >= min_line_length_) {
+            // ====== 密度过滤 ======
+            pcl::PointCloud<pcl::PointXYZI>::Ptr filtered(new pcl::PointCloud<pcl::PointXYZI>);
+            // density_radius = 0.3; // 半径阈值，可根据实际调整
+            // min_neighbors = 5;      // 最小邻居数，可根据实际调整
+
+            pcl::search::KdTree<pcl::PointXYZI> kdtree;
+            kdtree.setInputCloud(power_line.points);
+
+            for (const auto& pt : power_line.points->points) {
+                std::vector<int> indices;
+                std::vector<float> distances;
+                pcl::PointXYZI query = pt;
+                if (kdtree.radiusSearch(query, density_radius, indices, distances) >= min_neighbors) {
+                    filtered->points.push_back(pt);
+                }
+            }
+            filtered->width = filtered->points.size();
+            filtered->height = 1;
+            filtered->is_dense = true;
+            power_line.points = filtered;
+            // ====== 密度过滤结束 ======
+            // 对group内片段排序，保证连接顺序合理
+            std::vector<int> sorted_group;
+            std::vector<bool> used(group.size(), false);
+            sorted_group.push_back(group[0]);
+            used[0] = true;
+            for (size_t k = 1; k < group.size(); ++k) {
+                int last_idx = sorted_group.back();
+                float min_dist = std::numeric_limits<float>::max();
+                int next_pos = -1;
+                for (size_t m = 0; m < group.size(); ++m) {
+                    if (used[m]) continue;
+                    float d1 = pointDistance(segments[last_idx].end_point, segments[group[m]].start_point);
+                    float d2 = pointDistance(segments[last_idx].end_point, segments[group[m]].end_point);
+                    float d3 = pointDistance(segments[last_idx].start_point, segments[group[m]].start_point);
+                    float d4 = pointDistance(segments[last_idx].start_point, segments[group[m]].end_point);
+                    float d = std::min({d1, d2, d3, d4});
+                    if (d < min_dist) {
+                        min_dist = d;
+                        next_pos = m;
+                    }
+                }
+                if (next_pos >= 0) {
+                    sorted_group.push_back(group[next_pos]);
+                    used[next_pos] = true;
+                }
+            }
+
+
+            // ====== 分段拟合并连接 ======
+            // power_line.fitted_curve_points.clear();
+            // std::vector<Eigen::Vector3f> all_curve_points;
+            // std::vector<Eigen::Vector3f> segment_ends;
+
+            // for (size_t j = 0; j < sorted_group.size(); ++j) {
+            //     // 对每个片段分别拟合
+            //     std::vector<Eigen::Vector3f> segment_curve;
+            //     fitSplineCurveForSegment(segments[sorted_group[j]], segment_curve);
+            //     all_curve_points.insert(all_curve_points.end(), segment_curve.begin(), segment_curve.end());
+            //     // 记录片段尾部
+            //     segment_ends.push_back(segments[sorted_group[j]].end_point);
+            // }
+
+            // // 插值连接片段之间的空隙
+            // for (size_t j = 1; j < segment_ends.size(); ++j) {
+            //     Eigen::Vector3f prev_end = segment_ends[j-1];
+            //     Eigen::Vector3f curr_start = segments[sorted_group[j]].start_point;
+            //     float gap = (curr_start - prev_end).norm();
+            //     if (gap > spline_resolution_ * 1.5) { // 空隙较大才插值
+            //         int n_interp = std::max(2, int(gap / spline_resolution_));
+            //         for (int k = 1; k < n_interp; ++k) {
+            //             float alpha = float(k) / n_interp;
+            //             Eigen::Vector3f interp_pt = prev_end * (1-alpha) + curr_start * alpha;
+            //             all_curve_points.push_back(interp_pt);
+            //         }
+            //     }
+            // }
+            // power_line.fitted_curve_points.clear();
+            // for (size_t j = 0; j < group.size(); ++j) {
+            //     std::vector<Eigen::Vector3f> segment_curve;
+            //     fitSplineCurveForSegment(segments[group[j]], segment_curve);
+            //     power_line.fitted_curve_points.insert(
+            //         power_line.fitted_curve_points.end(),
+            //         segment_curve.begin(),
+            //         segment_curve.end()
+            //     );
+            // }
+            // power_lines.push_back(power_line);
+
+
+            // // 按顺序合并所有拟合点和插值点
+            // power_line.fitted_curve_points = all_curve_points;
+            // power_lines.push_back(power_line);
+
+
             // 拟合样条曲线
             fitSplineCurve(power_line);
             power_lines.push_back(power_line);
@@ -432,6 +538,52 @@ void PowerLineReconstructor::mergeSegmentPoints(const std::vector<PowerLineSegme
     merged_cloud->is_dense = true;
 }
 
+void PowerLineReconstructor::fitSplineCurveForSegment(const PowerLineSegment& segment, std::vector<Eigen::Vector3f>& curve_points) {
+    curve_points.clear();
+    if (segment.points->empty()) return;
+
+    // 计算中心点
+    Eigen::Vector4f centroid;
+    pcl::compute3DCentroid(*segment.points, centroid);
+    Eigen::Vector3f center = centroid.head<3>();
+
+    // 计算沿主方向的投影范围
+    float min_proj = std::numeric_limits<float>::max();
+    float max_proj = std::numeric_limits<float>::lowest();
+    for (const auto& pt : segment.points->points) {
+        Eigen::Vector3f p(pt.x, pt.y, pt.z);
+        float proj = (p - center).dot(segment.overall_direction);
+        min_proj = std::min(min_proj, proj);
+        max_proj = std::max(max_proj, proj);
+    }
+
+    int num_samples = static_cast<int>((max_proj - min_proj) / spline_resolution_) + 1;
+    for (int i = 0; i < num_samples; ++i) {
+        float t = min_proj + i * spline_resolution_;
+        Eigen::Vector3f sample_point = center + t * segment.overall_direction;
+
+        // 找到最近的实际点进行修正，并限制垂直距离
+        float min_dist = std::numeric_limits<float>::max();
+        Eigen::Vector3f closest_point = sample_point;
+        for (const auto& pt : segment.points->points) {
+            Eigen::Vector3f p(pt.x, pt.y, pt.z);
+            // 计算垂直距离
+            float proj = (p - center).dot(segment.overall_direction);
+            Eigen::Vector3f proj_point = center + proj * segment.overall_direction;
+            float vertical_dist = (p - proj_point).norm();
+            float dist = (p - sample_point).norm();
+            if (vertical_dist < 0.1 && dist < min_dist) {
+                min_dist = dist;
+                closest_point = p;
+            }
+        }
+        if (min_dist < 0.1) {
+            curve_points.push_back(closest_point);
+        } else {
+            curve_points.push_back(sample_point);
+        }
+    }
+}
 void PowerLineReconstructor::fitSplineCurve(ReconstructedPowerLine& power_line) {
     power_line.fitted_curve_points.clear();
     
@@ -474,7 +626,7 @@ void PowerLineReconstructor::fitSplineCurve(ReconstructedPowerLine& power_line) 
         }
         
         // 如果距离合理，使用修正后的点
-        if (min_dist < 0.5) {  // 0.5米阈值
+        if (min_dist < 0.1) {  // 0.5米阈值
             power_line.fitted_curve_points.push_back(closest_point);
         } else {
             power_line.fitted_curve_points.push_back(sample_point);

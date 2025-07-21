@@ -137,8 +137,7 @@ bool PowerLineProbabilityMap::initializeProbabilityMap(
             markLineRegion(spline_point, local_direction, initial_probability_center_);  //将样条点扩展到体素中，并加入voxel_map_
             markLineRegionForSpecificLine(line.line_id, spline_point, local_direction, initial_probability_center_); //将该样条加入到每条线的概率地图
             
-            // 标记圆柱体区域
-            markLineRegion(spline_point, local_direction, initial_probability_center_); // 标记体素
+ 
         }
     }
     
@@ -559,7 +558,7 @@ void PowerLineProbabilityMap::publishProbabilityMarkers() { // 发布体素可�
     
     for (const auto& [voxel_key, voxel] : voxel_map_) {
         // 只可视化有意义的概率区域，避免显示过多标记
-        if (voxel.line_probability < 0.4f) {
+        if (voxel.line_probability < 0.6f) {
             continue;
         }
         
@@ -700,7 +699,7 @@ void PowerLineProbabilityMap::publishLineSpecificMarkers() { // 发布分线可�
         
         // 为该电力线的高概率体素创建标记
         for (const auto& [voxel_key, voxel] : line_map) {
-            if (voxel.line_probability < 0.5f) continue; // 只显示较高概率的体素
+            if (voxel.line_probability < 0.6f) continue; // 只显示较高概率的体素
             
             if (line_marker_count >= 1000) break; // 限制每条线的标记数量
             

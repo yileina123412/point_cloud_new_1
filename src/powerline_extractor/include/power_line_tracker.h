@@ -68,6 +68,9 @@ public:
     
     // 历史信息（用于补全）
     std::vector<ReconstructedPowerLine> history_;  // 最近N帧的检测历史
+
+    // 添加分线概率地图
+    std::unordered_map<VoxelKey, PowerLineVoxel> line_voxel_map_;
     
 public:
     TrackedPowerLine(int id, const ReconstructedPowerLine& initial_detection);
@@ -85,6 +88,12 @@ public:
     float calculateSimilarity(const ReconstructedPowerLine& detection) const;
 
     Eigen::Vector3f interpolateControlPoint(float t) const;
+
+    // 添加访问概率地图的方法
+    void updateProbabilityMap(const std::unordered_map<VoxelKey, PowerLineVoxel>& voxel_map);
+    float queryProbabilityAtPosition(const Eigen::Vector3f& position, float voxel_size) const;
+    bool isPointNearTrack(const Eigen::Vector3f& point, float threshold) const;
+
     
     // 状态管理
     void markAsLost();

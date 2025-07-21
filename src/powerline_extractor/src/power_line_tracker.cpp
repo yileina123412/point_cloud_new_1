@@ -271,6 +271,49 @@ bool TrackedPowerLine::shouldBeRemoved() const {
     return status_ == TRACK_LOST && (consecutive_misses_ > 10 || confidence_ < 0.1f);
 }
 
+// 更新分线概率地图
+void TrackedPowerLine::updateProbabilityMap(const std::unordered_map<VoxelKey, PowerLineVoxel>& voxel_map) {
+    // 合并新的概率地图
+    for (const auto& [key, voxel] : voxel_map) {
+        auto& track_voxel = line_voxel_map_[key];
+        track_voxel.line_probability = std::max(track_voxel.line_probability, voxel.line_probability);
+        track_voxel.confidence = std::max(track_voxel.confidence, voxel.confidence);
+        track_voxel.observation_count += voxel.observation_count;
+        track_voxel.frames_since_last_observation = 0;
+        track_voxel.last_update_time = voxel.last_update_time;
+    }
+}
+
+// 查询位置概率
+float TrackedPowerLine::queryProbabilityAtPosition(const Eigen::Vector3f& position, float voxel_size) const {
+    VoxelKey key(
+        static_cast<int>(std::floor(position.x() / voxel_size)),
+        static_cast<int>(std::floor(position.y() / voxel_size)),
+        static_cast<int>(std::floor(position.z() / voxel_size))
+    );
+    
+    auto it = line_voxel_map_.find(key);
+    if (it != line_voxel_map_.end()) {
+        return it->second.line_probability;
+    }
+    return 0.1f; // 背景概率
+}
+
+// 判断点是否在轨迹附近
+bool TrackedPowerLine::isPointNearTrack(const Eigen::Vector3f& point, float threshold) const {
+    // 检查点是否在任意控制点附近
+    for (const auto& control_point : state_.control_points) {
+        if ((point - control_point).norm() < threshold) {
+            return true;
+        }
+    }
+    
+    // 检查概率地图中是否有高概率区域
+    // 这需要更高级的实现，此处略过
+    
+    return false;
+}
+
 // ==================== PowerLineTracker 实现 ====================
 
 PowerLineTracker::PowerLineTracker(ros::NodeHandle& nh) 
@@ -412,8 +455,8 @@ std::vector<ReconstructedPowerLine> PowerLineTracker::updateTracker(
     auto end_time = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> duration = end_time - start_time;
     
-    ROS_DEBUG("跟踪器更新完成，耗时: %.3f 秒", duration.count());
-    ROS_DEBUG("活跃轨迹: %zu，当前检测: %zu，输出结果: %zu", 
+    ROS_INFO("跟踪器更新完成，耗时: %.3f 秒", duration.count());
+    ROS_INFO("活跃轨迹: %zu，当前检测: %zu，输出结果: %zu", 
              active_tracks_.size(), current_detections.size(), result.size());
     // 可视化
     if (enable_track_visualization_) {

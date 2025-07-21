@@ -76,6 +76,8 @@ private:
     double parallel_threshold_;       // 平行线判断阈值
     double connection_weight_distance_; // 连接判断距离权重
     double connection_weight_angle_;   // 连接判断角度权重
+    float density_radius; // 对提取的电力线点云密度计算半径
+    int min_neighbors; // 密度计算最小邻居数
 
     
     // 可视化参数
@@ -96,7 +98,9 @@ private:
     void reconstructLines(const std::vector<PowerLineSegment>& segments,
                          const std::vector<std::vector<int>>& connected_groups,
                          std::vector<ReconstructedPowerLine>& power_lines);
-    
+
+    void fitSplineCurveForSegment(const PowerLineSegment& segment, std::vector<Eigen::Vector3f>& curve_points);
+
     void fitSplineCurve(ReconstructedPowerLine& power_line);
     
     void visualizeResults(const std::vector<PowerLineSegment>& segments,
