@@ -22,10 +22,13 @@ PowerLineProbabilityMap::PowerLineProbabilityMap(ros::NodeHandle& nh) : nh_(nh) 
         "power_line_probability_map/line_specific_markers", 1); // 分线概率地图发布器 <-- 添加这行
 
 
+
     bounding_box_pub_ = nh_.advertise<visualization_msgs::MarkerArray>(
     "power_line_probability_map/bounding_boxes", 1); // 包围盒发布器 <-- 添加这行
     cropped_cloud_pub_ = nh_.advertise<sensor_msgs::PointCloud2>(
     "power_line_probability_map/cropped_pointcloud", 1); // 裁剪点云发布器 <-- 添加这行
+
+
     
     ROS_INFO("PowerLineProbabilityMap 初始化完成"); // 输出初始化信息
     ROS_INFO("参数配置:");
@@ -39,6 +42,7 @@ PowerLineProbabilityMap::PowerLineProbabilityMap(ros::NodeHandle& nh) : nh_(nh) 
     ROS_INFO("  概率阈值: %.2f", probability_threshold_);
     ROS_INFO("  置信度阈值: %.2f", confidence_threshold_);
     ROS_INFO("  启用可视化: %s", enable_visualization_ ? "是" : "否");
+
 }
 
 PowerLineProbabilityMap::~PowerLineProbabilityMap() { // 析构函数
@@ -113,6 +117,8 @@ bool PowerLineProbabilityMap::initializeProbabilityMap(
         
         ROS_DEBUG("处理电力线 %d，拟合点数: %zu", 
                  line.line_id, line.fitted_curve_points.size()); // 输出调试信息
+
+
         
         // 沿着三次样条点建立概率区域
         for (size_t i = 0; i < line.fitted_curve_points.size(); ++i) { // 遍历拟合点
@@ -136,8 +142,6 @@ bool PowerLineProbabilityMap::initializeProbabilityMap(
             // 同时更新全局地图和分线地图
             markLineRegion(spline_point, local_direction, initial_probability_center_);  //将样条点扩展到体素中，并加入voxel_map_
             markLineRegionForSpecificLine(line.line_id, spline_point, local_direction, initial_probability_center_); //将该样条加入到每条线的概率地图
-            
- 
         }
     }
     
@@ -147,10 +151,13 @@ bool PowerLineProbabilityMap::initializeProbabilityMap(
     ROS_INFO("概率地图初始化完成"); // 输出完成信息
     ROS_INFO("  耗时: %.3f 秒", duration.count()); // 输出耗时
     ROS_INFO("  创建体素数: %zu", voxel_map_.size()); // 输出体素数
+
+
     
     // 发布可视化
     if (enable_visualization_) { // 如果启用可视化
         visualizeProbabilityMap(); // 可视化地图
+
     }
     
     return true; // 返回成功
@@ -184,10 +191,11 @@ bool PowerLineProbabilityMap::updateProbabilityMap(
 
     // 更新分线概率地图
     updateLineSpecificMaps(power_lines);
+
     
     // 管理电力线生命周期
     manageLineLifecycles();
-    
+
     // 衰减长期未观测区域
     decayUnobservedRegions(); // 衰减未观测体素
     
@@ -199,6 +207,7 @@ bool PowerLineProbabilityMap::updateProbabilityMap(
     // 发布可视化
     if (enable_visualization_) { // 如果启用可视化
         visualizeProbabilityMap(); // 可视化地图
+
     }
     
     return true; // 返回成功
@@ -260,6 +269,7 @@ void PowerLineProbabilityMap::clearMap() { // 清空地图
     line_specific_maps_.clear();
     line_regions_.clear();
     next_available_line_id_ = 0;
+
     ROS_DEBUG("概率地图已清空"); // 输出调试信息
 }
 
@@ -548,6 +558,7 @@ void PowerLineProbabilityMap::visualizeProbabilityMap() { // 可视化概率地�
     std::vector<AABB> line_boxes = calculateLineBoundingBoxes();
     merged_bounding_boxes_ = mergeBoundingBoxes(line_boxes);
     publishBoundingBoxes(); // <-- 添加这行
+
 }
 
 void PowerLineProbabilityMap::publishProbabilityMarkers() { // 发布体素可视化
@@ -1349,3 +1360,4 @@ std::vector<float> PowerLineProbabilityMap::batchQueryProbability(
     
     return probabilities;
 }
+

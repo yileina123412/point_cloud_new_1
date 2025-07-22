@@ -271,48 +271,7 @@ bool TrackedPowerLine::shouldBeRemoved() const {
     return status_ == TRACK_LOST && (consecutive_misses_ > 10 || confidence_ < 0.1f);
 }
 
-// 更新分线概率地图
-void TrackedPowerLine::updateProbabilityMap(const std::unordered_map<VoxelKey, PowerLineVoxel>& voxel_map) {
-    // 合并新的概率地图
-    for (const auto& [key, voxel] : voxel_map) {
-        auto& track_voxel = line_voxel_map_[key];
-        track_voxel.line_probability = std::max(track_voxel.line_probability, voxel.line_probability);
-        track_voxel.confidence = std::max(track_voxel.confidence, voxel.confidence);
-        track_voxel.observation_count += voxel.observation_count;
-        track_voxel.frames_since_last_observation = 0;
-        track_voxel.last_update_time = voxel.last_update_time;
-    }
-}
 
-// 查询位置概率
-float TrackedPowerLine::queryProbabilityAtPosition(const Eigen::Vector3f& position, float voxel_size) const {
-    VoxelKey key(
-        static_cast<int>(std::floor(position.x() / voxel_size)),
-        static_cast<int>(std::floor(position.y() / voxel_size)),
-        static_cast<int>(std::floor(position.z() / voxel_size))
-    );
-    
-    auto it = line_voxel_map_.find(key);
-    if (it != line_voxel_map_.end()) {
-        return it->second.line_probability;
-    }
-    return 0.1f; // 背景概率
-}
-
-// 判断点是否在轨迹附近
-bool TrackedPowerLine::isPointNearTrack(const Eigen::Vector3f& point, float threshold) const {
-    // 检查点是否在任意控制点附近
-    for (const auto& control_point : state_.control_points) {
-        if ((point - control_point).norm() < threshold) {
-            return true;
-        }
-    }
-    
-    // 检查概率地图中是否有高概率区域
-    // 这需要更高级的实现，此处略过
-    
-    return false;
-}
 
 // ==================== PowerLineTracker 实现 ====================
 
@@ -424,13 +383,13 @@ std::vector<ReconstructedPowerLine> PowerLineTracker::updateTracker(
     predictAllTracks();
     
     // 2. 数据关联
-    // AssociationResult association = associateDetections(current_detections, &prob_map);
+    AssociationResult association = associateDetections(current_detections, &prob_map);
 
-    EnhancedAssociationResult enhanced_association = associateWithFragmentMerging(current_detections, &prob_map);
+  
     
     // 3. 处理关联结果
-    // processAssociationResults(association, current_detections);
-    processAssociationResults(enhanced_association, current_detections);
+    processAssociationResults(association, current_detections);
+
 
 
 
@@ -648,31 +607,11 @@ std::vector<Eigen::Vector3f> PowerLineTracker::extractControlPoints(const Recons
     return control_points;
 }
 // 处理关联结果
-// void PowerLineTracker::processAssociationResults(const AssociationResult& results,
-//                                                 const std::vector<ReconstructedPowerLine>& detections) {
-    
-//     // 更新匹配的轨迹
-//     updateMatchedTracks(results.matched_pairs, detections);
-    
-//     // 处理未匹配的轨迹
-//     handleUnmatchedTracks(results.unmatched_tracks);
-    
-//     // 创建新轨迹
-//     createNewTracks(results.unmatched_detections, detections);
-// }
-
-void PowerLineTracker::processAssociationResults(const EnhancedAssociationResult& results,
+void PowerLineTracker::processAssociationResults(const AssociationResult& results,
                                                 const std::vector<ReconstructedPowerLine>& detections) {
     
-    // 更新匹配的轨迹（支持多片段）
-    for (const auto& match : results.track_to_fragments) {
-        int track_idx = match.first;
-        const std::vector<int>& fragment_indices = match.second;
-        
-        if (track_idx < active_tracks_.size()) {
-            updateTrackWithFragments(active_tracks_[track_idx], fragment_indices, detections);
-        }
-    }
+    // 更新匹配的轨迹
+    updateMatchedTracks(results.matched_pairs, detections);
     
     // 处理未匹配的轨迹
     handleUnmatchedTracks(results.unmatched_tracks);
@@ -680,6 +619,8 @@ void PowerLineTracker::processAssociationResults(const EnhancedAssociationResult
     // 创建新轨迹
     createNewTracks(results.unmatched_detections, detections);
 }
+
+
 
 void PowerLineTracker::updateMatchedTracks(const std::vector<std::pair<int, int>>& matched_pairs,
                                          const std::vector<ReconstructedPowerLine>& detections) {
@@ -1004,292 +945,3 @@ void PowerLineTracker::publishTrackStatistics() {
 }
 
 
-// 片段连续性评估
-ContinuityScore PowerLineTracker::evaluateContinuity(const ReconstructedPowerLine& seg1, 
-                                                    const ReconstructedPowerLine& seg2) const {
-    ContinuityScore score;
-    
-    if (seg1.fitted_curve_points.empty() || seg2.fitted_curve_points.empty()) {
-        return score;
-    }
-    
-    // 1. 空间连续性：计算端点间的最小距离
-    std::vector<float> distances;
-    distances.push_back((seg1.fitted_curve_points.front() - seg2.fitted_curve_points.front()).norm());
-    distances.push_back((seg1.fitted_curve_points.front() - seg2.fitted_curve_points.back()).norm());
-    distances.push_back((seg1.fitted_curve_points.back() - seg2.fitted_curve_points.front()).norm());
-    distances.push_back((seg1.fitted_curve_points.back() - seg2.fitted_curve_points.back()).norm());
-    
-    float min_distance = *std::min_element(distances.begin(), distances.end());
-    score.spatial_continuity = std::exp(-min_distance / max_fragment_gap_distance_);
-    
-    // 2. 方向连续性：主方向的一致性
-    float direction_dot = std::abs(seg1.main_direction.dot(seg2.main_direction));
-    score.direction_continuity = direction_dot;
-    
-    // 3. 综合评分
-    score.overall_score = 0.6f * score.spatial_continuity + 0.4f * score.direction_continuity;
-    
-    return score;
-}
-
-bool PowerLineTracker::areContinuousSegments(const ReconstructedPowerLine& seg1, 
-                                            const ReconstructedPowerLine& seg2,
-                                            float threshold) const {
-    ContinuityScore score = evaluateContinuity(seg1, seg2);
-    return score.overall_score >= threshold;
-}
-
-// 片段聚类（基于图连通性）
-std::vector<std::vector<int>> PowerLineTracker::clusterDetectionSegments(
-    const std::vector<ReconstructedPowerLine>& detections) const {
-    
-    int n = detections.size();
-    std::vector<std::vector<int>> clusters;
-    std::vector<bool> visited(n, false);
-    
-    // 构建邻接表（连通图）
-    std::vector<std::vector<int>> adj(n);
-    for (int i = 0; i < n; ++i) {
-        for (int j = i + 1; j < n; ++j) {
-            if (areContinuousSegments(detections[i], detections[j], fragment_continuity_threshold_)) {
-                adj[i].push_back(j);
-                adj[j].push_back(i);
-            }
-        }
-    }
-    
-    // DFS找连通分量
-    for (int i = 0; i < n; ++i) {
-        if (!visited[i]) {
-            std::vector<int> cluster;
-            std::queue<int> q;
-            q.push(i);
-            visited[i] = true;
-            
-            while (!q.empty()) {
-                int curr = q.front();
-                q.pop();
-                cluster.push_back(curr);
-                
-                for (int neighbor : adj[curr]) {
-                    if (!visited[neighbor]) {
-                        visited[neighbor] = true;
-                        q.push(neighbor);
-                    }
-                }
-            }
-            clusters.push_back(cluster);
-        }
-    }
-    
-    return clusters;
-}
-
-// 多片段相似度计算
-float PowerLineTracker::calculateTrackToFragmentsSimilarity(
-    const TrackedPowerLine& track,
-    const std::vector<int>& fragment_indices,
-    const std::vector<ReconstructedPowerLine>& detections) const {
-    
-    if (fragment_indices.empty()) return 0.0f;
-    
-    // 1. 合并片段计算总体特征
-    float total_length = 0.0f;
-    Eigen::Vector3f overall_direction = Eigen::Vector3f::Zero();
-    std::vector<Eigen::Vector3f> all_points;
-    
-    for (int idx : fragment_indices) {
-        if (idx < detections.size()) {
-            const auto& fragment = detections[idx];
-            total_length += fragment.total_length;
-            overall_direction += fragment.main_direction * fragment.total_length; // 按长度加权
-            
-            all_points.insert(all_points.end(), 
-                            fragment.fitted_curve_points.begin(), 
-                            fragment.fitted_curve_points.end());
-        }
-    }
-    
-    if (total_length < 1e-6) return 0.0f;
-    overall_direction = overall_direction.normalized();
-    
-    // 2. 计算与历史轨迹的相似度
-    float length_similarity = std::min(total_length, track.state_.total_length) / 
-                             std::max(total_length, track.state_.total_length);
-    
-    float direction_similarity = std::max(0.0f, track.state_.main_direction.dot(overall_direction));
-    
-    // 3. 空间覆盖度计算
-    float spatial_coverage = 0.0f;
-    if (!all_points.empty()) {
-        // 计算片段组合与历史轨迹控制点的匹配度
-        float total_distance = 0.0f;
-        for (const auto& control_point : track.state_.control_points) {
-            float min_dist = std::numeric_limits<float>::max();
-            for (const auto& point : all_points) {
-                min_dist = std::min(min_dist, (point - control_point).norm());
-            }
-            total_distance += min_dist;
-        }
-        spatial_coverage = std::exp(-total_distance / (5.0f * max_association_distance_));
-    }
-    
-    // 4. 综合评分
-    return 0.4f * spatial_coverage + 0.35f * direction_similarity + 0.25f * length_similarity;
-}
-
-// 扩展的数据关联
-EnhancedAssociationResult PowerLineTracker::associateWithFragmentMerging(
-    const std::vector<ReconstructedPowerLine>& detections,
-    const PowerLineProbabilityMap* prob_map) const {
-    
-    EnhancedAssociationResult result;
-    
-    // 1. 首先进行片段聚类
-    result.fragment_clusters = clusterDetectionSegments(detections);
-    
-    // 2. 构建轨迹-片段组相似度矩阵
-    int num_tracks = active_tracks_.size();
-    int num_clusters = result.fragment_clusters.size();
-    
-    if (num_tracks == 0 || num_clusters == 0) {
-        // 处理边界情况
-        for (int i = 0; i < detections.size(); ++i) {
-            result.unmatched_detections.push_back(i);
-        }
-        for (int i = 0; i < num_tracks; ++i) {
-            result.unmatched_tracks.push_back(i);
-        }
-        return result;
-    }
-    
-    Eigen::MatrixXf similarity_matrix(num_tracks, num_clusters);
-    
-    for (int i = 0; i < num_tracks; ++i) {
-        for (int j = 0; j < num_clusters; ++j) {
-            similarity_matrix(i, j) = calculateTrackToFragmentsSimilarity(
-                active_tracks_[i], result.fragment_clusters[j], detections);
-        }
-    }
-    
-    // 3. 贪心匹配（允许1对多）
-    std::vector<bool> track_matched(num_tracks, false);
-    std::vector<bool> cluster_matched(num_clusters, false);
-    
-    // 按相似度降序处理
-    std::vector<std::tuple<float, int, int>> candidates;
-    for (int i = 0; i < num_tracks; ++i) {
-        for (int j = 0; j < num_clusters; ++j) {
-            if (similarity_matrix(i, j) >= association_threshold_) {
-                candidates.emplace_back(similarity_matrix(i, j), i, j);
-            }
-        }
-    }
-    std::sort(candidates.rbegin(), candidates.rend()); // 降序
-    
-    for (const auto& candidate : candidates) {
-        int track_idx = std::get<1>(candidate);
-        int cluster_idx = std::get<2>(candidate);
-        
-        if (!track_matched[track_idx] && !cluster_matched[cluster_idx]) {
-            result.track_to_fragments.emplace_back(track_idx, result.fragment_clusters[cluster_idx]);
-            track_matched[track_idx] = true;
-            cluster_matched[cluster_idx] = true;
-        }
-    }
-    
-    // 4. 处理未匹配的轨迹和检测
-    for (int i = 0; i < num_tracks; ++i) {
-        if (!track_matched[i]) {
-            result.unmatched_tracks.push_back(i);
-        }
-    }
-    
-    for (int i = 0; i < num_clusters; ++i) {
-        if (!cluster_matched[i]) {
-            for (int detection_idx : result.fragment_clusters[i]) {
-                result.unmatched_detections.push_back(detection_idx);
-            }
-        }
-    }
-    
-    return result;
-}
-
-// 多片段轨迹更新
-void PowerLineTracker::updateTrackWithFragments(TrackedPowerLine& track,
-                                               const std::vector<int>& fragment_indices,
-                                               const std::vector<ReconstructedPowerLine>& detections) {
-    
-    if (fragment_indices.empty()) return;
-    
-    // 合并片段为完整电力线
-    std::vector<ReconstructedPowerLine> fragments;
-    for (int idx : fragment_indices) {
-        if (idx < detections.size()) {
-            fragments.push_back(detections[idx]);
-        }
-    }
-    
-    ReconstructedPowerLine merged_line = mergeFragmentsToCompleteLine(fragments, track);
-    
-    // 使用合并后的完整线更新轨迹
-    track.update(merged_line);
-}
-
-ReconstructedPowerLine PowerLineTracker::mergeFragmentsToCompleteLine(
-    const std::vector<ReconstructedPowerLine>& fragments,
-    const TrackedPowerLine& historical_track) const
-{
-    ReconstructedPowerLine merged_line;
-    merged_line.line_id = historical_track.track_id_;
-
-    // 合并所有片段的点云和曲线点
-    for (const auto& frag : fragments) {
-        // 合并点云
-        *merged_line.points += *(frag.points);
-        // 合并曲线点
-        merged_line.fitted_curve_points.insert(
-            merged_line.fitted_curve_points.end(),
-            frag.fitted_curve_points.begin(),
-            frag.fitted_curve_points.end()
-        );
-        // 记录片段索引
-        merged_line.segment_indices.insert(
-            merged_line.segment_indices.end(),
-            frag.segment_indices.begin(),
-            frag.segment_indices.end()
-        );
-    }
-
-    // 去重拟合曲线点（防止首尾重复）
-    auto& pts = merged_line.fitted_curve_points;
-    pts.erase(std::unique(pts.begin(), pts.end(), [](const Eigen::Vector3f& a, const Eigen::Vector3f& b){
-        return (a - b).norm() < 1e-3f;
-    }), pts.end());
-
-    // 计算主方向和长度
-    if (!pts.empty()) {
-        merged_line.main_direction = (pts.back() - pts.front()).normalized();
-        merged_line.total_length = 0.0;
-        for (size_t i = 1; i < pts.size(); ++i) {
-            merged_line.total_length += (pts[i] - pts[i-1]).norm();
-        }
-    } else {
-        // 如果没有曲线点，用历史轨迹补全
-        merged_line.main_direction = historical_track.state_.main_direction;
-        merged_line.total_length = historical_track.state_.total_length;
-    }
-
-    // 如果首尾点缺失，参考历史轨迹补全
-    if (pts.empty() && !historical_track.state_.control_points.empty()) {
-        pts.push_back(historical_track.state_.start_point);
-        pts.push_back(historical_track.state_.end_point);
-    }
-
-    // 可选：重新拟合曲线点（如有需要，可调用拟合函数）
-    // fitSplineCurve(merged_line);
-
-    return merged_line;
-}

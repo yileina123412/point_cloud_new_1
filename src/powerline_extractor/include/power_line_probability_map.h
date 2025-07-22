@@ -119,6 +119,8 @@ struct LineROIInfo {
     }
 };
 
+
+
 // 为VoxelKey提供哈希函数  可以在unordered_map中使用  在std中添加一个模板特化
 namespace std {
     template<>
@@ -159,6 +161,7 @@ struct SpaceBounds {
                point.z() >= z_min && point.z() <= z_max;
     }
 };
+
 
 class PowerLineProbabilityMap {
 public:
@@ -321,6 +324,9 @@ public:
      * @return 对应的概率列表
      */
     std::vector<float> batchQueryProbability(const std::vector<Eigen::Vector3f>& points) const;
+
+
+
     
 private:
     // ==================== 核心数据结构 ====================
@@ -339,6 +345,8 @@ private:
     int next_available_line_id_;
 
 
+
+
     
     // 空间边界
     SpaceBounds bounds_; // 空间边界
@@ -351,8 +359,11 @@ private:
 
     ros::Publisher line_specific_pub_;     // 分线概率地图发布器
 
+
     ros::Publisher bounding_box_pub_;      // 包围盒发布器 <-- 添加这行
     ros::Publisher cropped_cloud_pub_;     // 裁剪点云发布器 <-- 添加这行
+
+
     
     // ==================== 参数变量 ====================
     
@@ -389,6 +400,9 @@ private:
     int max_line_count_;                  // 最大电力线数量
     // ==================== 包围盒相关 ====================
     std::vector<AABB> merged_bounding_boxes_; // 合并后的包围盒列表 <-- 添加这行
+
+
+
     
     // ==================== 内部函数 ====================
     
@@ -467,7 +481,11 @@ private:
         const pcl::PointCloud<pcl::PointXYZ>::Ptr& input_cloud) const; // 裁剪点云 <-- 添加这行
     void publishCroppedPointCloud(const pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud); // 发布裁剪点云 <-- 添加这行
 
+
+
+    
+
     
 };
 
-#endif // POWER_LINE_PROBABILITY_MAP_H // 头文件保护宏结束
+#endif // POWER_LINE_PROBABILITY_MAP_H  头文件保护宏结束

@@ -89,10 +89,7 @@ public:
 
     Eigen::Vector3f interpolateControlPoint(float t) const;
 
-    // 添加访问概率地图的方法
-    void updateProbabilityMap(const std::unordered_map<VoxelKey, PowerLineVoxel>& voxel_map);
-    float queryProbabilityAtPosition(const Eigen::Vector3f& position, float voxel_size) const;
-    bool isPointNearTrack(const Eigen::Vector3f& point, float threshold) const;
+
 
     
     // 状态管理
@@ -272,10 +269,9 @@ private:
                                   const ReconstructedPowerLine& detection) const;
     
     // 轨迹生命周期管理
-    // void processAssociationResults(const AssociationResult& results,
-    //                               const std::vector<ReconstructedPowerLine>& detections);
-    void processAssociationResults(const EnhancedAssociationResult& results,
+    void processAssociationResults(const AssociationResult& results,
                                   const std::vector<ReconstructedPowerLine>& detections);
+
     
     void createNewTracks(const std::vector<int>& unmatched_detections,
                         const std::vector<ReconstructedPowerLine>& detections,
@@ -313,40 +309,7 @@ private:
     std_msgs::ColorRGBA getTrackStatusColor(TrackStatus status) const;
 
 
-    // ==================== 片段处理相关函数 ====================
 
-    // 片段连续性检测
-    ContinuityScore evaluateContinuity(const ReconstructedPowerLine& seg1, 
-                                    const ReconstructedPowerLine& seg2) const;
-
-    bool areContinuousSegments(const ReconstructedPowerLine& seg1, 
-                            const ReconstructedPowerLine& seg2,
-                            float threshold = 0.6f) const;
-
-    // 片段聚类
-    std::vector<std::vector<int>> clusterDetectionSegments(
-        const std::vector<ReconstructedPowerLine>& detections) const;
-
-    // 扩展的数据关联
-    EnhancedAssociationResult associateWithFragmentMerging(
-        const std::vector<ReconstructedPowerLine>& detections,
-        const PowerLineProbabilityMap* prob_map = nullptr) const;
-
-    // 多片段相似度计算
-    float calculateTrackToFragmentsSimilarity(
-        const TrackedPowerLine& track,
-        const std::vector<int>& fragment_indices,
-        const std::vector<ReconstructedPowerLine>& detections) const;
-
-    // 片段融合
-    ReconstructedPowerLine mergeFragmentsToCompleteLine(
-        const std::vector<ReconstructedPowerLine>& fragments,
-        const TrackedPowerLine& historical_track) const;
-
-    // 多片段轨迹更新
-    void updateTrackWithFragments(TrackedPowerLine& track,
-                                const std::vector<int>& fragment_indices,
-                                const std::vector<ReconstructedPowerLine>& detections);
 };
 
 #endif // POWER_LINE_TRACKER_H
