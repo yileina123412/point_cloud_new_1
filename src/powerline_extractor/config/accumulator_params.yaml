@@ -211,6 +211,7 @@ probability_map:
   # =========================== 分线管理参数 ===========================
   max_inactive_duration: 30.0  # 秒，分线在此时间内未更新则被视为不活跃
   spatial_overlap_threshold: 0.7f            # 空间重叠阈值
+  coincidence_rate_threshold: 0.3f        # 重合率阈值
   min_stable_frames: 3          # 分线稳定所需的最小连续帧数
   max_line_count: 10          # 最大分线数量，防止过多分线导致性能问题
 

@@ -88,6 +88,7 @@ void PowerLineProbabilityMap::loadParameters() { // 读取参数
     // 分线管理参数
     nh_.param("probability_map/max_inactive_duration", max_inactive_duration_, 30.0f); // 最大非活跃时间
     nh_.param("probability_map/spatial_overlap_threshold", spatial_overlap_threshold_, 0.7f); // 空间重叠阈值
+    nh_.param("probability_map/coincidence_rate_threshold", coincidence_rate_threshold_, 0.3f); // 时间重叠阈值
     nh_.param("probability_map/min_stable_frames", min_stable_frames_, 3); // 最小稳定帧数
     nh_.param("probability_map/max_line_count", max_line_count_, 20); // 最大电力线数量
 }
@@ -186,8 +187,8 @@ bool PowerLineProbabilityMap::updateProbabilityMap(
         voxel.frames_since_last_observation++; // 未观测帧数加1
     }
     
-    // 贝叶斯更新
-    bayesianUpdate(power_lines); // 执行贝叶斯概率更新
+    // // 贝叶斯更新
+    // bayesianUpdate(power_lines); // 执行贝叶斯概率更新
 
     // 更新分线概率地图
     updateLineSpecificMaps(power_lines);
@@ -196,8 +197,8 @@ bool PowerLineProbabilityMap::updateProbabilityMap(
     // 管理电力线生命周期
     manageLineLifecycles();
 
-    // 衰减长期未观测区域
-    decayUnobservedRegions(); // 衰减未观测体素
+    // // 衰减长期未观测区域
+    // decayUnobservedRegions(); // 衰减未观测体素
     
     auto end = std::chrono::high_resolution_clock::now(); // 记录结束时间
     std::chrono::duration<double> duration = end - start; // 计算耗时
@@ -712,7 +713,7 @@ void PowerLineProbabilityMap::publishLineSpecificMarkers() { // 发布分线可�
         for (const auto& [voxel_key, voxel] : line_map) {
             if (voxel.line_probability < 0.6f) continue; // 只显示较高概率的体素
             
-            if (line_marker_count >= 1000) break; // 限制每条线的标记数量
+            if (line_marker_count >= max_visualization_markers_) break; // 限制每条线的标记数量
             
             visualization_msgs::Marker marker;
             marker.header.frame_id = frame_id_;
@@ -877,7 +878,8 @@ int PowerLineProbabilityMap::assignLineID(const ReconstructedPowerLine& new_line
         auto it = line_regions_.find(new_line.line_id);
         if (it != line_regions_.end()) {
             float overlap = calculateSpatialOverlap(new_line, it->second);
-            if (overlap > spatial_overlap_threshold_) {
+            float overlao_rate = calculateSpatialOverlap(new_line, line_specific_maps_[new_line.line_id], 0.6);
+            if (overlao_rate > coincidence_rate_threshold_) {
                 return new_line.line_id; // 复用现有ID
             }
         }
@@ -886,7 +888,8 @@ int PowerLineProbabilityMap::assignLineID(const ReconstructedPowerLine& new_line
     // 检查是否与现有区域重叠
     for (const auto& [existing_id, region_info] : line_regions_) {
         float overlap = calculateSpatialOverlap(new_line, region_info);
-        if (overlap > spatial_overlap_threshold_) {
+        float overlao_rate = calculateSpatialOverlap(new_line, line_specific_maps_[existing_id], 0.6);
+        if (overlao_rate > coincidence_rate_threshold_) {
             return existing_id; // 复用现有ID
         }
     }
@@ -902,10 +905,18 @@ void PowerLineProbabilityMap::updateLineSpecificMaps(const std::vector<Reconstru
     for (auto& [line_id, region_info] : line_regions_) {
         region_info.frames_since_creation++;
     }
-    
+        // 增加所有分线体素的未观测帧数（添加这段）
+    for (auto& [line_id, line_map] : line_specific_maps_) {
+        for (auto& [key, voxel] : line_map) {
+            voxel.frames_since_last_observation++;
+        }
+    }
+    // 统计本帧活跃的line_id
+    std::unordered_set<int> active_line_ids;
     // 为每条电力线更新其专属地图
     for (const auto& line : power_lines) {
         int assigned_id = assignLineID(line);
+        active_line_ids.insert(assigned_id);
         
         // 更新活跃时间
         if (line_regions_.find(assigned_id) != line_regions_.end()) {
@@ -919,15 +930,33 @@ void PowerLineProbabilityMap::updateLineSpecificMaps(const std::vector<Reconstru
             }
         }
         
-        // 更新该电力线的专属概率地图
-        for (size_t i = 0; i < line.fitted_curve_points.size(); ++i) {
-            const auto& spline_point = line.fitted_curve_points[i];
+        // // 更新该电力线的专属概率地图
+        // for (size_t i = 0; i < line.fitted_curve_points.size(); ++i) {
+        //     const auto& spline_point = line.fitted_curve_points[i];
             
-            if (!bounds_.isInBounds(spline_point)) continue;
+        //     if (!bounds_.isInBounds(spline_point)) continue;
             
-            Eigen::Vector3f local_direction = computeLocalDirection(line.fitted_curve_points, i);
-            markLineRegionForSpecificLine(assigned_id, spline_point, local_direction, initial_probability_center_);
+        //     Eigen::Vector3f local_direction = computeLocalDirection(line.fitted_curve_points, i);
+        //     markLineRegionForSpecificLine(assigned_id, spline_point, local_direction, initial_probability_center_);
+        // }
+    }
+    // 针对每个活跃的line_id，收集其所有片段，做贝叶斯更新
+    for (int line_id : active_line_ids) {
+        // 收集属于该line_id的所有ReconstructedPowerLine
+        std::vector<ReconstructedPowerLine> lines_for_this_id;
+        for (const auto& line : power_lines) {
+            int assigned_id = assignLineID(line);
+            if (assigned_id == line_id) {
+                lines_for_this_id.push_back(line);
+            }
         }
+        // 贝叶斯更新
+        TrackerBayesianUpdate(lines_for_this_id, line_specific_maps_[line_id]);
+    }
+
+    // 对所有分线概率地图做衰减
+    for (auto& [line_id, line_map] : line_specific_maps_) {
+        TrackerDecayUnobservedRegions(line_map);
     }
 }
 //管理电力线生命周期
@@ -1010,6 +1039,24 @@ float PowerLineProbabilityMap::calculateSpatialOverlap(const ReconstructedPowerL
     }
     
     return static_cast<float>(points_in_region) / line.fitted_curve_points.size();
+}
+
+float PowerLineProbabilityMap::calculateSpatialOverlap(
+    const ReconstructedPowerLine& line, 
+    const std::unordered_map<VoxelKey, PowerLineVoxel>& line_map,
+    float prob_threshold) const
+{
+    if (line.fitted_curve_points.empty() || line_map.empty()) return 0.0f;
+
+    int points_in_map = 0;
+    for (const auto& point : line.fitted_curve_points) {
+        VoxelKey key = pointToVoxel(point);
+        auto it = line_map.find(key);
+        if (it != line_map.end() && it->second.line_probability > prob_threshold) {
+            points_in_map++;
+        }
+    }
+    return static_cast<float>(points_in_map) / line.fitted_curve_points.size();
 }
 
 std::vector<Eigen::Vector3f> PowerLineProbabilityMap::extractHighProbRegions(
@@ -1359,5 +1406,147 @@ std::vector<float> PowerLineProbabilityMap::batchQueryProbability(
     }
     
     return probabilities;
+}
+
+//跟踪器分线函数
+void PowerLineProbabilityMap::TrackerBayesianUpdate(const std::vector<ReconstructedPowerLine>& power_lines,
+                                                    std::unordered_map<VoxelKey, PowerLineVoxel>& line_tracker_map){
+    // 标记当前帧检测到的区域
+    std::unordered_set<VoxelKey> observed_voxels;
+    // 判断是否需要同时更新全局地图
+    bool update_global = (&line_tracker_map != &voxel_map_);
+    
+    for (const auto& line : power_lines) {
+        for (const auto& spline_point : line.fitted_curve_points) {
+            if (!bounds_.isInBounds(spline_point)) continue;
+            
+            // 计算需要检查的体素范围
+            int radius_in_voxels = static_cast<int>(std::ceil(expansion_radius_ / voxel_size_));
+            VoxelKey center_key = pointToVoxel(spline_point);
+            
+            // 遍历周围体素
+            for (int dx = -radius_in_voxels; dx <= radius_in_voxels; ++dx) {
+                for (int dy = -radius_in_voxels; dy <= radius_in_voxels; ++dy) {
+                    for (int dz = -radius_in_voxels; dz <= radius_in_voxels; ++dz) {
+                        VoxelKey key(center_key.x + dx, center_key.y + dy, center_key.z + dz);
+                        Eigen::Vector3f voxel_center = voxelToPoint(key);
+                        
+                        if (!bounds_.isInBounds(voxel_center)) continue;
+                        
+                        // 计算体素中心到样条点的距离
+                        float distance = (voxel_center - spline_point).norm();
+                        
+                        if (distance <= expansion_radius_) {
+                            observed_voxels.insert(key);
+                            auto& voxel = line_tracker_map[key];
+                            
+                            // 贝叶斯更新：检测命中
+                            voxel.line_probability = updateBayesian(
+                                voxel.line_probability, hit_likelihood_, true);
+                            
+                            voxel.observation_count++;
+                            voxel.updateConfidence();
+                            voxel.frames_since_last_observation = 0;
+                            voxel.last_update_time = ros::Time::now();
+
+                            // 同时更新全局地图
+                            if (update_global) {
+                                auto& global_voxel = voxel_map_[key];
+                                global_voxel.line_probability = updateBayesian(
+                                    global_voxel.line_probability, hit_likelihood_, true);
+                                global_voxel.observation_count++;
+                                global_voxel.updateConfidence();
+                                global_voxel.frames_since_last_observation = 0;
+                                global_voxel.last_update_time = ros::Time::now();
+                            }
+
+                            
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // 对于历史存在但当前未检测到的区域，降低概率
+    for (auto& [key, voxel] : line_tracker_map) {
+        if (observed_voxels.find(key) == observed_voxels.end()) {
+            // 贝叶斯更新：检测丢失
+            voxel.line_probability = updateBayesian(
+                voxel.line_probability, miss_likelihood_, false);
+        }
+    }
+
+    // 同步更新全局地图中未观测区域
+    if (update_global) {
+        for (auto& [key, voxel] : voxel_map_) {
+            if (observed_voxels.find(key) == observed_voxels.end()) {
+                // 贝叶斯更新：检测丢失
+                voxel.line_probability = updateBayesian(
+                    voxel.line_probability, miss_likelihood_, false);
+            }
+        }
+    }
+    
+}
+
+
+// 跟踪器分线衰减未观测区域
+void PowerLineProbabilityMap::TrackerDecayUnobservedRegions(std::unordered_map<VoxelKey, PowerLineVoxel>& line_tracker_map) { 
+    // 判断是否需要同时更新全局地图
+    bool update_global = (&line_tracker_map != &voxel_map_);
+        // 处理传入地图的衰减
+    auto it = line_tracker_map.begin();
+    while (it != line_tracker_map.end()) {
+        auto& voxel = it->second;
+        if (voxel.frames_since_last_observation > max_frames_without_observation_) {
+            // 向不确定状态衰减
+            float target = 0.5f;  // 不确定状态
+            voxel.line_probability = target + (voxel.line_probability - target) * decay_rate_;
+            
+            // 置信度也逐渐衰减
+            voxel.confidence *= decay_rate_;
+            
+            // 如果概率接近0.5且置信度很低，直接移除体素
+            if (std::abs(voxel.line_probability - 0.5f) < 0.05f && voxel.confidence < 0.1f) {
+                it = line_tracker_map.erase(it);
+                continue;
+            }
+        }
+        ++it;
+    }
+    
+    // 同步更新全局地图的衰减
+    if (update_global) {
+        auto it_global = voxel_map_.begin();
+        while (it_global != voxel_map_.end()) {
+            auto& voxel = it_global->second;
+            if (voxel.frames_since_last_observation > max_frames_without_observation_) {
+                float target = 0.5f;
+                voxel.line_probability = target + (voxel.line_probability - target) * decay_rate_;
+                voxel.confidence *= decay_rate_;
+                
+                if (std::abs(voxel.line_probability - 0.5f) < 0.05f && voxel.confidence < 0.1f) {
+                    it_global = voxel_map_.erase(it_global);
+                    continue;
+                }
+            }
+            ++it_global;
+        }
+    }
+    
+    
+    // for (auto& [key, voxel] : line_tracker_map) {
+    //     if (voxel.frames_since_last_observation > max_frames_without_observation_) {
+    //         // 向不确定状态衰减
+    //         float target = 0.5f;  // 不确定状态
+    //         voxel.line_probability = target + (voxel.line_probability - target) * decay_rate_;
+            
+    //         // 置信度也逐渐衰减
+    //         voxel.confidence *= decay_rate_;
+
+
+    //     }
+    // }
 }
 

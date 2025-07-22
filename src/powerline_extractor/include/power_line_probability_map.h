@@ -396,6 +396,7 @@ private:
     // 分线管理参数
     float max_inactive_duration_;          // 最大非活跃时间 (秒)
     float spatial_overlap_threshold_;      // 空间重叠阈值
+    float coincidence_rate_threshold_;         // 置信度阈值
     int min_stable_frames_;               // 最小稳定帧数
     int max_line_count_;                  // 最大电力线数量
     // ==================== 包围盒相关 ====================
@@ -464,6 +465,9 @@ private:
     void manageLineLifecycles(); // 管理电力线生命周期
     void createNewLineRegion(int line_id, const ReconstructedPowerLine& line); // 根据三次样条曲线创建新区域 LineRegionInfo
     float calculateSpatialOverlap(const ReconstructedPowerLine& line, const LineRegionInfo& region) const; // 计算空间重叠
+    float calculateSpatialOverlap(const ReconstructedPowerLine& line, 
+                                                            const std::unordered_map<VoxelKey, PowerLineVoxel>& line_map,
+                                                            float prob_threshold) const; // 计算空间重叠（针对分线地图）
     std::vector<Eigen::Vector3f> extractHighProbRegions(const std::unordered_map<VoxelKey, PowerLineVoxel>& line_map, float threshold) const; // 提取高概率区域
     float calculateLineConfidence(int line_id) const; // 计算电力线置信度
     void markLineRegionForSpecificLine(int line_id, const Eigen::Vector3f& spline_point, 
@@ -482,10 +486,13 @@ private:
     void publishCroppedPointCloud(const pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud); // 发布裁剪点云 <-- 添加这行
 
 
+//跟踪器分线函数
+    // 跟踪器贝叶斯更新
+    void TrackerBayesianUpdate(const std::vector<ReconstructedPowerLine>& power_lines,
+        std::unordered_map<VoxelKey, PowerLineVoxel>& line_tracker_map);
+    //跟踪器衰减未观测区域
+    void TrackerDecayUnobservedRegions(std::unordered_map<VoxelKey, PowerLineVoxel>& line_tracker_map);
 
-    
-
-    
 };
 
 #endif // POWER_LINE_PROBABILITY_MAP_H  头文件保护宏结束

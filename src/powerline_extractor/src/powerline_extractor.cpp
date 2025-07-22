@@ -148,7 +148,7 @@ void PowerlineExtractor::process_first_method(const std_msgs::Header& header){
     auto extractor_start = std::chrono::high_resolution_clock::now();
     extractor_s_->extractPowerLinesByPoints(preprocessor__output_cloud_);    //0.3
     env_not_power_cloud_ = extractor_s_->getEnvWithoutPowerCloud();
-    extractor_s_->visualizeParameters(preprocessor_);
+    // extractor_s_->visualizeParameters(preprocessor_);
     auto extractor_end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> extractor_duration = extractor_end - extractor_start;
     ROS_INFO("粗提取电力线 执行时间: %f 秒", extractor_duration.count());
@@ -203,7 +203,7 @@ void PowerlineExtractor::process_second_times(const std_msgs::Header& header){
     auto extractor_start = std::chrono::high_resolution_clock::now();
     extractor_s_->extractPowerLinesByPoints(roi_output_cloud_);    //0.3
     env_not_power_cloud_ = extractor_s_->getEnvWithoutPowerCloud();
-    extractor_s_->visualizeParameters(preprocessor_);
+    // extractor_s_->visualizeParameters(preprocessor_);
     auto extractor_end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> extractor_duration = extractor_end - extractor_start;
     ROS_INFO("粗提取电力线 执行时间: %f 秒", extractor_duration.count());
