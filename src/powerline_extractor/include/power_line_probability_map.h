@@ -1,6 +1,9 @@
 #ifndef POWER_LINE_PROBABILITY_MAP_H // 头文件保护，防止重复包含
 #define POWER_LINE_PROBABILITY_MAP_H // 头文件保护宏定义
 
+#include <std_msgs/String.h>
+#include <sstream>
+#include <iomanip>
 #include <ros/ros.h> // ROS主头文件
 #include <pcl/point_cloud.h> // PCL点云库头文件
 #include <pcl/point_types.h> // PCL点类型定义
@@ -116,6 +119,23 @@ struct LineROIInfo {
         confidence = 0.0f;
         is_active = false;
         last_update = ros::Time::now();
+    }
+};
+
+// 电力线ID变化记录结构体
+struct LineIdChange {
+    int old_id;                    // 被合并的ID
+    int new_id;                    // 合并到的目标ID  
+    ros::Time merge_time;          // 合并时间戳
+    float merge_confidence;        // 合并置信度
+    std::string change_reason;     // 变化原因
+    
+    LineIdChange() {
+        old_id = -1;
+        new_id = -1;
+        merge_time = ros::Time::now();
+        merge_confidence = 0.0f;
+        change_reason = "unknown";
     }
 };
 
@@ -363,6 +383,8 @@ private:
     ros::Publisher bounding_box_pub_;      // 包围盒发布器 <-- 添加这行
     ros::Publisher cropped_cloud_pub_;     // 裁剪点云发布器 <-- 添加这行
 
+    ros::Publisher line_merge_pub_;        // 线段合并通知发布器
+
 
     
     // ==================== 参数变量 ====================
@@ -399,6 +421,17 @@ private:
     float coincidence_rate_threshold_;         // 置信度阈值
     int min_stable_frames_;               // 最小稳定帧数
     int max_line_count_;                  // 最大电力线数量
+
+    // 合并相关参数
+    float merge_angle_threshold_;          // 合并角度阈值（弧度）
+    float merge_overlap_threshold_;        // 合并重叠阈值
+    int merge_check_interval_;             // 合并检查间隔帧数
+    float merge_distance_threshold_;       // 合并距离阈值
+
+    // 合并管理相关
+    std::vector<LineIdChange> recent_merges_;     // 最近的合并记录
+    int frame_count_since_last_merge_check_;      // 距离上次合并检查的帧数
+
     // ==================== 包围盒相关 ====================
     std::vector<AABB> merged_bounding_boxes_; // 合并后的包围盒列表 <-- 添加这行
 
@@ -486,12 +519,20 @@ private:
     void publishCroppedPointCloud(const pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud); // 发布裁剪点云 <-- 添加这行
 
 
-//跟踪器分线函数
+    //跟踪器分线函数
     // 跟踪器贝叶斯更新
     void TrackerBayesianUpdate(const std::vector<ReconstructedPowerLine>& power_lines,
         std::unordered_map<VoxelKey, PowerLineVoxel>& line_tracker_map);
     //跟踪器衰减未观测区域
     void TrackerDecayUnobservedRegions(std::unordered_map<VoxelKey, PowerLineVoxel>& line_tracker_map);
+
+    // 合并管理函数
+    std::vector<std::pair<int,int>> detectMergeablePairs(); // 检测可合并片段对
+    bool checkAngleAlignment(const LineRegionInfo& region1, const LineRegionInfo& region2) const; // 检查角度对齐
+    bool checkSpatialOverlap(int line_id1, int line_id2) const; // 检查空间重叠
+    bool mergeLineSegments(int primary_id, int secondary_id); // 执行线段合并
+    void publishLineIdChanges(); // 发布ID变化通知
+    void checkAndExecuteMerge(); // 检查并执行合并
 
 };
 

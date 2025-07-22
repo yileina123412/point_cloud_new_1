@@ -10,6 +10,8 @@ PowerLineProbabilityMap::PowerLineProbabilityMap(ros::NodeHandle& nh) : nh_(nh) 
 
     // 初始化分线管理变量
     next_available_line_id_ = 0;
+    // 初始化合并管理变量
+    frame_count_since_last_merge_check_ = 0;
     
 
 
@@ -20,6 +22,9 @@ PowerLineProbabilityMap::PowerLineProbabilityMap(ros::NodeHandle& nh) : nh_(nh) 
         "power_line_probability_map/map_info", 1); // 地图统计信息发布器
     line_specific_pub_ = nh_.advertise<visualization_msgs::MarkerArray>(
         "power_line_probability_map/line_specific_markers", 1); // 分线概率地图发布器 <-- 添加这行
+
+    line_merge_pub_ = nh_.advertise<std_msgs::String>(
+        "power_line_probability_map/line_merges", 1); // 线段合并通知发布器
 
 
 
@@ -91,6 +96,12 @@ void PowerLineProbabilityMap::loadParameters() { // 读取参数
     nh_.param("probability_map/coincidence_rate_threshold", coincidence_rate_threshold_, 0.3f); // 时间重叠阈值
     nh_.param("probability_map/min_stable_frames", min_stable_frames_, 3); // 最小稳定帧数
     nh_.param("probability_map/max_line_count", max_line_count_, 20); // 最大电力线数量
+
+    // 合并参数
+    nh_.param("probability_map/merge_angle_threshold", merge_angle_threshold_, 0.52f); // 约30度
+    nh_.param("probability_map/merge_overlap_threshold", merge_overlap_threshold_, 0.1f); // 30%重叠
+    nh_.param("probability_map/merge_check_interval", merge_check_interval_, 5); // 每5帧检查
+    nh_.param("probability_map/merge_distance_threshold", merge_distance_threshold_, 10.0f); // 10米
 }
 
 bool PowerLineProbabilityMap::initializeProbabilityMap(
@@ -196,6 +207,13 @@ bool PowerLineProbabilityMap::updateProbabilityMap(
     
     // 管理电力线生命周期
     manageLineLifecycles();
+
+    // 检查并执行合并（每隔一定帧数）
+    frame_count_since_last_merge_check_++;
+    if (frame_count_since_last_merge_check_ >= merge_check_interval_) {
+        checkAndExecuteMerge();
+        frame_count_since_last_merge_check_ = 0;
+    }
 
     // // 衰减长期未观测区域
     // decayUnobservedRegions(); // 衰减未观测体素
@@ -1534,19 +1552,173 @@ void PowerLineProbabilityMap::TrackerDecayUnobservedRegions(std::unordered_map<V
             ++it_global;
         }
     }
-    
-    
-    // for (auto& [key, voxel] : line_tracker_map) {
-    //     if (voxel.frames_since_last_observation > max_frames_without_observation_) {
-    //         // 向不确定状态衰减
-    //         float target = 0.5f;  // 不确定状态
-    //         voxel.line_probability = target + (voxel.line_probability - target) * decay_rate_;
-            
-    //         // 置信度也逐渐衰减
-    //         voxel.confidence *= decay_rate_;
 
-
-    //     }
-    // }
 }
 
+
+// ==================== 合并管理函数实现 ====================
+
+std::vector<std::pair<int,int>> PowerLineProbabilityMap::detectMergeablePairs() {
+    std::vector<std::pair<int,int>> candidate_pairs;
+    
+    for (auto it1 = line_regions_.begin(); it1 != line_regions_.end(); ++it1) {
+        for (auto it2 = std::next(it1); it2 != line_regions_.end(); ++it2) {
+            int id1 = it1->first;
+            int id2 = it2->first;
+            
+            // 快速距离筛选
+            float center_distance = (it1->second.region_center - it2->second.region_center).norm();
+            if (center_distance > merge_distance_threshold_) continue;
+            
+            // 角度对齐检查
+            if (checkAngleAlignment(it1->second, it2->second)) {
+                candidate_pairs.push_back({id1, id2});
+            }
+        }
+    }
+    
+    return candidate_pairs;
+}
+
+bool PowerLineProbabilityMap::checkAngleAlignment(const LineRegionInfo& region1, 
+                                                 const LineRegionInfo& region2) const {
+    // 计算各自的方向向量
+    Eigen::Vector3f dir1 = (region1.end_point - region1.start_point).normalized();
+    Eigen::Vector3f dir2 = (region2.end_point - region2.start_point).normalized();
+    
+    // 计算中心连接向量
+    Eigen::Vector3f connection = (region2.region_center - region1.region_center).normalized();
+    
+    // 两个方向都要与连接向量对齐（使用绝对值处理方向相反的情况）
+    float angle1 = std::acos(std::abs(dir1.dot(connection)));
+    float angle2 = std::acos(std::abs(dir2.dot(connection)));
+    
+    return (angle1 < merge_angle_threshold_) && (angle2 < merge_angle_threshold_);
+}
+
+bool PowerLineProbabilityMap::checkSpatialOverlap(int line_id1, int line_id2) const {
+    auto it1 = line_specific_maps_.find(line_id1);
+    auto it2 = line_specific_maps_.find(line_id2);
+    
+    if (it1 == line_specific_maps_.end() || it2 == line_specific_maps_.end()) {
+        return false;
+    }
+    
+    const auto& map1 = it1->second;
+    const auto& map2 = it2->second;
+    
+    // 计算重叠体素数
+    int overlap_count = 0;
+    int total_voxels = map1.size();
+    
+    for (const auto& [key, voxel1] : map1) {
+        if (voxel1.line_probability > 0.5f) { // 只考虑高概率体素
+            auto it = map2.find(key);
+            if (it != map2.end() && it->second.line_probability > 0.5f) {
+                overlap_count++;
+            }
+        }
+    }
+    
+    float overlap_ratio = total_voxels > 0 ? static_cast<float>(overlap_count) / total_voxels : 0.0f;
+    return overlap_ratio > merge_overlap_threshold_;
+}
+
+bool PowerLineProbabilityMap::mergeLineSegments(int primary_id, int secondary_id) {
+    auto primary_it = line_regions_.find(primary_id);
+    auto secondary_it = line_regions_.find(secondary_id);
+    
+    if (primary_it == line_regions_.end() || secondary_it == line_regions_.end()) {
+        return false;
+    }
+    
+    // 选择更稳定的作为主ID
+    if (secondary_it->second.is_stable && !primary_it->second.is_stable) {
+        std::swap(primary_id, secondary_id);
+        std::swap(primary_it, secondary_it);
+    }
+    
+    // 合并概率地图
+    auto primary_map_it = line_specific_maps_.find(primary_id);
+    auto secondary_map_it = line_specific_maps_.find(secondary_id);
+    
+    if (primary_map_it != line_specific_maps_.end() && 
+        secondary_map_it != line_specific_maps_.end()) {
+        
+        // 合并体素数据
+        for (const auto& [key, voxel] : secondary_map_it->second) {
+            auto& primary_voxel = primary_map_it->second[key];
+            // 取更高的概率值
+            primary_voxel.line_probability = std::max(primary_voxel.line_probability, voxel.line_probability);
+            primary_voxel.observation_count += voxel.observation_count;
+            primary_voxel.updateConfidence();
+        }
+        
+        // 删除被合并的地图
+        line_specific_maps_.erase(secondary_map_it);
+    }
+    
+    // 更新区域信息（扩展包围区域）
+    auto& primary_region = primary_it->second;
+    const auto& secondary_region = secondary_it->second;
+    
+    // 重新计算边界
+    Eigen::Vector3f min_point = primary_region.region_center.cwiseMin(secondary_region.region_center);
+    Eigen::Vector3f max_point = primary_region.region_center.cwiseMax(secondary_region.region_center);
+    
+    primary_region.region_center = (min_point + max_point) * 0.5f;
+    primary_region.region_radius = std::max(primary_region.region_radius, 
+                                          (max_point - min_point).norm() * 0.5f + expansion_radius_);
+    
+    // 记录合并信息
+    LineIdChange change;
+    change.old_id = secondary_id;
+    change.new_id = primary_id;
+    change.merge_time = ros::Time::now();
+    change.merge_confidence = 0.8f; // 可根据重叠度计算
+    change.change_reason = "segment_merge";
+    recent_merges_.push_back(change);
+    
+    // 删除被合并的区域
+    line_regions_.erase(secondary_it);
+    
+    ROS_INFO("合并电力线片段: %d -> %d", secondary_id, primary_id);
+    return true;
+}
+
+void PowerLineProbabilityMap::publishLineIdChanges() {
+    if (recent_merges_.empty()) return;
+    
+    std_msgs::String msg;
+    std::ostringstream ss;
+    
+    ss << "LINE_MERGES:" << recent_merges_.size() << ";";
+    for (const auto& change : recent_merges_) {
+        ss << change.old_id << "->" << change.new_id << ":" << change.merge_confidence << ";";
+    }
+    
+    msg.data = ss.str();
+    line_merge_pub_.publish(msg);
+    
+    // 清空已发布的记录（或者保留最近几条）
+    recent_merges_.clear();
+}
+
+void PowerLineProbabilityMap::checkAndExecuteMerge() {
+    // 检测可合并的片段对
+    auto candidate_pairs = detectMergeablePairs();
+    
+    if (candidate_pairs.empty()) return;
+    
+    ROS_DEBUG("发现 %zu 个候选合并对", candidate_pairs.size());
+    
+    // 对每个候选对进行详细检查并执行合并
+    for (const auto& [id1, id2] : candidate_pairs) {
+        if (checkSpatialOverlap(id1, id2)) {
+            if (mergeLineSegments(id1, id2)) {
+                // 合并成功后发布通知
+                publishLineIdChanges();
+            }
+        }
+    }
+}

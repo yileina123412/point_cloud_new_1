@@ -2,9 +2,7 @@ powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_probabilit
  /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/src/power_line_probability_map.cpp \
  /usr/include/stdc-predef.h \
  /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/include/power_line_probability_map.h \
- /opt/ros/noetic/include/ros/ros.h /opt/ros/noetic/include/ros/time.h \
- /opt/ros/noetic/include/ros/platform.h /usr/include/c++/9/stdlib.h \
- /usr/include/c++/9/cstdlib \
+ /opt/ros/noetic/include/std_msgs/String.h /usr/include/c++/9/string \
  /usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/9/bits/os_defines.h \
  /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
@@ -13,45 +11,7 @@ powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_probabilit
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
  /usr/include/x86_64-linux-gnu/c++/9/bits/cpu_defines.h \
- /usr/include/c++/9/pstl/pstl_config.h /usr/include/stdlib.h \
- /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
- /usr/lib/gcc/x86_64-linux-gnu/9/include/stddef.h \
- /usr/include/x86_64-linux-gnu/bits/waitflags.h \
- /usr/include/x86_64-linux-gnu/bits/waitstatus.h \
- /usr/include/x86_64-linux-gnu/bits/floatn.h \
- /usr/include/x86_64-linux-gnu/bits/floatn-common.h \
- /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
- /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
- /usr/include/x86_64-linux-gnu/sys/types.h \
- /usr/include/x86_64-linux-gnu/bits/types.h \
- /usr/include/x86_64-linux-gnu/bits/timesize.h \
- /usr/include/x86_64-linux-gnu/bits/typesizes.h \
- /usr/include/x86_64-linux-gnu/bits/time64.h \
- /usr/include/x86_64-linux-gnu/bits/types/clock_t.h \
- /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h \
- /usr/include/x86_64-linux-gnu/bits/types/time_t.h \
- /usr/include/x86_64-linux-gnu/bits/types/timer_t.h \
- /usr/include/x86_64-linux-gnu/bits/stdint-intn.h /usr/include/endian.h \
- /usr/include/x86_64-linux-gnu/bits/endian.h \
- /usr/include/x86_64-linux-gnu/bits/endianness.h \
- /usr/include/x86_64-linux-gnu/bits/byteswap.h \
- /usr/include/x86_64-linux-gnu/bits/uintn-identity.h \
- /usr/include/x86_64-linux-gnu/sys/select.h \
- /usr/include/x86_64-linux-gnu/bits/select.h \
- /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h \
- /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h \
- /usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h \
- /usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h \
- /usr/include/x86_64-linux-gnu/bits/select2.h \
- /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
- /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h \
- /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h \
- /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
- /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h /usr/include/alloca.h \
- /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
- /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
- /usr/include/x86_64-linux-gnu/bits/stdlib.h \
- /usr/include/c++/9/bits/std_abs.h /usr/include/c++/9/string \
+ /usr/include/c++/9/pstl/pstl_config.h \
  /usr/include/c++/9/bits/stringfwd.h /usr/include/c++/9/bits/memoryfwd.h \
  /usr/include/c++/9/bits/char_traits.h \
  /usr/include/c++/9/bits/stl_algobase.h \
@@ -69,15 +29,27 @@ powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_probabilit
  /usr/include/c++/9/bits/ptr_traits.h /usr/include/c++/9/debug/debug.h \
  /usr/include/c++/9/bits/predefined_ops.h \
  /usr/include/c++/9/bits/postypes.h /usr/include/c++/9/cwchar \
- /usr/include/wchar.h /usr/lib/gcc/x86_64-linux-gnu/9/include/stdarg.h \
+ /usr/include/wchar.h \
+ /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
+ /usr/include/x86_64-linux-gnu/bits/floatn.h \
+ /usr/include/x86_64-linux-gnu/bits/floatn-common.h \
+ /usr/lib/gcc/x86_64-linux-gnu/9/include/stddef.h \
+ /usr/lib/gcc/x86_64-linux-gnu/9/include/stdarg.h \
  /usr/include/x86_64-linux-gnu/bits/wchar.h \
  /usr/include/x86_64-linux-gnu/bits/types/wint_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/__FILE.h \
  /usr/include/x86_64-linux-gnu/bits/types/FILE.h \
+ /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
  /usr/include/x86_64-linux-gnu/bits/wchar2.h /usr/include/c++/9/cstdint \
  /usr/lib/gcc/x86_64-linux-gnu/9/include/stdint.h /usr/include/stdint.h \
+ /usr/include/x86_64-linux-gnu/bits/types.h \
+ /usr/include/x86_64-linux-gnu/bits/timesize.h \
+ /usr/include/x86_64-linux-gnu/bits/typesizes.h \
+ /usr/include/x86_64-linux-gnu/bits/time64.h \
+ /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
  /usr/include/c++/9/bits/allocator.h \
  /usr/include/x86_64-linux-gnu/c++/9/bits/c++allocator.h \
@@ -92,6 +64,8 @@ powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_probabilit
  /usr/include/c++/9/clocale /usr/include/locale.h \
  /usr/include/x86_64-linux-gnu/bits/locale.h /usr/include/c++/9/iosfwd \
  /usr/include/c++/9/cctype /usr/include/ctype.h \
+ /usr/include/x86_64-linux-gnu/bits/endian.h \
+ /usr/include/x86_64-linux-gnu/bits/endianness.h \
  /usr/include/c++/9/bits/ostream_insert.h \
  /usr/include/c++/9/bits/cxxabi_forced.h \
  /usr/include/c++/9/bits/stl_function.h \
@@ -103,20 +77,45 @@ powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_probabilit
  /usr/include/x86_64-linux-gnu/c++/9/bits/gthr.h \
  /usr/include/x86_64-linux-gnu/c++/9/bits/gthr-default.h \
  /usr/include/pthread.h /usr/include/sched.h \
+ /usr/include/x86_64-linux-gnu/bits/types/time_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h \
  /usr/include/x86_64-linux-gnu/bits/sched.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h \
  /usr/include/x86_64-linux-gnu/bits/cpu-set.h /usr/include/time.h \
  /usr/include/x86_64-linux-gnu/bits/time.h \
  /usr/include/x86_64-linux-gnu/bits/timex.h \
+ /usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h \
+ /usr/include/x86_64-linux-gnu/bits/types/clock_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h \
+ /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/timer_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h \
+ /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
+ /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h \
+ /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h \
+ /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
+ /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
  /usr/include/x86_64-linux-gnu/bits/setjmp.h \
  /usr/include/x86_64-linux-gnu/c++/9/bits/atomic_word.h \
  /usr/include/c++/9/ext/alloc_traits.h \
  /usr/include/c++/9/bits/alloc_traits.h /usr/include/c++/9/string_view \
  /usr/include/c++/9/limits /usr/include/c++/9/bits/functional_hash.h \
  /usr/include/c++/9/bits/string_view.tcc \
- /usr/include/c++/9/ext/string_conversions.h /usr/include/c++/9/cstdio \
+ /usr/include/c++/9/ext/string_conversions.h /usr/include/c++/9/cstdlib \
+ /usr/include/stdlib.h /usr/include/x86_64-linux-gnu/bits/waitflags.h \
+ /usr/include/x86_64-linux-gnu/bits/waitstatus.h \
+ /usr/include/x86_64-linux-gnu/sys/types.h /usr/include/endian.h \
+ /usr/include/x86_64-linux-gnu/bits/byteswap.h \
+ /usr/include/x86_64-linux-gnu/bits/uintn-identity.h \
+ /usr/include/x86_64-linux-gnu/sys/select.h \
+ /usr/include/x86_64-linux-gnu/bits/select.h \
+ /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h \
+ /usr/include/x86_64-linux-gnu/bits/select2.h /usr/include/alloca.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib.h \
+ /usr/include/c++/9/bits/std_abs.h /usr/include/c++/9/cstdio \
  /usr/include/stdio.h /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h \
@@ -129,15 +128,41 @@ powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_probabilit
  /usr/include/linux/errno.h /usr/include/x86_64-linux-gnu/asm/errno.h \
  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
  /usr/include/x86_64-linux-gnu/bits/types/error_t.h \
- /usr/include/c++/9/bits/basic_string.tcc /usr/include/c++/9/iostream \
- /usr/include/c++/9/ostream /usr/include/c++/9/ios \
- /usr/include/c++/9/bits/ios_base.h \
+ /usr/include/c++/9/bits/basic_string.tcc /usr/include/c++/9/vector \
+ /usr/include/c++/9/bits/stl_construct.h \
+ /usr/include/c++/9/bits/stl_uninitialized.h /usr/include/c++/9/utility \
+ /usr/include/c++/9/bits/stl_relops.h \
+ /usr/include/c++/9/bits/stl_vector.h \
+ /usr/include/c++/9/bits/stl_bvector.h /usr/include/c++/9/bits/vector.tcc \
+ /usr/include/c++/9/memory /usr/include/c++/9/bits/stl_tempbuf.h \
+ /usr/include/c++/9/bits/stl_raw_storage_iter.h \
+ /usr/include/c++/9/ext/concurrence.h \
+ /usr/include/c++/9/bits/uses_allocator.h \
+ /usr/include/c++/9/bits/unique_ptr.h /usr/include/c++/9/tuple \
+ /usr/include/c++/9/array /usr/include/c++/9/stdexcept \
+ /usr/include/c++/9/bits/invoke.h /usr/include/c++/9/bits/shared_ptr.h \
+ /usr/include/c++/9/bits/shared_ptr_base.h \
+ /usr/include/c++/9/bits/allocated_ptr.h \
+ /usr/include/c++/9/bits/refwrap.h \
+ /usr/include/c++/9/ext/aligned_buffer.h \
+ /usr/include/c++/9/bits/shared_ptr_atomic.h \
+ /usr/include/c++/9/bits/atomic_base.h \
+ /usr/include/c++/9/bits/atomic_lockfree_defines.h \
+ /usr/include/c++/9/backward/auto_ptr.h \
+ /usr/include/c++/9/pstl/glue_memory_defs.h \
+ /usr/include/c++/9/pstl/execution_defs.h \
+ /opt/ros/noetic/include/ros/types.h \
+ /opt/ros/noetic/include/ros/serialization.h \
+ /opt/ros/noetic/include/ros/roscpp_serialization_macros.h \
+ /opt/ros/noetic/include/ros/macros.h /opt/ros/noetic/include/ros/time.h \
+ /opt/ros/noetic/include/ros/platform.h /usr/include/c++/9/stdlib.h \
+ /usr/include/c++/9/iostream /usr/include/c++/9/ostream \
+ /usr/include/c++/9/ios /usr/include/c++/9/bits/ios_base.h \
  /usr/include/c++/9/bits/locale_classes.h \
  /usr/include/c++/9/bits/locale_classes.tcc \
  /usr/include/c++/9/system_error \
  /usr/include/x86_64-linux-gnu/c++/9/bits/error_constants.h \
- /usr/include/c++/9/stdexcept /usr/include/c++/9/streambuf \
- /usr/include/c++/9/bits/streambuf.tcc \
+ /usr/include/c++/9/streambuf /usr/include/c++/9/bits/streambuf.tcc \
  /usr/include/c++/9/bits/basic_ios.h \
  /usr/include/c++/9/bits/locale_facets.h /usr/include/c++/9/cwctype \
  /usr/include/wctype.h /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
@@ -182,7 +207,6 @@ powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_probabilit
  /usr/include/x86_64-linux-gnu/bits/xopen_lim.h \
  /usr/include/x86_64-linux-gnu/bits/uio_lim.h \
  /opt/ros/noetic/include/ros/rostime_decl.h \
- /opt/ros/noetic/include/ros/macros.h \
  /usr/include/boost/math/special_functions/round.hpp \
  /usr/include/boost/math/tools/config.hpp /usr/include/boost/config.hpp \
  /usr/include/boost/config/user.hpp \
@@ -211,28 +235,18 @@ powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_probabilit
  /usr/include/boost/config/workaround.hpp \
  /usr/include/boost/type_traits/is_integral.hpp \
  /usr/include/boost/type_traits/integral_constant.hpp \
- /usr/include/c++/9/algorithm /usr/include/c++/9/utility \
- /usr/include/c++/9/bits/stl_relops.h /usr/include/c++/9/bits/stl_algo.h \
+ /usr/include/c++/9/algorithm /usr/include/c++/9/bits/stl_algo.h \
  /usr/include/c++/9/bits/algorithmfwd.h \
- /usr/include/c++/9/bits/stl_heap.h /usr/include/c++/9/bits/stl_tempbuf.h \
- /usr/include/c++/9/bits/stl_construct.h \
+ /usr/include/c++/9/bits/stl_heap.h \
  /usr/include/c++/9/bits/uniform_int_dist.h \
  /usr/include/c++/9/pstl/glue_algorithm_defs.h \
- /usr/include/c++/9/functional /usr/include/c++/9/tuple \
- /usr/include/c++/9/array /usr/include/c++/9/bits/uses_allocator.h \
- /usr/include/c++/9/bits/invoke.h /usr/include/c++/9/bits/refwrap.h \
- /usr/include/c++/9/bits/std_function.h /usr/include/c++/9/unordered_map \
- /usr/include/c++/9/ext/aligned_buffer.h \
- /usr/include/c++/9/bits/hashtable.h \
+ /usr/include/c++/9/functional /usr/include/c++/9/bits/std_function.h \
+ /usr/include/c++/9/unordered_map /usr/include/c++/9/bits/hashtable.h \
  /usr/include/c++/9/bits/hashtable_policy.h \
  /usr/include/c++/9/bits/node_handle.h /usr/include/c++/9/optional \
  /usr/include/c++/9/bits/enable_special_members.h \
  /usr/include/c++/9/bits/unordered_map.h \
- /usr/include/c++/9/bits/erase_if.h /usr/include/c++/9/vector \
- /usr/include/c++/9/bits/stl_uninitialized.h \
- /usr/include/c++/9/bits/stl_vector.h \
- /usr/include/c++/9/bits/stl_bvector.h /usr/include/c++/9/bits/vector.tcc \
- /usr/include/c++/9/pstl/execution_defs.h \
+ /usr/include/c++/9/bits/erase_if.h \
  /usr/include/boost/config/no_tr1/cmath.hpp /usr/include/c++/9/cfloat \
  /usr/lib/gcc/x86_64-linux-gnu/9/include/float.h \
  /usr/include/boost/math/tools/user.hpp \
@@ -244,7 +258,6 @@ powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_probabilit
  /usr/include/libintl.h /usr/include/c++/9/bits/codecvt.h \
  /usr/include/c++/9/bits/locale_facets_nonio.tcc \
  /usr/include/c++/9/bits/locale_conv.h \
- /usr/include/c++/9/bits/unique_ptr.h \
  /usr/include/c++/9/bits/quoted_string.h /usr/include/c++/9/sstream \
  /usr/include/c++/9/bits/sstream.tcc /usr/include/c++/9/cstring \
  /usr/include/string.h /usr/include/strings.h \
@@ -581,39 +594,13 @@ powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_probabilit
  /usr/include/boost/predef/os/android.h \
  /usr/lib/gcc/x86_64-linux-gnu/9/include/quadmath.h \
  /usr/include/x86_64-linux-gnu/sys/time.h \
- /opt/ros/noetic/include/ros/rate.h /opt/ros/noetic/include/ros/console.h \
- /opt/ros/noetic/include/ros/console_backend.h /usr/include/c++/9/cstdarg \
- /usr/include/c++/9/map /usr/include/c++/9/bits/stl_tree.h \
- /usr/include/c++/9/bits/stl_map.h /usr/include/c++/9/bits/stl_multimap.h \
- /usr/include/log4cxx/level.h /usr/include/log4cxx/logstring.h \
- /usr/include/log4cxx/log4cxx.h /usr/include/log4cxx/helpers/transcoder.h \
- /usr/include/log4cxx/helpers/objectimpl.h \
- /usr/include/log4cxx/helpers/object.h \
- /usr/include/log4cxx/helpers/class.h \
- /usr/include/log4cxx/helpers/objectptr.h \
- /usr/include/log4cxx/helpers/classregistration.h \
- /opt/ros/noetic/include/rosconsole/macros_generated.h \
- /opt/ros/noetic/include/ros/assert.h \
- /opt/ros/noetic/include/ros/static_assert.h \
- /opt/ros/noetic/include/ros/common.h \
- /opt/ros/noetic/include/ros/forwards.h /usr/include/c++/9/set \
- /usr/include/c++/9/bits/stl_set.h /usr/include/c++/9/bits/stl_multiset.h \
- /usr/include/c++/9/list /usr/include/c++/9/bits/stl_list.h \
- /usr/include/c++/9/bits/allocated_ptr.h /usr/include/c++/9/bits/list.tcc \
- /usr/include/boost/shared_ptr.hpp \
- /usr/include/boost/smart_ptr/shared_ptr.hpp \
- /usr/include/boost/config/no_tr1/memory.hpp /usr/include/c++/9/memory \
- /usr/include/c++/9/bits/stl_raw_storage_iter.h \
- /usr/include/c++/9/ext/concurrence.h \
- /usr/include/c++/9/bits/shared_ptr.h \
- /usr/include/c++/9/bits/shared_ptr_base.h \
- /usr/include/c++/9/bits/shared_ptr_atomic.h \
- /usr/include/c++/9/bits/atomic_base.h \
- /usr/include/c++/9/bits/atomic_lockfree_defines.h \
- /usr/include/c++/9/backward/auto_ptr.h \
- /usr/include/c++/9/pstl/glue_memory_defs.h \
+ /opt/ros/noetic/include/ros/serialized_message.h \
+ /usr/include/boost/shared_array.hpp \
+ /usr/include/boost/smart_ptr/shared_array.hpp \
  /usr/include/boost/checked_delete.hpp \
  /usr/include/boost/core/checked_delete.hpp \
+ /usr/include/boost/smart_ptr/shared_ptr.hpp \
+ /usr/include/boost/config/no_tr1/memory.hpp \
  /usr/include/boost/smart_ptr/detail/shared_count.hpp \
  /usr/include/boost/smart_ptr/bad_weak_ptr.hpp \
  /usr/include/boost/smart_ptr/detail/sp_counted_base.hpp \
@@ -639,6 +626,41 @@ powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_probabilit
  /usr/include/boost/smart_ptr/detail/operator_bool.hpp \
  /usr/include/boost/smart_ptr/detail/local_sp_deleter.hpp \
  /usr/include/boost/smart_ptr/detail/local_counted_base.hpp \
+ /usr/include/boost/shared_ptr.hpp \
+ /opt/ros/noetic/include/ros/message_traits.h \
+ /opt/ros/noetic/include/ros/message_forward.h \
+ /usr/include/boost/type_traits/remove_const.hpp \
+ /opt/ros/noetic/include/ros/builtin_message_traits.h \
+ /opt/ros/noetic/include/ros/message_traits.h \
+ /opt/ros/noetic/include/ros/datatypes.h /usr/include/c++/9/map \
+ /usr/include/c++/9/bits/stl_tree.h /usr/include/c++/9/bits/stl_map.h \
+ /usr/include/c++/9/bits/stl_multimap.h /usr/include/c++/9/set \
+ /usr/include/c++/9/bits/stl_set.h /usr/include/c++/9/bits/stl_multiset.h \
+ /usr/include/c++/9/list /usr/include/c++/9/bits/stl_list.h \
+ /usr/include/c++/9/bits/list.tcc /usr/include/boost/array.hpp \
+ /usr/include/boost/swap.hpp /usr/include/boost/core/swap.hpp \
+ /usr/include/boost/detail/iterator.hpp /usr/include/c++/9/iterator \
+ /usr/include/c++/9/bits/stream_iterator.h \
+ /usr/include/boost/call_traits.hpp \
+ /usr/include/boost/detail/call_traits.hpp \
+ /usr/include/boost/type_traits/is_enum.hpp \
+ /usr/include/boost/type_traits/is_pointer.hpp \
+ /opt/ros/noetic/include/ros/message_operations.h \
+ /opt/ros/noetic/include/ros/ros.h /opt/ros/noetic/include/ros/rate.h \
+ /opt/ros/noetic/include/ros/console.h \
+ /opt/ros/noetic/include/ros/console_backend.h /usr/include/c++/9/cstdarg \
+ /usr/include/log4cxx/level.h /usr/include/log4cxx/logstring.h \
+ /usr/include/log4cxx/log4cxx.h /usr/include/log4cxx/helpers/transcoder.h \
+ /usr/include/log4cxx/helpers/objectimpl.h \
+ /usr/include/log4cxx/helpers/object.h \
+ /usr/include/log4cxx/helpers/class.h \
+ /usr/include/log4cxx/helpers/objectptr.h \
+ /usr/include/log4cxx/helpers/classregistration.h \
+ /opt/ros/noetic/include/rosconsole/macros_generated.h \
+ /opt/ros/noetic/include/ros/assert.h \
+ /opt/ros/noetic/include/ros/static_assert.h \
+ /opt/ros/noetic/include/ros/common.h \
+ /opt/ros/noetic/include/ros/forwards.h \
  /usr/include/boost/make_shared.hpp \
  /usr/include/boost/smart_ptr/make_shared.hpp \
  /usr/include/boost/smart_ptr/make_shared_object.hpp \
@@ -654,8 +676,6 @@ powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_probabilit
  /usr/include/boost/type_traits/alignment_of.hpp \
  /usr/include/boost/type_traits/is_pod.hpp \
  /usr/include/boost/type_traits/is_scalar.hpp \
- /usr/include/boost/type_traits/is_enum.hpp \
- /usr/include/boost/type_traits/is_pointer.hpp \
  /usr/include/boost/type_traits/is_member_pointer.hpp \
  /usr/include/boost/type_traits/is_member_function_pointer.hpp \
  /usr/include/boost/type_traits/detail/is_member_function_pointer_cxx_11.hpp \
@@ -716,31 +736,14 @@ powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_probabilit
  /usr/include/boost/function/function_template.hpp \
  /usr/include/boost/core/no_exceptions_support.hpp \
  /opt/ros/noetic/include/ros/exceptions.h \
- /opt/ros/noetic/include/ros/datatypes.h \
  /opt/ros/noetic/include/ros/serialized_message.h \
- /opt/ros/noetic/include/ros/roscpp_serialization_macros.h \
- /usr/include/boost/shared_array.hpp \
- /usr/include/boost/smart_ptr/shared_array.hpp \
- /opt/ros/noetic/include/ros/types.h \
  /opt/ros/noetic/include/ros/node_handle.h \
  /opt/ros/noetic/include/ros/publisher.h \
- /opt/ros/noetic/include/ros/message.h /usr/include/boost/array.hpp \
- /usr/include/boost/swap.hpp /usr/include/boost/core/swap.hpp \
- /usr/include/boost/detail/iterator.hpp /usr/include/c++/9/iterator \
- /usr/include/c++/9/bits/stream_iterator.h \
- /opt/ros/noetic/include/ros/serialization.h \
- /opt/ros/noetic/include/ros/serialized_message.h \
- /opt/ros/noetic/include/ros/message_traits.h \
- /opt/ros/noetic/include/ros/message_forward.h \
- /usr/include/boost/type_traits/remove_const.hpp \
- /opt/ros/noetic/include/ros/builtin_message_traits.h \
- /opt/ros/noetic/include/ros/message_traits.h \
- /usr/include/boost/call_traits.hpp \
- /usr/include/boost/detail/call_traits.hpp \
- /usr/include/boost/bind/bind.hpp /usr/include/boost/type.hpp \
- /usr/include/boost/is_placeholder.hpp /usr/include/boost/bind/arg.hpp \
- /usr/include/boost/visit_each.hpp /usr/include/boost/core/is_same.hpp \
- /usr/include/boost/bind/storage.hpp /usr/include/boost/bind/bind_cc.hpp \
+ /opt/ros/noetic/include/ros/message.h /usr/include/boost/bind/bind.hpp \
+ /usr/include/boost/type.hpp /usr/include/boost/is_placeholder.hpp \
+ /usr/include/boost/bind/arg.hpp /usr/include/boost/visit_each.hpp \
+ /usr/include/boost/core/is_same.hpp /usr/include/boost/bind/storage.hpp \
+ /usr/include/boost/bind/bind_cc.hpp \
  /usr/include/boost/bind/bind_mf_cc.hpp \
  /usr/include/boost/bind/bind_mf2_cc.hpp \
  /usr/include/boost/bind/placeholders.hpp \
@@ -1308,7 +1311,6 @@ powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_probabilit
  /usr/include/pcl-1.10/pcl/impl/point_types.hpp \
  /usr/include/pcl-1.10/pcl/common/point_tests.h \
  /opt/ros/noetic/include/visualization_msgs/MarkerArray.h \
- /opt/ros/noetic/include/ros/message_operations.h \
  /opt/ros/noetic/include/visualization_msgs/Marker.h \
  /opt/ros/noetic/include/std_msgs/Header.h \
  /opt/ros/noetic/include/geometry_msgs/Pose.h \
