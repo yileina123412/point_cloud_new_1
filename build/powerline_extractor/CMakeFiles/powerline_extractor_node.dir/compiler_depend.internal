@@ -5,6 +5,7 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
  /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/src/powerline_extractor_node.cpp
  /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/include/advanced_obstacle_analyzer.h
  /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/include/building_edge_filter.h
+ /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/include/enhanced_power_line_tracker.h
  /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/include/obstacle_analyzer.h
  /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/include/point_cloud_preprocessor.h
  /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/include/power_line_coarse_extractor_s.h

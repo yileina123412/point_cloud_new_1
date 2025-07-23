@@ -37,6 +37,7 @@ struct ReconstructedPowerLine {
     std::vector<int> segment_indices;  // 包含的片段索引
     pcl::PointCloud<pcl::PointXYZI>::Ptr points;
     std::vector<Eigen::Vector3f> fitted_curve_points;  // 拟合的曲线点
+    std::vector<int> point_types;      // 点类型标记：0=补全, 1=检测, 2=预测
     double total_length;
     int line_id;
     Eigen::Vector3f main_direction;  // 整条线的主方向

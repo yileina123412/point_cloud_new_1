@@ -264,6 +264,54 @@ public:
      */
     bool isLineActive(int line_id) const;
     
+
+    /**
+     * @brief 获取指定电力线的分线概率地图
+     * @param line_id 电力线ID
+     * @return 该电力线的体素概率地图
+     */
+    std::unordered_map<VoxelKey, PowerLineVoxel> getLineSpecificMap(int line_id) const;
+    
+    /**
+     * @brief 获取所有分线概率地图
+     * @return 所有电力线的体素概率地图
+     */
+    std::unordered_map<int, std::unordered_map<VoxelKey, PowerLineVoxel>> getAllLineSpecificMaps() const;
+    
+    /**
+     * @brief 检查检测片段与指定电力线的匹配程度
+     * @param line_id 电力线ID  
+     * @param detection 检测结果
+     * @param threshold 概率阈值
+     * @return 匹配度 [0,1]
+     */
+    float calculateDetectionMatchScore(int line_id, const ReconstructedPowerLine& detection, 
+                                     float threshold = 0.5f) const;
+
+    /**
+     * @brief 批量为检测结果分配line_id
+     * @param power_lines 检测到的电力线列表
+     * @return 每个检测对应的line_id列表，索引对应power_lines的索引
+     */
+    std::vector<int> assignLineIDsForDetections(const std::vector<ReconstructedPowerLine>& power_lines);
+
+    /**
+     * @brief 获取检测结果的详细匹配信息
+     * @param power_lines 检测到的电力线列表
+     * @return 详细的匹配信息列表
+     */
+    struct DetectionLineMatch {
+        int detection_index;        // 检测索引
+        int assigned_line_id;       // 分配的line_id
+        float match_confidence;     // 匹配置信度 [0,1]
+        float coverage_ratio;       // 检测点在概率地图中的覆盖率 [0,1]
+        bool is_new_line;          // 是否为新创建的线
+        
+        DetectionLineMatch() : detection_index(-1), assigned_line_id(-1), 
+                            match_confidence(0.0f), coverage_ratio(0.0f), is_new_line(false) {}
+    };
+
+    std::vector<DetectionLineMatch> getDetailedDetectionMatches(const std::vector<ReconstructedPowerLine>& power_lines);
     // ==================== 可视化接口 ====================
     
     /**

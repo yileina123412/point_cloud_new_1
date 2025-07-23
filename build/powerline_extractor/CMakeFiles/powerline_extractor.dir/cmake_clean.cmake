@@ -5,6 +5,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/powerline_extractor.dir/src/advanced_obstacle_analyzer.cpp.o.d"
   "CMakeFiles/powerline_extractor.dir/src/building_edge_filter.cpp.o"
   "CMakeFiles/powerline_extractor.dir/src/building_edge_filter.cpp.o.d"
+  "CMakeFiles/powerline_extractor.dir/src/enhanced_power_line_tracker.cpp.o"
+  "CMakeFiles/powerline_extractor.dir/src/enhanced_power_line_tracker.cpp.o.d"
   "CMakeFiles/powerline_extractor.dir/src/obstacle_analyzer.cpp.o"
   "CMakeFiles/powerline_extractor.dir/src/obstacle_analyzer.cpp.o.d"
   "CMakeFiles/powerline_extractor.dir/src/point_cloud_preprocessor.cpp.o"

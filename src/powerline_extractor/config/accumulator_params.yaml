@@ -368,3 +368,62 @@ tracker:
   track_visualization_duration: 1.0  # 轨迹可视化持续时间 (秒)
   # 坐标系
   frame_id: "map"              # 可视化使用的坐标系
+
+
+# 增强型电力线跟踪器参数配置
+enhanced_tracker:
+  
+  # ==================== 卡尔曼滤波参数 ====================
+  # 过程噪声参数 - 控制状态预测的不确定性
+  process_noise_position: 0.01      # 位置过程噪声标准差 (m)
+  process_noise_velocity: 0.005     # 速度过程噪声标准差 (m/s) 
+  process_noise_shape: 0.001        # 形状参数过程噪声标准差
+  measurement_noise: 0.1            # 测量噪声标准差 (m)
+  
+  # ==================== 片段融合参数 ====================
+  # 多个检测片段如何融合成一个观测
+  segment_merge_distance: 2.0       # 片段合并距离阈值 (m) - 小于此距离的片段可能属于同一条线
+  segment_overlap_threshold: 0.3    # 片段重叠阈值 [0,1] - 重叠度超过此值的片段将被合并
+  min_segment_length: 1.0           # 最小片段长度 (m) - 短于此长度的片段将被忽略
+  max_gap_distance: 5.0             # 最大间隙距离 (m) - 间隙超过此距离的片段不会被连接
+  
+  # ==================== 补全参数 ====================
+  # 轨迹补全和预测相关参数
+  completion_confidence_threshold: 0.2   # 补全置信度阈值 [0,1] - 只有高于此阈值的轨迹才会被补全
+  max_extrapolation_distance: 15.0      # 最大外推距离 (m) - 补全不会超出此距离
+  interpolation_resolution: 0.1         # 插值分辨率 (m) - 补全点的间距
+  enable_completion: true                # 是否启用轨迹补全功能
+  
+  # ==================== 轨迹管理参数 ====================
+  # 轨迹生命周期管理
+  max_consecutive_misses: 5          # 最大连续未匹配次数 - 超过后轨迹将被标记为丢失
+  min_updates_for_stable: 3          # 稳定轨迹最小更新次数 - 连续成功更新此次数后轨迹变为稳定
+  min_confidence_threshold: 0.2      # 最小置信度阈值 [0,1] - 低于此阈值的轨迹将被移除
+  max_track_count: 15                # 最大轨迹数量 - 超过后将移除置信度最低的轨迹
+  track_timeout_duration: 30.0       # 轨迹超时时间 (s) - 超过此时间未更新的轨迹将被移除
+  
+  # ==================== 可视化参数 ====================
+  # RViz可视化相关设置
+  enable_visualization: true         # 是否启用可视化发布
+  visualization_duration: 2.0        # 可视化持续时间 (s) - 标记在RViz中的显示时间
+  frame_id: "map"                    # 坐标系ID - 所有可视化标记使用的坐标系
+  
+  # ==================== 性能优化参数 ====================
+  # 系统性能相关参数
+  max_points_per_segment: 100        # 每个片段最大点数 - 超过将进行下采样
+  kalman_update_frequency: 30.0      # 卡尔曼滤波更新频率 (Hz)
+  probability_query_batch_size: 50   # 概率查询批处理大小
+  
+  # ==================== 高级参数 ====================
+  # 专家级参数，一般不需要修改
+  adaptive_noise_scaling: true       # 是否启用自适应噪声缩放
+  dynamic_control_points: false      # 是否使用动态控制点数量
+  robust_estimation: true            # 是否使用鲁棒估计（抗异常值）
+  temporal_smoothing: 0.1            # 时间平滑系数 [0,1] - 用于平滑轨迹变化
+  
+  # ==================== 调试参数 ====================
+  # 调试和开发用参数
+  debug_mode: false                  # 是否启用调试模式
+  log_detailed_timing: false         # 是否记录详细的时间统计
+  save_trajectory_history: false     # 是否保存轨迹历史到文件
+  export_statistics: false           # 是否导出统计信息

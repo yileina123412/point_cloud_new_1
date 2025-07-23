@@ -1493,6 +1493,30 @@ src/building_edge_filter.cpp.s:
 	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/building_edge_filter.cpp.s
 .PHONY : src/building_edge_filter.cpp.s
 
+src/enhanced_power_line_tracker.o: src/enhanced_power_line_tracker.cpp.o
+.PHONY : src/enhanced_power_line_tracker.o
+
+# target to build an object file
+src/enhanced_power_line_tracker.cpp.o:
+	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/enhanced_power_line_tracker.cpp.o
+.PHONY : src/enhanced_power_line_tracker.cpp.o
+
+src/enhanced_power_line_tracker.i: src/enhanced_power_line_tracker.cpp.i
+.PHONY : src/enhanced_power_line_tracker.i
+
+# target to preprocess a source file
+src/enhanced_power_line_tracker.cpp.i:
+	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/enhanced_power_line_tracker.cpp.i
+.PHONY : src/enhanced_power_line_tracker.cpp.i
+
+src/enhanced_power_line_tracker.s: src/enhanced_power_line_tracker.cpp.s
+.PHONY : src/enhanced_power_line_tracker.s
+
+# target to generate assembly for a file
+src/enhanced_power_line_tracker.cpp.s:
+	cd /home/furina/powerline_extraction/point_cloud_extractor_success02/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/enhanced_power_line_tracker.cpp.s
+.PHONY : src/enhanced_power_line_tracker.cpp.s
+
 src/obstacle_analyzer.o: src/obstacle_analyzer.cpp.o
 .PHONY : src/obstacle_analyzer.o
 
@@ -1915,6 +1939,9 @@ help:
 	@echo "... src/building_edge_filter.o"
 	@echo "... src/building_edge_filter.i"
 	@echo "... src/building_edge_filter.s"
+	@echo "... src/enhanced_power_line_tracker.o"
+	@echo "... src/enhanced_power_line_tracker.i"
+	@echo "... src/enhanced_power_line_tracker.s"
 	@echo "... src/obstacle_analyzer.o"
 	@echo "... src/obstacle_analyzer.i"
 	@echo "... src/obstacle_analyzer.s"

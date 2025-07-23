@@ -7,6 +7,9 @@ Panels:
         - /Global Options1
         - /Status1
         - /概率地图1
+        - /智能补全的电力线部分1
+        - /当前帧实际检测到的电力线部分1
+        - /完整的轨迹骨架1
       Splitter Ratio: 0.5647059082984924
     Tree Height: 549
   - Class: rviz/Selection
@@ -697,13 +700,13 @@ Visualization Manager:
       Use rainbow: true
       Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
+      Enabled: false
       Marker Topic: /power_line_probability_map/line_specific_markers
       Name: 分线概率地图
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
       Enabled: false
       Marker Topic: /power_line_probability_map/bounding_boxes
@@ -772,6 +775,38 @@ Visualization Manager:
         {}
       Queue Size: 100
       Value: false
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /enhanced_tracker/completed_lines
+      Name: 智能补全的电力线部分
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /enhanced_tracker/detected_parts
+      Name: 当前帧实际检测到的电力线部分
+      Namespaces:
+        detected_parts: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /enhanced_tracker/track_visualization
+      Name: 完整的轨迹骨架
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /enhanced_tracker/statistics
+      Name: 跟踪器运行统计
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 255; 255; 255
@@ -800,7 +835,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 34.98080825805664
+      Distance: 41.406517028808594
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -816,9 +851,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.1997967958450317
+      Pitch: 1.3597965240478516
       Target Frame: <Fixed Frame>
-      Yaw: 1.6977450847625732
+      Yaw: 2.5577433109283447
     Saved: ~
 Window Geometry:
   Displays:

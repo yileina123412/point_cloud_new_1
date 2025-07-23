@@ -136,7 +136,7 @@ void TrackedPowerLine::update(const ReconstructedPowerLine& detection) {
     // 更新状态
     if (status_ == TRACK_NEW && consecutive_hits_ >= 3) {
         status_ = TRACK_CONFIRMED;
-    } else if (status_ == TRACK_PREDICTED) {
+    } else if (status_ == TRACK_PREDICTED_OLD) {
         status_ = TRACK_ACTIVE;
     }
 }
@@ -254,7 +254,7 @@ void TrackedPowerLine::updateHistory(const ReconstructedPowerLine& detection) {
 }
 
 void TrackedPowerLine::markAsLost() {
-    status_ = TRACK_LOST;
+    status_ = TRACK_LOST_OLD;
     consecutive_misses_++;
     confidence_ = std::max(0.0f, confidence_ - 0.2f);
 }
@@ -268,7 +268,7 @@ bool TrackedPowerLine::isStable() const {
 }
 
 bool TrackedPowerLine::shouldBeRemoved() const {
-    return status_ == TRACK_LOST && (consecutive_misses_ > 10 || confidence_ < 0.1f);
+    return status_ == TRACK_LOST_OLD && (consecutive_misses_ > 10 || confidence_ < 0.1f);
 }
 
 
@@ -641,7 +641,7 @@ void PowerLineTracker::handleUnmatchedTracks(const std::vector<int>& unmatched_t
     for (int track_idx : unmatched_tracks) {
         if (track_idx < active_tracks_.size()) {
             active_tracks_[track_idx].markAsLost();
-            active_tracks_[track_idx].status_ = TRACK_PREDICTED;
+            active_tracks_[track_idx].status_ = TRACK_PREDICTED_OLD;
         }
     }
 }
@@ -716,7 +716,7 @@ std::vector<ReconstructedPowerLine> PowerLineTracker::generateCompletedLines() c
     std::vector<ReconstructedPowerLine> completed_lines;
     
     for (const auto& track : active_tracks_) {
-        if (track.status_ == TRACK_PREDICTED && 
+        if (track.status_ == TRACK_PREDICTED_OLD && 
             track.confidence_ >= completion_confidence_threshold_ &&
             track.consecutive_misses_ <= 3) {
             
@@ -841,7 +841,7 @@ void PowerLineTracker::publishTrackVisualization() {
     track_markers_pub_.publish(marker_array);
 }
 
-std_msgs::ColorRGBA PowerLineTracker::getTrackStatusColor(TrackStatus status) const {
+std_msgs::ColorRGBA PowerLineTracker::getTrackStatusColor(TrackStatusOld status) const {
     std_msgs::ColorRGBA color;
     color.a = 0.8f;
     
@@ -852,10 +852,10 @@ std_msgs::ColorRGBA PowerLineTracker::getTrackStatusColor(TrackStatus status) co
         case TRACK_ACTIVE:
             color.r = 0.0f; color.g = 1.0f; color.b = 0.0f;  // 绿色：活跃
             break;
-        case TRACK_PREDICTED:
+        case TRACK_PREDICTED_OLD:
             color.r = 1.0f; color.g = 0.5f; color.b = 0.0f;  // 橙色：预测
             break;
-        case TRACK_LOST:
+        case TRACK_LOST_OLD:
             color.r = 1.0f; color.g = 0.0f; color.b = 0.0f;  // 红色：丢失
             break;
         case TRACK_CONFIRMED:
@@ -922,7 +922,7 @@ void PowerLineTracker::publishTrackStatistics() {
     
     for (const auto& track : active_tracks_) {
         if (track.status_ == TRACK_ACTIVE) active_count++;
-        else if (track.status_ == TRACK_PREDICTED) predicted_count++;
+        else if (track.status_ == TRACK_PREDICTED_OLD) predicted_count++;
         else if (track.status_ == TRACK_CONFIRMED) confirmed_count++;
         avg_confidence += track.confidence_;
     }

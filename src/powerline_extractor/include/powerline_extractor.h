@@ -30,7 +30,7 @@
 // #include "power_line_probability_map.h"
 #include "power_line_probability_map.h"
 #include "power_line_tracker.h"
-
+#include "enhanced_power_line_tracker.h"
 
 
 
@@ -151,7 +151,9 @@ private:
     std::unique_ptr<PowerLineTracker> tracker_;
     std::vector<ReconstructedPowerLine> complete_result;
 
- 
+    std::unique_ptr<EnhancedPowerLineTracker> enhanced_tracker_;  //增强版跟踪器
+    std::vector<ReconstructedPowerLine> enhanced_complete_result;
+
     //================= 融合多技术的现代电力线提取完整解决方案 =================
     std::unique_ptr<powerline_extraction::MultiLevelPreprocessor> multi_preprocessor_;  //多层级预处理
     

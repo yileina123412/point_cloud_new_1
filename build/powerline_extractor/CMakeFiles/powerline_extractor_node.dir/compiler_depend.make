@@ -4,6 +4,7 @@
 powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extractor_node.cpp.o: /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/src/powerline_extractor_node.cpp \
   /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/include/advanced_obstacle_analyzer.h \
   /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/include/building_edge_filter.h \
+  /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/include/enhanced_power_line_tracker.h \
   /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/include/obstacle_analyzer.h \
   /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/include/point_cloud_preprocessor.h \
   /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/include/power_line_coarse_extractor_s.h \
@@ -2797,7 +2798,9 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 
 /usr/include/pcl-1.10/pcl/kdtree/kdtree_flann.h:
 
-/usr/include/boost/mpl/void_fwd.hpp:
+/usr/include/x86_64-linux-gnu/bits/endian.h:
+
+/usr/include/pcl-1.10/pcl/kdtree/kdtree.h:
 
 /usr/include/boost/fusion/support/detail/index_sequence.hpp:
 
@@ -3289,10 +3292,6 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 
 /usr/include/boost/detail/workaround.hpp:
 
-/usr/include/x86_64-linux-gnu/bits/endian.h:
-
-/usr/include/pcl-1.10/pcl/kdtree/kdtree.h:
-
 /usr/include/boost/iterator/detail/facade_iterator_category.hpp:
 
 /usr/include/boost/iostreams/detail/select_by_size.hpp:
@@ -3683,6 +3682,14 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 
 /usr/include/c++/9/tr1/modified_bessel_func.tcc:
 
+/usr/include/boost/mpl/min_max.hpp:
+
+/usr/include/boost/fusion/support/detail/is_mpl_sequence.hpp:
+
+/usr/include/c++/9/bits/memoryfwd.h:
+
+/usr/include/eigen3/Eigen/src/StlSupport/StdVector.h:
+
 /usr/include/boost/fusion/iterator/next.hpp:
 
 /usr/include/boost/predef/architecture/convex.h:
@@ -3955,16 +3962,6 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 
 /usr/include/boost/parameter/template_keyword.hpp:
 
-/usr/include/boost/algorithm/string/predicate.hpp:
-
-/usr/include/boost/mpl/list.hpp:
-
-/usr/include/boost/parameter/aux_/pack/item.hpp:
-
-/usr/include/boost/preprocessor/iteration/detail/local.hpp:
-
-/opt/ros/noetic/include/pcl_msgs/PolygonMesh.h:
-
 /usr/include/boost/algorithm/string/formatter.hpp:
 
 /usr/include/boost/type_index/stl_type_index.hpp:
@@ -4113,20 +4110,6 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 
 /usr/include/eigen3/Eigen/src/Core/SolveTriangular.h:
 
-/opt/ros/noetic/include/ros/platform.h:
-
-/usr/include/c++/9/bits/functexcept.h:
-
-/usr/include/boost/chrono/detail/system.hpp:
-
-/usr/include/boost/predef/detail/test.h:
-
-/usr/include/log4cxx/helpers/object.h:
-
-/usr/include/pcl-1.10/pcl/common/impl/common.hpp:
-
-/usr/include/boost/mpl/pop_front.hpp:
-
 /usr/include/boost/mpl/vector/aux_/back.hpp:
 
 /usr/include/boost/mpl/aux_/preprocessed/gcc/minus.hpp:
@@ -4142,6 +4125,16 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 /usr/include/boost/mpl/size_t_fwd.hpp:
 
 /opt/ros/noetic/include/ros/message_operations.h:
+
+/usr/include/boost/algorithm/string/predicate.hpp:
+
+/usr/include/boost/mpl/list.hpp:
+
+/usr/include/boost/parameter/aux_/pack/item.hpp:
+
+/usr/include/boost/preprocessor/iteration/detail/local.hpp:
+
+/opt/ros/noetic/include/pcl_msgs/PolygonMesh.h:
 
 /usr/include/boost/mpl/quote.hpp:
 
@@ -4291,6 +4284,32 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 
 /opt/ros/noetic/include/ros/steady_timer_options.h:
 
+/usr/include/boost/detail/select_type.hpp:
+
+/usr/include/boost/fusion/container/vector/convert.hpp:
+
+/usr/include/flann/util/params.h:
+
+/opt/ros/noetic/include/pcl_msgs/Vertices.h:
+
+/usr/include/boost/fusion/support/detail/and.hpp:
+
+/usr/include/boost/type_traits/is_abstract.hpp:
+
+/usr/include/boost/chrono/clock_string.hpp:
+
+/usr/include/eigen3/Eigen/src/SparseLU/SparseLU_pivotL.h:
+
+/opt/ros/noetic/include/std_msgs/String.h:
+
+/usr/include/boost/variant/detail/apply_visitor_binary.hpp:
+
+/usr/include/boost/utility/detail/result_of_iterate.hpp:
+
+/usr/include/boost/mpl/reverse_fold.hpp:
+
+/opt/ros/noetic/include/tf2/LinearMath/Scalar.h:
+
 /usr/include/boost/mpl/size_t.hpp:
 
 /usr/include/boost/mpl/aux_/config/lambda.hpp:
@@ -4366,10 +4385,6 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 /usr/include/boost/date_time/time_parsing.hpp:
 
 /usr/include/boost/predef/compiler/intel.h:
-
-/usr/include/boost/mpl/reverse_fold.hpp:
-
-/opt/ros/noetic/include/tf2/LinearMath/Scalar.h:
 
 /opt/ros/noetic/include/geometry_msgs/Point32.h:
 
@@ -4455,27 +4470,19 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 
 /usr/include/boost/functional/hash/hash.hpp:
 
-/usr/include/boost/chrono/clock_string.hpp:
+/opt/ros/noetic/include/ros/platform.h:
 
-/usr/include/eigen3/Eigen/src/SparseLU/SparseLU_pivotL.h:
+/usr/include/c++/9/bits/functexcept.h:
 
-/usr/include/boost/detail/select_type.hpp:
+/usr/include/boost/chrono/detail/system.hpp:
 
-/usr/include/boost/fusion/container/vector/convert.hpp:
+/usr/include/boost/predef/detail/test.h:
 
-/usr/include/flann/util/params.h:
+/usr/include/log4cxx/helpers/object.h:
 
-/opt/ros/noetic/include/pcl_msgs/Vertices.h:
+/usr/include/pcl-1.10/pcl/common/impl/common.hpp:
 
-/usr/include/boost/fusion/support/detail/and.hpp:
-
-/usr/include/boost/type_traits/is_abstract.hpp:
-
-/opt/ros/noetic/include/std_msgs/String.h:
-
-/usr/include/boost/variant/detail/apply_visitor_binary.hpp:
-
-/usr/include/boost/utility/detail/result_of_iterate.hpp:
+/usr/include/boost/mpl/pop_front.hpp:
 
 /usr/include/boost/atomic/detail/atomic_template.hpp:
 
@@ -4528,6 +4535,12 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 /usr/include/boost/iostreams/detail/enable_if_stream.hpp:
 
 /usr/include/boost/algorithm/string/std_containers_traits.hpp:
+
+/usr/include/eigen3/Eigen/src/SparseCore/CompressedStorage.h:
+
+/usr/include/boost/interprocess/sync/detail/common_algorithms.hpp:
+
+/opt/ros/noetic/include/ros/roscpp_serialization_macros.h:
 
 /usr/include/boost/mpl/contains.hpp:
 
@@ -4843,12 +4856,6 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 
 /usr/include/boost/type_traits/is_constructible.hpp:
 
-/usr/include/eigen3/Eigen/src/SparseCore/CompressedStorage.h:
-
-/usr/include/boost/interprocess/sync/detail/common_algorithms.hpp:
-
-/opt/ros/noetic/include/ros/roscpp_serialization_macros.h:
-
 /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h:
 
 /usr/include/boost/chrono/config.hpp:
@@ -5078,6 +5085,8 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 /usr/include/boost/type_traits/has_left_shift.hpp:
 
 /usr/include/eigen3/Eigen/src/Core/Block.h:
+
+/home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/include/enhanced_power_line_tracker.h:
 
 /usr/include/boost/move/detail/std_ns_begin.hpp:
 
@@ -5627,13 +5636,7 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 
 /usr/include/math.h:
 
-/usr/include/boost/mpl/min_max.hpp:
-
-/usr/include/boost/fusion/support/detail/is_mpl_sequence.hpp:
-
-/usr/include/c++/9/bits/memoryfwd.h:
-
-/usr/include/eigen3/Eigen/src/StlSupport/StdVector.h:
+/usr/include/boost/mpl/void_fwd.hpp:
 
 /usr/include/boost/next_prior.hpp:
 

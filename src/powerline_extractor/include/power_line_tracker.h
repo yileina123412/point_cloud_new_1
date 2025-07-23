@@ -12,11 +12,11 @@
 #include "power_line_probability_map.h" // 概率地图接口
 
 // 轨迹状态枚举
-enum TrackStatus {
+enum TrackStatusOld {
     TRACK_NEW = 0,           // 新建轨迹
     TRACK_ACTIVE = 1,        // 活跃跟踪
-    TRACK_PREDICTED = 2,     // 预测状态（当前帧无检测）
-    TRACK_LOST = 3,          // 丢失轨迹
+    TRACK_PREDICTED_OLD = 2,     // 预测状态（当前帧无检测）
+    TRACK_LOST_OLD = 3,          // 丢失轨迹
     TRACK_CONFIRMED = 4      // 确认稳定轨迹
 };
 
@@ -49,7 +49,7 @@ struct PowerLineState {
 class TrackedPowerLine {
 public:
     int track_id_;                    // 轨迹ID
-    TrackStatus status_;              // 轨迹状态
+    TrackStatusOld status_;              // 轨迹状态
     PowerLineState state_;            // 当前状态
     PowerLineState predicted_state_;  // 预测状态
     
@@ -239,7 +239,7 @@ private:
     float direction_consistency_threshold_;   // 方向一致性阈值
     float fragment_merge_confidence_;         // 片段合并置信度阈值
     // ==================== 内部函数 ====================
-    
+
     // 参数读取
     void loadParameters();
     
@@ -306,7 +306,7 @@ private:
     void publishCompletedLinesVisualization(const std::vector<ReconstructedPowerLine>& completed_lines);
     void publishTrackStatistics();
     visualization_msgs::Marker createTrackMarker(const TrackedPowerLine& track, int marker_id) const;
-    std_msgs::ColorRGBA getTrackStatusColor(TrackStatus status) const;
+    std_msgs::ColorRGBA getTrackStatusColor(TrackStatusOld status) const;
 
 
 

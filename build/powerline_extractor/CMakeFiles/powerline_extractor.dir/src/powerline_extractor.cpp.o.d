@@ -2396,6 +2396,7 @@ powerline_extractor/CMakeFiles/powerline_extractor.dir/src/powerline_extractor.c
  /opt/ros/noetic/include/std_msgs/String.h \
  /usr/include/c++/9/bits/unordered_set.h \
  /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/include/power_line_tracker.h \
+ /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/include/enhanced_power_line_tracker.h \
  /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/include/powerline_extraction/core/data_structures.h \
  /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/include/powerline_extraction/preprocessing/multilevel_preprocessor.h \
  /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/include/powerline_extraction/preprocessing/../core/data_structures.h

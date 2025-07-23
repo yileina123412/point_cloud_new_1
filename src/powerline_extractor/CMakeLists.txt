@@ -185,6 +185,7 @@ add_library(${PROJECT_NAME}
   src/power_line_probability_map.cpp
   src/roi_manager.cpp
   src/power_line_tracker.cpp
+  src/enhanced_power_line_tracker.cpp
   ${SOURCES}
   
 

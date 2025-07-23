@@ -889,6 +889,46 @@ bool PowerLineProbabilityMap::isLineActive(int line_id) const {
     
     return inactive_duration <= max_inactive_duration_;
 }
+
+
+std::unordered_map<VoxelKey, PowerLineVoxel> PowerLineProbabilityMap::getLineSpecificMap(int line_id) const {
+    auto it = line_specific_maps_.find(line_id);
+    if (it != line_specific_maps_.end()) {
+        return it->second;
+    }
+    return std::unordered_map<VoxelKey, PowerLineVoxel>();
+}
+
+std::unordered_map<int, std::unordered_map<VoxelKey, PowerLineVoxel>> PowerLineProbabilityMap::getAllLineSpecificMaps() const {
+    return line_specific_maps_;
+}
+
+float PowerLineProbabilityMap::calculateDetectionMatchScore(int line_id, const ReconstructedPowerLine& detection, 
+                                                          float threshold) const {
+    auto it = line_specific_maps_.find(line_id);
+    if (it == line_specific_maps_.end() || detection.fitted_curve_points.empty()) {
+        return 0.0f;
+    }
+    
+    const auto& line_map = it->second;
+    int matched_points = 0;
+    int total_points = 0;
+    
+    for (const auto& point : detection.fitted_curve_points) {
+        if (bounds_.isInBounds(point)) {
+            VoxelKey key = pointToVoxel(point);
+            auto voxel_it = line_map.find(key);
+            
+            total_points++;
+            if (voxel_it != line_map.end() && voxel_it->second.line_probability > threshold) {
+                matched_points++;
+            }
+        }
+    }
+    
+    return total_points > 0 ? static_cast<float>(matched_points) / total_points : 0.0f;
+}
+
 //为新检测的电力线分配或复用ID 检查新传入的和已经有的电力线区域的重叠度  如果匹配不到，就创建新的
 int PowerLineProbabilityMap::assignLineID(const ReconstructedPowerLine& new_line) {
     // 如果输入线已有ID且在范围内，检查是否可以复用
@@ -1721,4 +1761,61 @@ void PowerLineProbabilityMap::checkAndExecuteMerge() {
             }
         }
     }
+}
+
+
+std::vector<int> PowerLineProbabilityMap::assignLineIDsForDetections(
+    const std::vector<ReconstructedPowerLine>& power_lines) {
+    
+    std::vector<int> assigned_ids;
+    assigned_ids.reserve(power_lines.size());
+    
+    for (const auto& line : power_lines) {
+        int assigned_id = assignLineID(line);
+        assigned_ids.push_back(assigned_id);
+    }
+    
+    return assigned_ids;
+}
+
+std::vector<PowerLineProbabilityMap::DetectionLineMatch> PowerLineProbabilityMap::getDetailedDetectionMatches(
+    const std::vector<ReconstructedPowerLine>& power_lines) {
+    
+    std::vector<DetectionLineMatch> matches;
+    matches.reserve(power_lines.size());
+    
+    for (size_t i = 0; i < power_lines.size(); ++i) {
+        const auto& line = power_lines[i];
+        DetectionLineMatch match;
+        
+        match.detection_index = i;
+        
+        // 记录分配前的现有line数量，用于判断是否为新线
+        size_t existing_lines = line_regions_.size();
+        
+        // 分配ID
+        match.assigned_line_id = assignLineID(line);
+        
+        // 判断是否为新创建的线
+        match.is_new_line = (line_regions_.size() > existing_lines);
+        
+        // 计算匹配置信度和覆盖率
+        if (!match.is_new_line) {
+            // 对于已存在的线，计算匹配置信度
+            auto line_map_it = line_specific_maps_.find(match.assigned_line_id);
+            if (line_map_it != line_specific_maps_.end()) {
+                match.coverage_ratio = calculateSpatialOverlap(line, line_map_it->second, 0.6f);
+                match.match_confidence = match.coverage_ratio;
+            }
+        } else {
+            // 新线的匹配置信度设为较低值
+            match.match_confidence = 0.3f;
+            match.coverage_ratio = 0.0f;
+        }
+        
+        matches.push_back(match);
+    }
+    
+    ROS_DEBUG("完成 %zu 个检测的line_id分配", power_lines.size());
+    return matches;
 }

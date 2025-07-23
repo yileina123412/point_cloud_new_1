@@ -123,6 +123,7 @@ void PowerlineExtractor::initializeAccumulateCloud()
     prob_map_.reset(new PowerLineProbabilityMap(nh_));
 
     tracker_.reset(new PowerLineTracker(nh_));
+    enhanced_tracker_.reset(new EnhancedPowerLineTracker(nh_));
 
 
     ROS_INFO("Accumulate Cloud initialized");
@@ -224,8 +225,10 @@ void PowerlineExtractor::process_second_times(const std_msgs::Header& header){
     reconstruction_->reconstructPowerLines(extractor_s__output_cloud_,reconstruction_output_cloud_,power_lines_);//0.2s
 
     //跟踪器跟踪
-    complete_result = tracker_->updateTracker(power_lines_, *prob_map_);
-   
+
+    // complete_result = tracker_->updateTracker(power_lines_, *prob_map_);
+    enhanced_complete_result = enhanced_tracker_->updateTracker(power_lines_, *prob_map_);
+
     // building_edge_filter_->filterBuildingEdges(preprocessor__output_cloud_,power_lines_,building_edge_filter_output_cloud_);
     
     auto analy_star = std::chrono::high_resolution_clock::now();
@@ -299,10 +302,16 @@ void PowerlineExtractor::pointCloudCallback(const sensor_msgs::PointCloud2::Cons
                         all_time);
             is_first_frame_ = 1;
             prob_map_->initializeProbabilityMap(power_lines_);
-            tracker_->initializeTracker(power_lines_); // 初始化跟踪器
+            // tracker_->initializeTracker(power_lines_); // 初始化跟踪器
+            
+
             
         }
         else{
+            if(run_times == 2)
+            {
+                enhanced_tracker_->initializeTracker(*prob_map_); // 初始化增强跟踪器
+            }
             auto start_time = std::chrono::high_resolution_clock::now();
             process_second_times(transformed_msg.header);
             auto end_time = std::chrono::high_resolution_clock::now();
