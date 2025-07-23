@@ -427,3 +427,8 @@ enhanced_tracker:
   log_detailed_timing: false         # 是否记录详细的时间统计
   save_trajectory_history: false     # 是否保存轨迹历史到文件
   export_statistics: false           # 是否导出统计信息
+  # ==================== 长度稳定性参数 ====================
+  length_update_rate: 0.02           # 长度更新率 [0,1] - 越小越稳定
+  max_length_change_ratio: 0.15       # 最大长度变化比例
+  length_consistency_frames: 8        # 大变化需要连续几帧确认
+  enable_length_constraint: true     # 是否启用长度约束

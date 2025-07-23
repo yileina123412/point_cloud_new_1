@@ -91,8 +91,23 @@ public:
     bool isStable() const;
 
     std::vector<Eigen::Vector3f> getControlPointsFromState() const;
+
+    // 添加到现有public函数后面
+    float getStableLength() const { return stable_total_length_; }
     
 private:
+
+    // 长度稳定性管理（添加到现有private成员后面）
+    float stable_total_length_;           // 稳定的总长度估计
+    float length_confidence_;             // 长度估计的置信度
+    std::vector<float> recent_lengths_;   // 最近几帧的长度记录
+    float length_update_rate_;            // 长度更新率（越小越稳定）
+
+    void initializeStableLengthFromProbMap(const PowerLineProbabilityMap& prob_map);
+    void updateStableLength(float observed_length, float observation_completeness);
+    void constrainControlPointsToLength();
+    std::vector<Eigen::Vector3f> interpolateCompleteCurveWithFixedLength(const PowerLineProbabilityMap& prob_map) const;
+
     void markDetectedParts(ReconstructedPowerLine& complete_line) const {
         if (observation_history_.empty() || complete_line.fitted_curve_points.empty()) {
             return;
@@ -219,6 +234,10 @@ private:
     bool enable_visualization_;                    // 是否启用可视化
     float visualization_duration_;                 // 可视化持续时间
     std::string frame_id_;                         // 坐标系ID
+    // 在现有参数变量后面添加：
+    float length_update_rate_;
+    float max_length_change_ratio_;
+    bool enable_length_constraint_;
     
     // ==================== 内部函数 ====================
         // 初始化辅助函数

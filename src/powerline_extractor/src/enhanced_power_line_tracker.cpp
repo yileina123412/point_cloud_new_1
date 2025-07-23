@@ -22,6 +22,8 @@ LineTracker::LineTracker(int line_id, const PowerLineProbabilityMap& prob_map)
     
     // 从概率地图初始化
     initializeFromProbabilityMap(prob_map);
+
+    initializeStableLengthFromProbMap(prob_map);
 }
 
 void LineTracker::initializeFromProbabilityMap(const PowerLineProbabilityMap& prob_map) {
@@ -89,6 +91,9 @@ void LineTracker::update(const FusedObservation& observation, const PowerLinePro
         return;
     }
     
+    // 添加：先更新稳定长度
+    updateStableLength(observation.total_observed_length, observation.completeness_ratio);
+
     // 构建观测向量（只观测到部分控制点）
     Eigen::VectorXf measurement = Eigen::VectorXf::Zero(observation.observed_points.size() * 3);
     for (size_t i = 0; i < observation.observed_points.size(); ++i) {
@@ -152,6 +157,10 @@ void LineTracker::update(const FusedObservation& observation, const PowerLinePro
     } else {
         status_ = TRACK_PREDICTED;
     }
+
+    // 在现有代码的最后，before 保存观测历史之前添加：
+    constrainControlPointsToLength();
+    estimated_total_length_ = stable_total_length_;  // 使用稳定长度
     
     // 保存观测历史
     observation_history_.push_back(observation);
@@ -160,37 +169,73 @@ void LineTracker::update(const FusedObservation& observation, const PowerLinePro
     }
 }
 
+// ReconstructedPowerLine LineTracker::generateCompleteLine(const PowerLineProbabilityMap& prob_map) const {
+//     ReconstructedPowerLine complete_line;
+//     complete_line.line_id = line_id_;
+    
+//     // 从状态向量生成完整的样条曲线
+//     std::vector<Eigen::Vector3f> complete_curve = interpolateCompleteCurve(prob_map);
+//     complete_line.fitted_curve_points = complete_curve;
+
+//     // 添加标记向量，标识哪些点是检测的，哪些是补全的
+//     complete_line.point_types.resize(complete_curve.size(), 0); // 0=补全, 1=检测
+    
+//     if (!complete_curve.empty()) {
+
+//         // 标记检测到的部分
+//         markDetectedParts(complete_line);
+//         complete_line.main_direction = (complete_curve.back() - complete_curve.front()).normalized();
+        
+//         // 计算总长度
+//         complete_line.total_length = 0.0;
+//         for (size_t i = 1; i < complete_curve.size(); ++i) {
+//             complete_line.total_length += (complete_curve[i] - complete_curve[i-1]).norm();
+//         }
+        
+//         // 创建点云（可选）
+//         complete_line.points = pcl::PointCloud<pcl::PointXYZI>::Ptr(new pcl::PointCloud<pcl::PointXYZI>);
+//         for (const auto& point : complete_curve) {
+//             pcl::PointXYZI pcl_point;
+//             pcl_point.x = point.x();
+//             pcl_point.y = point.y();
+//             pcl_point.z = point.z();
+//             pcl_point.intensity = confidence_ * 100; // 用强度表示置信度
+//             complete_line.points->push_back(pcl_point);
+//         }
+//     }
+    
+//     return complete_line;
+// }
+
 ReconstructedPowerLine LineTracker::generateCompleteLine(const PowerLineProbabilityMap& prob_map) const {
     ReconstructedPowerLine complete_line;
     complete_line.line_id = line_id_;
     
-    // 从状态向量生成完整的样条曲线
-    std::vector<Eigen::Vector3f> complete_curve = interpolateCompleteCurve(prob_map);
-    complete_line.fitted_curve_points = complete_curve;
-
-    // 添加标记向量，标识哪些点是检测的，哪些是补全的
-    complete_line.point_types.resize(complete_curve.size(), 0); // 0=补全, 1=检测
+    // 修改：使用稳定长度
+    complete_line.total_length = stable_total_length_;
     
+    // 修改：使用固定长度的曲线生成
+    std::vector<Eigen::Vector3f> complete_curve = interpolateCompleteCurveWithFixedLength(prob_map);
+    complete_line.fitted_curve_points = complete_curve;
+    
+    // 保持其余代码不变...
     if (!complete_curve.empty()) {
-
+        // 添加标记向量，标识哪些点是检测的，哪些是补全的
+        complete_line.point_types.resize(complete_curve.size(), 0);
+        
         // 标记检测到的部分
         markDetectedParts(complete_line);
-        complete_line.main_direction = (complete_curve.back() - complete_curve.front()).normalized();
         
-        // 计算总长度
-        complete_line.total_length = 0.0;
-        for (size_t i = 1; i < complete_curve.size(); ++i) {
-            complete_line.total_length += (complete_curve[i] - complete_curve[i-1]).norm();
-        }
+        complete_line.main_direction = (complete_curve.back() - complete_curve.front()).normalized();
         
         // 创建点云（可选）
         complete_line.points = pcl::PointCloud<pcl::PointXYZI>::Ptr(new pcl::PointCloud<pcl::PointXYZI>);
-        for (const auto& point : complete_curve) {
+        for (size_t i = 0; i < complete_curve.size(); ++i) {
             pcl::PointXYZI pcl_point;
-            pcl_point.x = point.x();
-            pcl_point.y = point.y();
-            pcl_point.z = point.z();
-            pcl_point.intensity = confidence_ * 100; // 用强度表示置信度
+            pcl_point.x = complete_curve[i].x();
+            pcl_point.y = complete_curve[i].y();
+            pcl_point.z = complete_curve[i].z();
+            pcl_point.intensity = complete_line.point_types[i] * 100;
             complete_line.points->push_back(pcl_point);
         }
     }
@@ -261,6 +306,98 @@ bool LineTracker::isStable() const {
     return status_ == TRACK_STABLE && consecutive_updates_ >= 3;
 }
 
+
+void LineTracker::initializeStableLengthFromProbMap(const PowerLineProbabilityMap& prob_map) {
+    std::vector<Eigen::Vector3f> high_prob_points = 
+        prob_map.getHighProbabilityRegionsForLine(line_id_, 0.5f, 0.3f);
+    
+    if (high_prob_points.size() >= 2) {
+        float prob_map_length = 0.0f;
+        for (size_t i = 1; i < high_prob_points.size(); ++i) {
+            prob_map_length += (high_prob_points[i] - high_prob_points[i-1]).norm();
+        }
+        
+        stable_total_length_ = prob_map_length;
+        length_confidence_ = 0.8f;
+        
+        ROS_INFO("Line %d: 从概率地图初始化稳定长度: %.2f", line_id_, stable_total_length_);
+    } else {
+        stable_total_length_ = 15.0f;
+        length_confidence_ = 0.3f;
+    }
+}
+
+void LineTracker::updateStableLength(float observed_length, float observation_completeness) {
+    if (observed_length <= 0 || observation_completeness <= 0) return;
+    
+    float inferred_total_length = observed_length / observation_completeness;
+    
+    recent_lengths_.push_back(inferred_total_length);
+    if (recent_lengths_.size() > 10) {
+        recent_lengths_.erase(recent_lengths_.begin());
+    }
+    
+    std::vector<float> sorted_lengths = recent_lengths_;
+    std::sort(sorted_lengths.begin(), sorted_lengths.end());
+    float median_length = sorted_lengths[sorted_lengths.size() / 2];
+    
+    float length_diff = std::abs(median_length - stable_total_length_);
+    float max_allowed_change = stable_total_length_ * 0.2f;
+    
+    if (length_diff < max_allowed_change) {
+        stable_total_length_ = (1.0f - length_update_rate_) * stable_total_length_ + 
+                              length_update_rate_ * median_length;
+        length_confidence_ = std::min(1.0f, length_confidence_ + 0.02f);
+    }
+}
+
+void LineTracker::constrainControlPointsToLength() {
+    std::vector<Eigen::Vector3f> control_points = getControlPointsFromState();
+    
+    float current_length = 0.0f;
+    for (int i = 1; i < NUM_CONTROL_POINTS; ++i) {
+        current_length += (control_points[i] - control_points[i-1]).norm();
+    }
+    
+    if (current_length > 0 && std::abs(current_length - stable_total_length_) > stable_total_length_ * 0.1f) {
+        float scale_factor = stable_total_length_ / current_length;
+        
+        Eigen::Vector3f base_point = control_points[0];
+        for (int i = 1; i < NUM_CONTROL_POINTS; ++i) {
+            Eigen::Vector3f offset = control_points[i] - base_point;
+            control_points[i] = base_point + offset * scale_factor;
+        }
+        
+        setControlPointsToState(control_points);
+    }
+}
+
+std::vector<Eigen::Vector3f> LineTracker::interpolateCompleteCurveWithFixedLength(
+    const PowerLineProbabilityMap& prob_map) const {
+    
+    std::vector<Eigen::Vector3f> control_points = getControlPointsFromState();
+    std::vector<Eigen::Vector3f> curve_points;
+    
+    int target_points = std::max(10, (int)(stable_total_length_ / 0.1f));
+    
+    for (int i = 0; i < target_points; ++i) {
+        float t = static_cast<float>(i) / (target_points - 1);
+        
+        // 简单线性插值（可以改为更复杂的样条插值）
+        int segment = (int)(t * (NUM_CONTROL_POINTS - 1));
+        segment = std::min(segment, NUM_CONTROL_POINTS - 2);
+        float local_t = t * (NUM_CONTROL_POINTS - 1) - segment;
+        
+        Eigen::Vector3f interpolated = (1.0f - local_t) * control_points[segment] + 
+                                      local_t * control_points[segment + 1];
+        
+        if (isPointInProbabilityMap(interpolated, prob_map)) {
+            curve_points.push_back(interpolated);
+        }
+    }
+    
+    return curve_points;
+}
 // ==================== EnhancedPowerLineTracker 实现 ====================
 
 EnhancedPowerLineTracker::EnhancedPowerLineTracker(ros::NodeHandle& nh) 
@@ -325,6 +462,11 @@ void EnhancedPowerLineTracker::loadParameters() {
     nh_.param("enhanced_tracker/enable_visualization", enable_visualization_, true);
     nh_.param("enhanced_tracker/visualization_duration", visualization_duration_, 2.0f);
     nh_.param("enhanced_tracker/frame_id", frame_id_, std::string("map"));
+    // 长度稳定性参数
+    nh_.param("enhanced_tracker/length_update_rate", length_update_rate_, 0.02f);
+    nh_.param("enhanced_tracker/max_length_change_ratio", max_length_change_ratio_, 0.15f);
+    nh_.param("enhanced_tracker/enable_length_constraint", enable_length_constraint_, true);
+    
 }
 
 bool EnhancedPowerLineTracker::initializeTracker(const PowerLineProbabilityMap& prob_map) {
