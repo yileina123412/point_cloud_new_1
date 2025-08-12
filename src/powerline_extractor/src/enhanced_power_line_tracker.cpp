@@ -6,9 +6,10 @@
 
 // ==================== LineTracker 实现 ====================
 
-LineTracker::LineTracker(int line_id, const PowerLineProbabilityMap& prob_map) 
+LineTracker::LineTracker(int line_id, const PowerLineProbabilityMap& prob_map,float length_update_rate, float max_length_change_ratio ) 
     : line_id_(line_id), status_(TRACK_INITIALIZING), confidence_(0.3f), 
-      consecutive_updates_(0), consecutive_misses_(0), estimated_total_length_(0.0f) {
+      consecutive_updates_(0), consecutive_misses_(0), estimated_total_length_(0.0f),
+      length_update_rate_(length_update_rate), max_length_change_ratio_(max_length_change_ratio) {
     
     creation_time_ = ros::Time::now();
     last_update_time_ = ros::Time::now();
@@ -141,6 +142,7 @@ void LineTracker::update(const FusedObservation& observation, const PowerLinePro
             point = closest_point;
         }
     }
+    // 设置状态向量
     setControlPointsToState(control_points);
     
     // 更新统计信息
@@ -169,43 +171,7 @@ void LineTracker::update(const FusedObservation& observation, const PowerLinePro
     }
 }
 
-// ReconstructedPowerLine LineTracker::generateCompleteLine(const PowerLineProbabilityMap& prob_map) const {
-//     ReconstructedPowerLine complete_line;
-//     complete_line.line_id = line_id_;
-    
-//     // 从状态向量生成完整的样条曲线
-//     std::vector<Eigen::Vector3f> complete_curve = interpolateCompleteCurve(prob_map);
-//     complete_line.fitted_curve_points = complete_curve;
 
-//     // 添加标记向量，标识哪些点是检测的，哪些是补全的
-//     complete_line.point_types.resize(complete_curve.size(), 0); // 0=补全, 1=检测
-    
-//     if (!complete_curve.empty()) {
-
-//         // 标记检测到的部分
-//         markDetectedParts(complete_line);
-//         complete_line.main_direction = (complete_curve.back() - complete_curve.front()).normalized();
-        
-//         // 计算总长度
-//         complete_line.total_length = 0.0;
-//         for (size_t i = 1; i < complete_curve.size(); ++i) {
-//             complete_line.total_length += (complete_curve[i] - complete_curve[i-1]).norm();
-//         }
-        
-//         // 创建点云（可选）
-//         complete_line.points = pcl::PointCloud<pcl::PointXYZI>::Ptr(new pcl::PointCloud<pcl::PointXYZI>);
-//         for (const auto& point : complete_curve) {
-//             pcl::PointXYZI pcl_point;
-//             pcl_point.x = point.x();
-//             pcl_point.y = point.y();
-//             pcl_point.z = point.z();
-//             pcl_point.intensity = confidence_ * 100; // 用强度表示置信度
-//             complete_line.points->push_back(pcl_point);
-//         }
-//     }
-    
-//     return complete_line;
-// }
 
 ReconstructedPowerLine LineTracker::generateCompleteLine(const PowerLineProbabilityMap& prob_map) const {
     ReconstructedPowerLine complete_line;
@@ -215,7 +181,34 @@ ReconstructedPowerLine LineTracker::generateCompleteLine(const PowerLineProbabil
     complete_line.total_length = stable_total_length_;
     
     // 修改：使用固定长度的曲线生成
-    std::vector<Eigen::Vector3f> complete_curve = interpolateCompleteCurveWithFixedLength(prob_map);
+    std::vector<Eigen::Vector3f> complete_curve;
+
+     // 添加：处理完全遮挡的情况
+    bool fully_occluded = status_ == TRACK_PREDICTED && consecutive_misses_ > 0;
+    if (fully_occluded && !observation_history_.empty()) {
+        // 使用历史观测记录中最完整的一次作为模板
+        float best_completeness = 0.0f;
+        const FusedObservation* best_observation = nullptr;
+        
+        for (const auto& obs : observation_history_) {
+            if (obs.completeness_ratio > best_completeness) {
+                best_completeness = obs.completeness_ratio;
+                best_observation = &obs;
+            }
+        }
+        
+        if (best_observation && best_completeness > 0.7f) {
+            // 基于历史最佳观测构建形状，但保持当前位置
+            complete_curve = recreateShapeFromTemplate(*best_observation, prob_map);
+            ROS_INFO("Line %d: 完全遮挡，使用历史模板补全 (完整度: %.2f)", line_id_, best_completeness);
+        } else {
+            complete_curve = interpolateCompleteCurveWithFixedLength(prob_map);
+        }
+    } else {
+        // 正常情况：使用固定长度的曲线生成
+        complete_curve = interpolateCompleteCurveWithFixedLength(prob_map);
+    }
+
     complete_line.fitted_curve_points = complete_curve;
     
     // 保持其余代码不变...
@@ -241,6 +234,68 @@ ReconstructedPowerLine LineTracker::generateCompleteLine(const PowerLineProbabil
     }
     
     return complete_line;
+}
+
+// 添加此新方法：基于历史模板重建形状
+std::vector<Eigen::Vector3f> LineTracker::recreateShapeFromTemplate(
+    const FusedObservation& template_obs, const PowerLineProbabilityMap& prob_map) const {
+    
+    if (template_obs.observed_points.empty()) {
+        return interpolateCompleteCurveWithFixedLength(prob_map);
+    }
+    
+    // 获取当前控制点状态
+    std::vector<Eigen::Vector3f> current_control_points = getControlPointsFromState();
+    if (current_control_points.empty()) {
+        return interpolateCompleteCurveWithFixedLength(prob_map);
+    }
+    
+    // 从模板获取形状
+    std::vector<Eigen::Vector3f> template_points = template_obs.observed_points;
+    
+    // 计算模板点的中心
+    Eigen::Vector3f template_center = Eigen::Vector3f::Zero();
+    for (const auto& p : template_points) {
+        template_center += p;
+    }
+    template_center /= template_points.size();
+    
+    // 计算当前控制点的中心
+    Eigen::Vector3f current_center = Eigen::Vector3f::Zero();
+    for (const auto& p : current_control_points) {
+        current_center += p;
+    }
+    current_center /= current_control_points.size();
+    
+    // 计算位移
+    Eigen::Vector3f translation = current_center - template_center;
+    
+    // 平移模板点到当前位置
+    std::vector<Eigen::Vector3f> transformed_points;
+    transformed_points.reserve(template_points.size());
+    
+    for (const auto& p : template_points) {
+        Eigen::Vector3f transformed = p + translation;
+        if (isPointInProbabilityMap(transformed, prob_map)) {
+            transformed_points.push_back(transformed);
+        }
+    }
+    
+    // 确保点数符合目标需求
+    std::vector<Eigen::Vector3f> result;
+    int target_points = std::max(10, (int)(stable_total_length_ / 0.1f));
+    
+    // 重采样到目标点数
+    if (!transformed_points.empty()) {
+        for (int i = 0; i < target_points; ++i) {
+            float t = static_cast<float>(i) / (target_points - 1);
+            int idx = std::min((int)(t * (transformed_points.size() - 1)), 
+                              (int)transformed_points.size() - 1);
+            result.push_back(transformed_points[idx]);
+        }
+    }
+    
+    return result;
 }
 
 std::vector<Eigen::Vector3f> LineTracker::interpolateCompleteCurve(const PowerLineProbabilityMap& prob_map) const {
@@ -331,7 +386,21 @@ void LineTracker::updateStableLength(float observed_length, float observation_co
     if (observed_length <= 0 || observation_completeness <= 0) return;
     
     float inferred_total_length = observed_length / observation_completeness;
-    
+
+    // 添加：长度变化的异常检测
+    float length_change_ratio = std::abs(inferred_total_length - stable_total_length_) / stable_total_length_;
+    // 添加大变化记录，连续多帧大变化才采纳
+    static int consecutive_big_changes = 0;
+    if (length_change_ratio > max_length_change_ratio_) {
+        consecutive_big_changes++;
+        if (consecutive_big_changes < 3) {  // 需要连续3帧大变化才接受
+            return;  // 暂时不接受这个变化
+        }
+    } else {
+        consecutive_big_changes = 0;  // 重置计数器
+    }
+
+
     recent_lengths_.push_back(inferred_total_length);
     if (recent_lengths_.size() > 10) {
         recent_lengths_.erase(recent_lengths_.begin());
@@ -493,7 +562,7 @@ bool EnhancedPowerLineTracker::initializeTracker(const PowerLineProbabilityMap& 
             }
             
             if (high_prob_voxels >= 5) { // 至少5个高概率体素才创建轨迹
-                auto tracker = std::make_unique<LineTracker>(line_id, prob_map);
+                auto tracker = std::make_unique<LineTracker>(line_id, prob_map,length_update_rate_,max_length_change_ratio_);
                 line_trackers_[line_id] = std::move(tracker);
                 ROS_INFO("为line_id %d 创建轨迹（基于概率地图，%d个高概率体素）", 
                          line_id, high_prob_voxels);
@@ -612,6 +681,40 @@ std::vector<ReconstructedPowerLine> EnhancedPowerLineTracker::updateTracker(
     auto start_time = std::chrono::high_resolution_clock::now();
     ros::Time current_time = ros::Time::now();
     float dt = (current_time - last_update_time_).toSec();
+
+    // 添加：对输入检测进行长度预处理
+    std::vector<ReconstructedPowerLine> normalized_detections;
+    normalized_detections.reserve(current_detections.size());
+    
+    for (const auto& detection : current_detections) {
+        int line_id = detection.line_id;
+        auto tracker_it = line_trackers_.find(line_id);
+        
+        if (tracker_it != line_trackers_.end() && detection.total_length > 0) {
+            // 获取跟踪器的稳定长度
+            float stable_length = tracker_it->second->getStableLength();
+            float length_ratio = detection.total_length / stable_length;
+            
+            // 如果检测长度与稳定长度差异太大，进行调整
+            if (length_ratio < 0.8f || length_ratio > 1.2f) {
+                ReconstructedPowerLine adjusted = detection;
+                
+                // 根据稳定长度调整检测长度
+                if (!detection.fitted_curve_points.empty()) {
+                    // 保留检测方向，但调整为稳定长度
+                    // 这里只是简单示例，实际可能需要更复杂的算法
+                    // ROS_DEBUG("Line %d: 调整检测长度 %.2f → %.2f", 
+                    //           line_id, detection.total_length, stable_length);
+                }
+                
+                normalized_detections.push_back(adjusted);
+            } else {
+                normalized_detections.push_back(detection);
+            }
+        } else {
+            normalized_detections.push_back(detection);
+        }
+    }
     
     // 1. 按line_id分组检测结果
     auto grouped_detections = groupDetectionsByLineID(current_detections, prob_map);
@@ -743,7 +846,7 @@ void EnhancedPowerLineTracker::createNewTracks(
         if (line_trackers_.find(line_id) == line_trackers_.end()) {
             // 检查是否为有效的新轨迹
             if (observation.completeness_ratio > 0.2f && observation.total_observed_length > min_segment_length_) {
-                auto new_tracker = std::make_unique<LineTracker>(line_id, prob_map);
+                auto new_tracker = std::make_unique<LineTracker>(line_id, prob_map,length_update_rate_,max_length_change_ratio_);
                 new_tracker->update(observation, prob_map);
                 line_trackers_[line_id] = std::move(new_tracker);
                 
@@ -783,21 +886,66 @@ void EnhancedPowerLineTracker::removeInactiveTracks() {
     }
 }
 
+// std::vector<ReconstructedPowerLine> EnhancedPowerLineTracker::generateOutputLines(
+//     const PowerLineProbabilityMap& prob_map) {
+    
+//     std::vector<ReconstructedPowerLine> output_lines;
+    
+//     for (const auto& [line_id, tracker] : line_trackers_) {
+//         // 只输出稳定或部分观测的轨迹
+//         if (tracker->status_ == TRACK_STABLE || 
+//             tracker->status_ == TRACK_PARTIAL ||
+//             (tracker->status_ == TRACK_PREDICTED && enable_completion_ && 
+//              tracker->confidence_ >= completion_confidence_threshold_)) {
+            
+//             ReconstructedPowerLine complete_line = tracker->generateCompleteLine(prob_map);
+//             if (!complete_line.fitted_curve_points.empty()) {
+//                 output_lines.push_back(complete_line);
+//             }
+//         }
+//     }
+    
+//     return output_lines;
+// }
 std::vector<ReconstructedPowerLine> EnhancedPowerLineTracker::generateOutputLines(
     const PowerLineProbabilityMap& prob_map) {
     
     std::vector<ReconstructedPowerLine> output_lines;
     
     for (const auto& [line_id, tracker] : line_trackers_) {
-        // 只输出稳定或部分观测的轨迹
-        if (tracker->status_ == TRACK_STABLE || 
-            tracker->status_ == TRACK_PARTIAL ||
-            (tracker->status_ == TRACK_PREDICTED && enable_completion_ && 
-             tracker->confidence_ >= completion_confidence_threshold_)) {
+        // 改进遮挡判断逻辑
+        bool stable_track = tracker->status_ == TRACK_STABLE;
+        bool partial_track = tracker->status_ == TRACK_PARTIAL;
+        bool predicted_track = tracker->status_ == TRACK_PREDICTED && 
+                              tracker->consecutive_misses_ > 0 &&
+                              tracker->confidence_ >= completion_confidence_threshold_;
+        
+        // 只要不是丢失状态，都尝试生成完整线
+        if (tracker->status_ != TRACK_LOST && (stable_track || partial_track || 
+            (enable_completion_ && predicted_track))) {
             
             ReconstructedPowerLine complete_line = tracker->generateCompleteLine(prob_map);
+            
             if (!complete_line.fitted_curve_points.empty()) {
-                output_lines.push_back(complete_line);
+                // 对补全线条做进一步验证
+                bool line_valid = true;
+                
+                // 检查是否有足够的点
+                if (complete_line.fitted_curve_points.size() < 5) {
+                    line_valid = false;
+                }
+                
+                // 检查线条长度是否合理
+                if (complete_line.total_length < min_segment_length_ || 
+                    complete_line.total_length > 100.0f) {
+                    line_valid = false;
+                }
+                
+                if (line_valid) {
+                    output_lines.push_back(complete_line);
+                } else {
+                    // ROS_WARN("Line %d: 生成的线条无效，被过滤", line_id);
+                }
             }
         }
     }

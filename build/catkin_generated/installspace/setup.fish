@@ -18,7 +18,7 @@ if not type -q bass
 end
 
 if test -z $_CATKIN_SETUP_DIR
-    set _CATKIN_SETUP_DIR /home/furina/powerline_extraction/point_cloud_extractor_success02/install
+    set _CATKIN_SETUP_DIR /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/install
 end
 
 set _SETUP_UTIL "$_CATKIN_SETUP_DIR/_setup_util.py"

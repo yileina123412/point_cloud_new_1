@@ -1,1 +1,1 @@
-/usr/bin/c++ -fPIC -shared -Wl,-soname,libgtest_main.so -o ../lib/libgtest_main.so CMakeFiles/gtest_main.dir/src/gtest_main.cc.o  -Wl,-rpath,/home/furina/powerline_extraction/point_cloud_extractor_success02/build/gtest/lib ../lib/libgtest.so -lpthread
+/usr/bin/c++ -fPIC -shared -Wl,-soname,libgtest_main.so -o ../lib/libgtest_main.so CMakeFiles/gtest_main.dir/src/gtest_main.cc.o  -Wl,-rpath,/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/gtest/lib ../lib/libgtest.so -lpthread

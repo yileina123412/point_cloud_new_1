@@ -943,13 +943,20 @@ int PowerLineProbabilityMap::assignLineID(const ReconstructedPowerLine& new_line
         }
     }
     
-    // 检查是否与现有区域重叠
+    // 寻找最佳匹配（而不是第一个匹配）
+    int best_match_id = -1;
+    float best_overlap = 0.0f;
+    
     for (const auto& [existing_id, region_info] : line_regions_) {
-        float overlap = calculateSpatialOverlap(new_line, region_info);
-        float overlao_rate = calculateSpatialOverlap(new_line, line_specific_maps_[existing_id], 0.6);
-        if (overlao_rate > coincidence_rate_threshold_) {
-            return existing_id; // 复用现有ID
+        float overlap_rate = calculateSpatialOverlap(new_line, line_specific_maps_[existing_id], 0.6);
+        if (overlap_rate > best_overlap && overlap_rate > coincidence_rate_threshold_) {
+            best_overlap = overlap_rate;
+            best_match_id = existing_id;
         }
+    }
+    
+    if (best_match_id != -1) {
+        return best_match_id;
     }
     
     // 分配新ID
@@ -988,15 +995,6 @@ void PowerLineProbabilityMap::updateLineSpecificMaps(const std::vector<Reconstru
             }
         }
         
-        // // 更新该电力线的专属概率地图
-        // for (size_t i = 0; i < line.fitted_curve_points.size(); ++i) {
-        //     const auto& spline_point = line.fitted_curve_points[i];
-            
-        //     if (!bounds_.isInBounds(spline_point)) continue;
-            
-        //     Eigen::Vector3f local_direction = computeLocalDirection(line.fitted_curve_points, i);
-        //     markLineRegionForSpecificLine(assigned_id, spline_point, local_direction, initial_probability_center_);
-        // }
     }
     // 针对每个活跃的line_id，收集其所有片段，做贝叶斯更新
     for (int line_id : active_line_ids) {

@@ -7,9 +7,8 @@
 # new environment variables
 
 # modified environment variables
-export CMAKE_PREFIX_PATH="/home/furina/powerline_extraction/point_cloud_extractor_success02/devel:$CMAKE_PREFIX_PATH"
-export LD_LIBRARY_PATH="/home/furina/powerline_extraction/point_cloud_extractor_success02/devel/lib:$LD_LIBRARY_PATH"
-export PKG_CONFIG_PATH="/home/furina/powerline_extraction/point_cloud_extractor_success02/devel/lib/pkgconfig:$PKG_CONFIG_PATH"
-export PWD='/home/furina/powerline_extraction/point_cloud_extractor_success02/build'
-export ROSLISP_PACKAGE_DIRECTORIES='/home/furina/powerline_extraction/point_cloud_extractor_success02/devel/share/common-lisp'
-export ROS_PACKAGE_PATH="/home/furina/powerline_extraction/point_cloud_extractor_success02/src:$ROS_PACKAGE_PATH"
+export CMAKE_PREFIX_PATH="/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/devel:$CMAKE_PREFIX_PATH"
+export PATH='/opt/ros/noetic/bin:/anaconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin'
+export PWD='/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build'
+export ROSLISP_PACKAGE_DIRECTORIES='/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/devel/share/common-lisp'
+export ROS_PACKAGE_PATH="/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src:$ROS_PACKAGE_PATH"

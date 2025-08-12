@@ -1,2 +1,2 @@
 powerline_extractor
--DCATKIN_DEVEL_PREFIX=/home/furina/powerline_extraction/point_cloud_extractor_success02/devel -DCMAKE_INSTALL_PREFIX=/home/furina/powerline_extraction/point_cloud_extractor_success02/install -G Unix Makefiles
+-DCATKIN_DEVEL_PREFIX=/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/devel -DCMAKE_INSTALL_PREFIX=/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/install -G Unix Makefiles

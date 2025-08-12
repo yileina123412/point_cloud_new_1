@@ -5,7 +5,7 @@
 # or fall back to the destination set at configure time
 
 if test -z $_CATKIN_SETUP_DIR
-    set _CATKIN_SETUP_DIR /home/furina/powerline_extraction/point_cloud_extractor_success02/install
+    set _CATKIN_SETUP_DIR /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/install
 end
 
 set CATKIN_SETUP_UTIL_ARGS "--extend --local"

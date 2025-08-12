@@ -2,7 +2,7 @@
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/furina/powerline_extraction/point_cloud_extractor_success02/install")
+  set(CMAKE_INSTALL_PREFIX "/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -44,7 +44,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/furina/powerline_extraction/point_cloud_extractor_success02/build/gtest/googletest/cmake_install.cmake")
+  include("/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/gtest/googletest/cmake_install.cmake")
 
 endif()
 

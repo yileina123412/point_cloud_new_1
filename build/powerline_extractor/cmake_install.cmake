@@ -1,8 +1,8 @@
-# Install script for directory: /home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor
+# Install script for directory: /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/furina/powerline_extraction/point_cloud_extractor_success02/install")
+  set(CMAKE_INSTALL_PREFIX "/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -43,17 +43,17 @@ if(NOT DEFINED CMAKE_OBJDUMP)
 endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/furina/powerline_extraction/point_cloud_extractor_success02/build/powerline_extractor/catkin_generated/installspace/powerline_extractor.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/powerline_extractor/catkin_generated/installspace/powerline_extractor.pc")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/powerline_extractor/cmake" TYPE FILE FILES
-    "/home/furina/powerline_extraction/point_cloud_extractor_success02/build/powerline_extractor/catkin_generated/installspace/powerline_extractorConfig.cmake"
-    "/home/furina/powerline_extraction/point_cloud_extractor_success02/build/powerline_extractor/catkin_generated/installspace/powerline_extractorConfig-version.cmake"
+    "/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/powerline_extractor/catkin_generated/installspace/powerline_extractorConfig.cmake"
+    "/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/powerline_extractor/catkin_generated/installspace/powerline_extractorConfig-version.cmake"
     )
 endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/powerline_extractor" TYPE FILE FILES "/home/furina/powerline_extraction/point_cloud_extractor_success02/src/powerline_extractor/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/powerline_extractor" TYPE FILE FILES "/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/package.xml")
 endif()
 

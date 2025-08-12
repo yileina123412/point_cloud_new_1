@@ -74,7 +74,7 @@ public:
     std::vector<FusedObservation> observation_history_; // 观测历史
     
 public:
-    LineTracker(int line_id, const PowerLineProbabilityMap& prob_map);
+    LineTracker(int line_id, const PowerLineProbabilityMap& prob_map,float length_update_rate = 0.02f, float max_length_change_ratio = 0.15f);
     
     // 预测步骤
     void predict(float dt);
@@ -102,12 +102,19 @@ private:
     float length_confidence_;             // 长度估计的置信度
     std::vector<float> recent_lengths_;   // 最近几帧的长度记录
     float length_update_rate_;            // 长度更新率（越小越稳定）
+    float max_length_change_ratio_;
+
+    // 历史轮廓记录
+    std::vector<std::vector<Eigen::Vector3f>> shape_history_;
+    int max_shape_history_size_ = 5;
 
     void initializeStableLengthFromProbMap(const PowerLineProbabilityMap& prob_map);
     void updateStableLength(float observed_length, float observation_completeness);
     void constrainControlPointsToLength();
     std::vector<Eigen::Vector3f> interpolateCompleteCurveWithFixedLength(const PowerLineProbabilityMap& prob_map) const;
-
+    // 新增方法声明
+    std::vector<Eigen::Vector3f> recreateShapeFromTemplate(
+        const FusedObservation& template_obs, const PowerLineProbabilityMap& prob_map) const;
     void markDetectedParts(ReconstructedPowerLine& complete_line) const {
         if (observation_history_.empty() || complete_line.fitted_curve_points.empty()) {
             return;

@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/furina/powerline_extraction/point_cloud_extractor_success02/devel/lib/libpowerline_extractor.pdb"
-  "/home/furina/powerline_extraction/point_cloud_extractor_success02/devel/lib/libpowerline_extractor.so"
+  "/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/devel/lib/libpowerline_extractor.pdb"
+  "/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/devel/lib/libpowerline_extractor.so"
   "CMakeFiles/powerline_extractor.dir/src/advanced_obstacle_analyzer.cpp.o"
   "CMakeFiles/powerline_extractor.dir/src/advanced_obstacle_analyzer.cpp.o.d"
   "CMakeFiles/powerline_extractor.dir/src/building_edge_filter.cpp.o"
