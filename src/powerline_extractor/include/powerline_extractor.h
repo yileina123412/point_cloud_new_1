@@ -31,7 +31,7 @@
 #include "power_line_probability_map.h"
 #include "power_line_tracker.h"
 #include "enhanced_power_line_tracker.h"
-
+#include "imu_orientation_estimator.h"
 
 
 
@@ -60,13 +60,16 @@ private:
     void initializePublishers();
     void initializeSubscribers();
 
-
+    void initializeIMUEstimator();       // 初始化IMU姿态估计器
 
     void initializeFineExtractor();
     
     // 点云变换
     bool transformPointCloud(const sensor_msgs::PointCloud2::ConstPtr& input_msg,
                            sensor_msgs::PointCloud2& transformed_msg);
+    
+    // 点云水平校正 - 新增函数  imu矫正
+    void correctPointCloudOrientation(pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud);
     
     // 发布点云
     void publishPointClouds(const pcl::PointCloud<pcl::PointXYZI>::Ptr& original_cloud,
@@ -99,6 +102,9 @@ private:
     ros::Publisher rol_cloud_pub_;
 
     ros::Publisher second_powerline_preprocessor_cloud_pub_;
+
+    // IMU校正后点云发布器
+    ros::Publisher corrected_cloud_pub_;
 
 
     
@@ -154,6 +160,11 @@ private:
     std::unique_ptr<EnhancedPowerLineTracker> enhanced_tracker_;  //增强版跟踪器
     std::vector<ReconstructedPowerLine> enhanced_complete_result;
 
+    // IMU姿态估计器
+    std::unique_ptr<IMUOrientationEstimator> imu_estimator_;
+    // IMU相关参数
+    bool enable_imu_correction_;  // 是否启用IMU姿态校正
+
     //================= 融合多技术的现代电力线提取完整解决方案 =================
     std::unique_ptr<powerline_extraction::MultiLevelPreprocessor> multi_preprocessor_;  //多层级预处理
     
@@ -180,6 +191,9 @@ private:
     pcl::PointCloud<pcl::PointXYZI>::Ptr filtered_pc_;
 
     pcl::PointCloud<pcl::PointXYZI>::Ptr fine_extract_cloud_;
+
+    // 校正后的点云
+    pcl::PointCloud<pcl::PointXYZI>::Ptr corrected_cloud_;
     
     // 处理标志
     bool first_cloud_received_;

@@ -2,4 +2,4 @@
 source_root_dir = '/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src'
 whitelisted_packages = ''.split(';') if '' != '' else []
 blacklisted_packages = ''.split(';') if '' != '' else []
-underlay_workspaces = '/opt/ros/noetic'.split(';') if '/opt/ros/noetic' != '' else []
+underlay_workspaces = '/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/devel;/opt/ros/noetic'.split(';') if '/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/devel;/opt/ros/noetic' != '' else []

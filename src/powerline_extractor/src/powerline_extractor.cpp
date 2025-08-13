@@ -16,7 +16,9 @@ PowerlineExtractor::PowerlineExtractor(ros::NodeHandle& nh, ros::NodeHandle& pri
       filtered_pc_(new pcl::PointCloud<pcl::PointXYZI>()),
       reconstruction_output_cloud_(new pcl::PointCloud<pcl::PointXYZI>()),
       roi_output_cloud_(new pcl::PointCloud<pcl::PointXYZI>()),
-      building_edge_filter_output_cloud_(new pcl::PointCloud<pcl::PointXYZI>()) {
+      building_edge_filter_output_cloud_(new pcl::PointCloud<pcl::PointXYZI>()),
+      corrected_cloud_(new pcl::PointCloud<pcl::PointXYZI>()),  // 新增
+      enable_imu_correction_(true) {
 
     //
     is_first_frame_ = 0;
@@ -31,7 +33,8 @@ PowerlineExtractor::PowerlineExtractor(ros::NodeHandle& nh, ros::NodeHandle& pri
     //初始化累积点云
     initializeAccumulateCloud();
     
-
+    // 初始化IMU姿态估计器 
+    initializeIMUEstimator();
     // 初始化精提取器
     initializeFineExtractor();
     
@@ -74,7 +77,16 @@ void PowerlineExtractor::loadParameters() {
     ROS_INFO("Process frequency: %.1f Hz", process_frequency_);
 }
 
-
+// 初始化IMU姿态估计器
+void PowerlineExtractor::initializeIMUEstimator() {
+    try {
+        imu_estimator_ = std::make_unique<IMUOrientationEstimator>(nh_, private_nh_);
+        ROS_INFO("IMU Orientation Estimator initialized successfully");
+    } catch (const std::exception& e) {
+        ROS_ERROR("Failed to initialize IMU Orientation Estimator: %s", e.what());
+        enable_imu_correction_ = false;
+    }
+}
 
 void PowerlineExtractor::initializeFineExtractor(){
 
@@ -107,6 +119,9 @@ void PowerlineExtractor::initializePublishers() {
 
     fine_extractor_cloud_pub_ = private_nh_.advertise<sensor_msgs::PointCloud2>("fine_extractor_cloud", 1);
     rol_cloud_pub_ = private_nh_.advertise<sensor_msgs::PointCloud2>("rol_cloud", 1);
+
+    // IMU校正后点云发布器
+    corrected_cloud_pub_ = private_nh_.advertise<sensor_msgs::PointCloud2>("corrected_cloud", 1);
     ROS_INFO("Publishers initialized");
 }
 void PowerlineExtractor::initializeAccumulateCloud()
@@ -133,6 +148,36 @@ void PowerlineExtractor::initializeAccumulateCloud()
 void PowerlineExtractor::initializeSubscribers() {
     point_cloud_sub_ = nh_.subscribe(lidar_topic_, 1, &PowerlineExtractor::pointCloudCallback, this);
     ROS_INFO("Subscribed to point cloud topic: %s", lidar_topic_.c_str());
+}
+
+
+// IMU点云水平校正函数
+void PowerlineExtractor::correctPointCloudOrientation(pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud) {
+    if (!enable_imu_correction_ || !imu_estimator_ || !imu_estimator_->isIMUDataValid()) {
+        ROS_WARN_THROTTLE(10.0, "IMU correction disabled or IMU data not valid");
+        *corrected_cloud_ = *cloud;  // 直接复制原始点云
+        return;
+    }
+    
+    try {
+        // 获取水平校正变换矩阵
+        Eigen::Matrix4f transform_matrix = imu_estimator_->getHorizontalTransformMatrix();
+        
+        // 应用变换到点云
+        pcl::transformPointCloud(*cloud, *corrected_cloud_, transform_matrix);
+        
+        // // 用校正后的点云替换原始点云
+        // *cloud = *corrected_cloud_;
+        
+        // 记录调试信息
+        double pitch = imu_estimator_->getCurrentPitch() * 180.0 / M_PI;
+        double roll = imu_estimator_->getCurrentRoll() * 180.0 / M_PI;
+        ROS_INFO("Applied IMU correction - Pitch: %.2f°, Roll: %.2f°", pitch, roll);
+        
+    } catch (const std::exception& e) {
+        ROS_INFO("Error applying IMU correction: %s", e.what());
+        *corrected_cloud_ = *cloud;  // 发生错误时使用原始点云
+    }
 }
 
 void PowerlineExtractor::process_first_method(const std_msgs::Header& header){
@@ -277,18 +322,9 @@ void PowerlineExtractor::pointCloudCallback(const sensor_msgs::PointCloud2::Cons
         run_times ++;
         ROS_INFO("程序运行的第: %d 轮。",run_times);
 
-        // if(1)
-        //     {
-        //         auto start_time = std::chrono::high_resolution_clock::now();
-        //         process_first_method(transformed_msg.header);
-        //         auto end_time = std::chrono::high_resolution_clock::now();
-        //         double all_time = std::chrono::duration<double, std::milli>(end_time - start_time).count();
-        //         ROS_INFO("===================程序运行的第: %d 轮。",run_times);
-        //         ROS_INFO("整个过程总共运行时间: %.3f ms", 
-        //                     all_time);
+        // 新增：应用IMU姿态校正
 
-                
-        //     }
+        // correctPointCloudOrientation(original_cloud_);
 
         
         if(is_first_frame_ == 0)
@@ -324,7 +360,8 @@ void PowerlineExtractor::pointCloudCallback(const sensor_msgs::PointCloud2::Cons
 
         }
 
-        
+        // publishPointClouds(original_cloud_, powerline_cloud_, 
+        //                 clustered_powerline_cloud_, transformed_msg.header);
 
                      
     } catch (const std::exception& e) {
@@ -373,7 +410,13 @@ void PowerlineExtractor::publishPointClouds(const pcl::PointCloud<pcl::PointXYZI
         original_msg.header = header;
         original_cloud_pub_.publish(original_msg);
     }
-
+    // IMU发布校正后的点云
+    if (corrected_cloud_pub_.getNumSubscribers() > 0 && !corrected_cloud_->empty()) {
+        sensor_msgs::PointCloud2 corrected_msg;
+        pcl::toROSMsg(*corrected_cloud_, corrected_msg);
+        corrected_msg.header = header;
+        corrected_cloud_pub_.publish(corrected_msg);
+    }
 
     if( preprocessor_cloud_pub_.getNumSubscribers() > 0 && !preprocessor__output_cloud_->empty()){
         sensor_msgs::PointCloud2 temp_msg;

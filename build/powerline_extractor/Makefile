@@ -1517,6 +1517,30 @@ src/enhanced_power_line_tracker.cpp.s:
 	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/enhanced_power_line_tracker.cpp.s
 .PHONY : src/enhanced_power_line_tracker.cpp.s
 
+src/imu_orientation_estimator.o: src/imu_orientation_estimator.cpp.o
+.PHONY : src/imu_orientation_estimator.o
+
+# target to build an object file
+src/imu_orientation_estimator.cpp.o:
+	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/imu_orientation_estimator.cpp.o
+.PHONY : src/imu_orientation_estimator.cpp.o
+
+src/imu_orientation_estimator.i: src/imu_orientation_estimator.cpp.i
+.PHONY : src/imu_orientation_estimator.i
+
+# target to preprocess a source file
+src/imu_orientation_estimator.cpp.i:
+	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/imu_orientation_estimator.cpp.i
+.PHONY : src/imu_orientation_estimator.cpp.i
+
+src/imu_orientation_estimator.s: src/imu_orientation_estimator.cpp.s
+.PHONY : src/imu_orientation_estimator.s
+
+# target to generate assembly for a file
+src/imu_orientation_estimator.cpp.s:
+	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/imu_orientation_estimator.cpp.s
+.PHONY : src/imu_orientation_estimator.cpp.s
+
 src/obstacle_analyzer.o: src/obstacle_analyzer.cpp.o
 .PHONY : src/obstacle_analyzer.o
 
@@ -1942,6 +1966,9 @@ help:
 	@echo "... src/enhanced_power_line_tracker.o"
 	@echo "... src/enhanced_power_line_tracker.i"
 	@echo "... src/enhanced_power_line_tracker.s"
+	@echo "... src/imu_orientation_estimator.o"
+	@echo "... src/imu_orientation_estimator.i"
+	@echo "... src/imu_orientation_estimator.s"
 	@echo "... src/obstacle_analyzer.o"
 	@echo "... src/obstacle_analyzer.i"
 	@echo "... src/obstacle_analyzer.s"

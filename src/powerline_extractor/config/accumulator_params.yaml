@@ -1,3 +1,23 @@
+# IMU数据源配置
+imu_topic: "/wit/imu"              # IMU数据话题名称
+imu_frame: "base_link"             # IMU坐标系名称
+target_frame: "map"                # 目标坐标系名称
+# 滤波参数
+imu_filter_window_size: 10         # 滑动平均滤波窗口大小
+gravity_magnitude: 9.8             # 重力加速度大小 (m/s²)
+imu_accel_threshold: 0.5           # 重力加速度偏差阈值 (m/s²)
+imu_angle_threshold: 0.02          # 角度变化阈值 (弧度，约1.15度)
+imu_update_frequency: 10.0         # IMU数据处理频率 (Hz)
+
+# 姿态估计参数
+min_samples_for_estimation: 5      # 开始估计姿态所需的最少采样数
+max_pitch_angle: 1.57              # 最大俯仰角限制 (弧度，90度)
+max_roll_angle: 1.57               # 最大滚转角限制 (弧度，90度)
+
+# 调试和可视化
+enable_debug_output: true          # 是否启用调试输出
+publish_gravity_vector: true       # 是否发布重力向量
+publish_orientation_angles: true   # 是否发布姿态角
 
 preprocessor:    #1
   cube_size: 70.0          # 立方体边长（米）

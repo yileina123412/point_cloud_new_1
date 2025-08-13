@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
+  <!-- imu相关参数 -->
+  <arg name="imu_topic" default="/wit/imu"/>  <!--IMU数据话题名 -->
+  <arg name="imu_frame" default="base_link"/>  <!--IMU坐标系名称 -->
   <!-- 雷达相关参数 -->
-  
   <arg name="lidar_topic" default="/livox/lidar"/>   <!--/livox/lidar   /rslidar_points  -->
   <arg name="lidar_frame" default="livox_frame"/><!--livox_frame    rslidar -->
   <arg name="target_frame" default="map"/>
@@ -34,6 +36,9 @@
   
   <!-- 启动电力线提取节点 -->
   <node name="powerline_extractor" pkg="powerline_extractor" type="powerline_extractor_node" output="screen">
+    <!-- IMU参数 -->
+    <param name="imu_topic" value="$(arg imu_topic)"/>
+    <param name="imu_frame" value="$(arg imu_frame)"/>
     <!-- 雷达参数 -->
     <param name="lidar_topic" value="$(arg lidar_topic)"/>
     <param name="lidar_frame" value="$(arg lidar_frame)"/>
@@ -65,8 +70,9 @@
   
   <!-- TF静态变换（如果需要的话） -->
   <node pkg="tf2_ros" type="static_transform_publisher" name="lidar_to_map_broadcaster"
-        args="0 0 0 0.4 -0.2 0 $(arg target_frame) $(arg lidar_frame)" />   <!--args="0 0 0 0 -1.5708 0 $(arg target_frame) $(arg lidar_frame)"-->
- 
+        args="0 0 0 0 0 0 $(arg target_frame) $(arg lidar_frame)" />   <!--args="0 0 0 0.4 -0.2 0 $(arg target_frame) $(arg lidar_frame)" />-->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="imu_to_map_broadcaster"
+        args="0 0 0 0 0 0 $(arg target_frame) $(arg imu_frame)" />   <!--args="0 0 0 0 -1.5708 0 $(arg target_frame) $(arg lidar_frame)"-->
   <!-- RViz可视化 -->
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find powerline_extractor)/rvizs/powerlines_extractor.rviz"  />
