@@ -12,7 +12,6 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
   /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/include/power_line_fine_extraction.h \
   /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/include/power_line_probability_map.h \
   /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/include/power_line_reconstruction.h \
-  /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/include/power_line_tracker.h \
   /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/include/powerline_extraction/core/data_structures.h \
   /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/include/powerline_extraction/core/data_structures.h \
   /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/include/powerline_extraction/preprocessing/multilevel_preprocessor.h \
@@ -106,6 +105,7 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
   /opt/ros/noetic/include/sensor_msgs/PointField.h \
   /opt/ros/noetic/include/sensor_msgs/impl/point_cloud2_iterator.h \
   /opt/ros/noetic/include/sensor_msgs/point_cloud2_iterator.h \
+  /opt/ros/noetic/include/std_msgs/Bool.h \
   /opt/ros/noetic/include/std_msgs/ColorRGBA.h \
   /opt/ros/noetic/include/std_msgs/Empty.h \
   /opt/ros/noetic/include/std_msgs/Header.h \
@@ -3051,8 +3051,6 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 
 /usr/include/boost/mpl/aux_/pop_back_impl.hpp:
 
-/usr/include/boost/mpl/aux_/numeric_op.hpp:
-
 /usr/include/boost/date_time/date_duration_types.hpp:
 
 /usr/include/boost/type_traits/has_plus.hpp:
@@ -3416,6 +3414,8 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 /usr/include/boost/preprocessor/control/expr_if.hpp:
 
 /usr/include/boost/interprocess/detail/config_end.hpp:
+
+/opt/ros/noetic/include/std_msgs/Bool.h:
 
 /usr/include/boost/integer/integer_mask.hpp:
 
@@ -4219,6 +4219,12 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 
 /usr/include/boost/date_time/date.hpp:
 
+/usr/include/boost/mpl/aux_/na.hpp:
+
+/usr/include/boost/atomic/detail/extra_ops_gcc_x86.hpp:
+
+/usr/include/boost/exception/get_error_info.hpp:
+
 /usr/include/boost/mpl/size_t_fwd.hpp:
 
 /opt/ros/noetic/include/ros/message_operations.h:
@@ -4311,46 +4317,6 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 
 /opt/ros/noetic/include/geometry_msgs/WrenchStamped.h:
 
-/opt/ros/noetic/include/ros/serialization.h:
-
-/usr/include/boost/algorithm/string/erase.hpp:
-
-/usr/include/boost/mpl/aux_/arity.hpp:
-
-/usr/include/boost/move/detail/pointer_element.hpp:
-
-/usr/include/boost/date_time/filetime_functions.hpp:
-
-/usr/include/x86_64-linux-gnu/bits/fcntl-linux.h:
-
-/usr/include/boost/mpl/aux_/has_tag.hpp:
-
-/usr/include/boost/mpl/aux_/na.hpp:
-
-/usr/include/boost/atomic/detail/extra_ops_gcc_x86.hpp:
-
-/usr/include/boost/exception/get_error_info.hpp:
-
-/usr/include/boost/config/abi_prefix.hpp:
-
-/opt/ros/noetic/include/ros/wall_timer.h:
-
-/usr/include/boost/mpl/aux_/back_impl.hpp:
-
-/usr/include/c++/9/bits/char_traits.h:
-
-/opt/ros/noetic/include/ros/message.h:
-
-/usr/include/boost/mpl/negate.hpp:
-
-/usr/include/c++/9/iterator:
-
-/usr/include/kdl/frames.inl:
-
-/usr/include/boost/fusion/container/vector/detail/value_of_impl.hpp:
-
-/usr/include/boost/fusion/container/list/detail/deref_impl.hpp:
-
 /opt/ros/noetic/include/pcl_ros/transforms.h:
 
 /opt/ros/noetic/include/ros/console_backend.h:
@@ -4378,6 +4344,10 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 /usr/include/boost/fusion/support/is_segmented.hpp:
 
 /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/include/power_line_coarse_extractor_s.h:
+
+/opt/ros/noetic/include/ros/wall_timer.h:
+
+/usr/include/boost/config/abi_prefix.hpp:
 
 /usr/include/boost/fusion/algorithm/transformation/push_front.hpp:
 
@@ -4457,8 +4427,6 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 
 /usr/include/eigen3/Eigen/src/QR/ColPivHouseholderQR.h:
 
-/opt/ros/noetic/include/geometry_msgs/Vector3Stamped.h:
-
 /usr/include/boost/mpl/aux_/static_cast.hpp:
 
 /opt/ros/noetic/include/xmlrpcpp/XmlRpcDecl.h:
@@ -4472,10 +4440,6 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 /usr/include/boost/date_time/date_generator_formatter.hpp:
 
 /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/include/powerline_extraction/core/data_structures.h:
-
-/usr/include/boost/mpl/front_fwd.hpp:
-
-/opt/ros/noetic/include/geometry_msgs/PoseWithCovariance.h:
 
 /opt/ros/noetic/include/geometry_msgs/Vector3.h:
 
@@ -4523,13 +4487,41 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 
 /usr/include/boost/predef/os/cygwin.h:
 
-/usr/include/boost/atomic/detail/atomic_template.hpp:
+/usr/include/boost/mpl/aux_/back_impl.hpp:
 
-/usr/include/boost/parameter/aux_/has_nested_template_fn.hpp:
+/usr/include/c++/9/bits/char_traits.h:
 
-/usr/include/boost/atomic/detail/hwcaps_gcc_x86.hpp:
+/opt/ros/noetic/include/ros/message.h:
 
-/usr/include/boost/range/value_type.hpp:
+/usr/include/boost/mpl/negate.hpp:
+
+/usr/include/c++/9/iterator:
+
+/usr/include/kdl/frames.inl:
+
+/usr/include/boost/fusion/container/vector/detail/value_of_impl.hpp:
+
+/usr/include/boost/fusion/container/list/detail/deref_impl.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/fcntl-linux.h:
+
+/usr/include/boost/mpl/aux_/has_tag.hpp:
+
+/opt/ros/noetic/include/geometry_msgs/PoseWithCovariance.h:
+
+/usr/include/boost/mpl/front_fwd.hpp:
+
+/usr/include/boost/algorithm/string/erase.hpp:
+
+/opt/ros/noetic/include/ros/serialization.h:
+
+/usr/include/boost/mpl/aux_/arity.hpp:
+
+/usr/include/boost/move/detail/pointer_element.hpp:
+
+/usr/include/boost/date_time/filetime_functions.hpp:
+
+/opt/ros/noetic/include/geometry_msgs/Vector3Stamped.h:
 
 /usr/include/boost/mpl/aux_/find_if_pred.hpp:
 
@@ -4591,6 +4583,14 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 
 /usr/include/boost/mpl/pop_front.hpp:
 
+/usr/include/boost/atomic/detail/atomic_template.hpp:
+
+/usr/include/boost/parameter/aux_/has_nested_template_fn.hpp:
+
+/usr/include/boost/atomic/detail/hwcaps_gcc_x86.hpp:
+
+/usr/include/boost/range/value_type.hpp:
+
 /usr/include/boost/iostreams/detail/dispatch.hpp:
 
 /usr/include/boost/random/uniform_int_distribution.hpp:
@@ -4626,6 +4626,8 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 /usr/include/eigen3/Eigen/Dense:
 
 /opt/ros/noetic/include/ros/callback_queue_interface.h:
+
+/usr/include/boost/mpl/aux_/numeric_op.hpp:
 
 /usr/include/boost/mpl/aux_/iter_push_front.hpp:
 
@@ -4821,8 +4823,6 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 
 /usr/include/boost/mpl/equal_to.hpp:
 
-/opt/ros/noetic/include/std_msgs/Empty.h:
-
 /usr/include/boost/iterator/reverse_iterator.hpp:
 
 /usr/include/boost/move/algorithm.hpp:
@@ -4851,8 +4851,6 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 
 /usr/include/boost/type_traits/is_same.hpp:
 
-/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/include/power_line_tracker.h:
-
 /opt/ros/noetic/include/ros/timer_options.h:
 
 /usr/include/boost/interprocess/detail/config_begin.hpp:
@@ -4864,6 +4862,8 @@ powerline_extractor/CMakeFiles/powerline_extractor_node.dir/src/powerline_extrac
 /usr/include/pcl-1.10/pcl/segmentation/extract_clusters.h:
 
 /usr/include/pcl-1.10/pcl/correspondence.h:
+
+/opt/ros/noetic/include/std_msgs/Empty.h:
 
 /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/include/power_line_fine_extraction.h:
 

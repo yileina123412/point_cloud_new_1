@@ -18,7 +18,9 @@ PowerlineExtractor::PowerlineExtractor(ros::NodeHandle& nh, ros::NodeHandle& pri
       roi_output_cloud_(new pcl::PointCloud<pcl::PointXYZI>()),
       building_edge_filter_output_cloud_(new pcl::PointCloud<pcl::PointXYZI>()),
       corrected_cloud_(new pcl::PointCloud<pcl::PointXYZI>()),  // 新增
-      enable_imu_correction_(true) {
+      enable_imu_correction_(true),
+      prob_map_output_cloud_(new pcl::PointCloud<pcl::PointXYZI>()),
+      need_reset_detection_(false){
 
     //
     is_first_frame_ = 0;
@@ -137,7 +139,6 @@ void PowerlineExtractor::initializeAccumulateCloud()
 
     prob_map_.reset(new PowerLineProbabilityMap(nh_));
 
-    tracker_.reset(new PowerLineTracker(nh_));
     enhanced_tracker_.reset(new EnhancedPowerLineTracker(nh_));
 
 
@@ -272,13 +273,19 @@ void PowerlineExtractor::process_second_times(const std_msgs::Header& header){
     //跟踪器跟踪
 
     // complete_result = tracker_->updateTracker(power_lines_, *prob_map_);
-    enhanced_complete_result = enhanced_tracker_->updateTracker(power_lines_, *prob_map_);
+    // enhanced_complete_result = enhanced_tracker_->updateTracker(power_lines_, *prob_map_);
 
     // building_edge_filter_->filterBuildingEdges(preprocessor__output_cloud_,power_lines_,building_edge_filter_output_cloud_);
+    prob_map_output_cloud_ = prob_map_->getProbabilityPointCloud();
     
     auto analy_star = std::chrono::high_resolution_clock::now();
     // analyzer_->analyzeObstacles(env_not_power_cloud_, fine_extract_cloud_, obbs_); //0.4
-    obs_analyzer_->analyzeObstacles(power_lines_,env_not_power_cloud_,obstacle_results_,warning_cloud_);
+    // 创建增强的电力线列表（原始检测 + 稳定电力线）
+    std::vector<ReconstructedPowerLine> enhanced_power_lines;
+    reconstruction_->separateCompletePowerLines(prob_map_output_cloud_,enhanced_power_lines);//0.2s
+    
+    obs_analyzer_->analyzeObstacles(enhanced_power_lines,preprocessor__output_cloud_,obstacle_results_,warning_cloud_);
+    // obs_analyzer_->analyzeObstacles(power_lines_,env_not_power_cloud_,prob_map_output_cloud_,obstacle_results_,warning_cloud_);
     auto analy_end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> analy_duration = analy_end - analy_star;
     ROS_INFO("障碍物检测 执行时间: %f 秒", analy_duration.count());
@@ -305,6 +312,29 @@ void PowerlineExtractor::pointCloudCallback(const sensor_msgs::PointCloud2::Cons
     ROS_DEBUG("Received point cloud with %d points", msg->width * msg->height);
     
     try {
+
+
+        // 检查设备稳定性
+    if (enable_imu_correction_ && imu_estimator_ && imu_estimator_->isIMUDataValid()) {
+        // 检查是否有移动
+        if (imu_estimator_->hasRecentMovement() || !imu_estimator_->isDeviceStable()) {
+            if (!need_reset_detection_) {
+                ROS_INFO("Device movement detected! Will reset powerline detection when stable.");
+
+                need_reset_detection_ = true;  // 标记需要重置
+            }
+            ROS_INFO_THROTTLE(2.0, "Device is moving/unstable, skipping point cloud processing");
+            return;
+        }
+        
+        // 如果现在稳定了，但之前有移动，需要重置
+        if (need_reset_detection_) {
+            ROS_WARN("Device stabilized after movement. Resetting powerline detection...");
+            run_times = 0;
+            need_reset_detection_ = false;
+        }
+    }
+        
         // 坐标变换
         sensor_msgs::PointCloud2 transformed_msg;
         if (!transformPointCloud(msg, transformed_msg)) {
@@ -324,9 +354,11 @@ void PowerlineExtractor::pointCloudCallback(const sensor_msgs::PointCloud2::Cons
 
         // 新增：应用IMU姿态校正
 
-        // correctPointCloudOrientation(original_cloud_);
+        correctPointCloudOrientation(original_cloud_);
 
-        
+        if(run_times == 1) is_first_frame_ = 0;
+        else is_first_frame_ = 1;
+        // ROS_INFO("is_first_frame_ = %d",is_first_frame_);
         if(is_first_frame_ == 0)
         {
             auto start_time = std::chrono::high_resolution_clock::now();
@@ -338,15 +370,15 @@ void PowerlineExtractor::pointCloudCallback(const sensor_msgs::PointCloud2::Cons
                         all_time);
             is_first_frame_ = 1;
             prob_map_->initializeProbabilityMap(power_lines_);
-            // tracker_->initializeTracker(power_lines_); // 初始化跟踪器
-            
+            prob_map_->resetProbabilityMap();
+            prob_map_->initializeProbabilityMap(power_lines_);
 
-            
+            // tracker_->initializeTracker(power_lines_); // 初始化跟踪器
         }
         else{
             if(run_times == 2)
             {
-                enhanced_tracker_->initializeTracker(*prob_map_); // 初始化增强跟踪器
+                // enhanced_tracker_->initializeTracker(*prob_map_); // 初始化增强跟踪器
             }
             auto start_time = std::chrono::high_resolution_clock::now();
             process_second_times(transformed_msg.header);

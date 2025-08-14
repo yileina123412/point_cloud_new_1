@@ -1755,6 +1755,8 @@ powerline_extractor/CMakeFiles/powerline_extractor.dir/src/advanced_obstacle_ana
  /usr/include/x86_64-linux-gnu/bits/mman-shared.h \
  /usr/include/x86_64-linux-gnu/sys/fcntl.h \
  /usr/include/pcl-1.10/pcl/io/lzf.h \
+ /opt/ros/noetic/include/std_msgs/Bool.h \
+ /opt/ros/noetic/include/std_msgs/String.h \
  /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/include/power_line_reconstruction.h \
  /usr/include/pcl-1.10/pcl/common/pca.h \
  /usr/include/pcl-1.10/pcl/common/impl/pca.hpp \

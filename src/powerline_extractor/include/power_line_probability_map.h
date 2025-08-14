@@ -312,6 +312,25 @@ public:
     };
 
     std::vector<DetectionLineMatch> getDetailedDetectionMatches(const std::vector<ReconstructedPowerLine>& power_lines);
+
+    /**
+     * @brief 获取概率点云
+     * @param threshold 概率阈值，默认0.6
+     * @return 概率点云
+     */
+    pcl::PointCloud<pcl::PointXYZI>::Ptr getProbabilityPointCloud(float threshold = 0.6f);
+
+    /**
+     * @brief 发布概率点云可视化
+     */
+    void publishProbabilityPointCloud();
+
+    /**
+     * @brief 重置概率地图（环境变动时使用）
+     * @param power_lines 重置后的初始电力线数据，如果为空则完全清空
+     * @return 成功返回true，失败返回false
+     */
+    bool resetProbabilityMap(const std::vector<ReconstructedPowerLine>& power_lines = {});
     // ==================== 可视化接口 ====================
     
     /**
@@ -398,7 +417,13 @@ public:
     
 private:
     // ==================== 核心数据结构 ====================
-    
+
+    // 概率点云相关
+    pcl::PointCloud<pcl::PointXYZI>::Ptr probability_cloud_;
+    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> line_spacific_maps_;
+    ros::Publisher probability_cloud_pub_;
+    float probability_cloud_threshold_;
+        
     // 稀疏体素存储
     std::unordered_map<VoxelKey, PowerLineVoxel> voxel_map_; // 体素哈希表，存储概率信息  每一个位置对应一个电力线的体素信息
     // ==================== 分线概率地图数据 ====================
@@ -581,6 +606,12 @@ private:
     bool mergeLineSegments(int primary_id, int secondary_id); // 执行线段合并
     void publishLineIdChanges(); // 发布ID变化通知
     void checkAndExecuteMerge(); // 检查并执行合并
+
+    /**
+     * @brief 更新概率点云
+     * @param threshold 概率阈值
+     */
+    void updateProbabilityPointCloud(float threshold = 0.6f);
 
 };
 

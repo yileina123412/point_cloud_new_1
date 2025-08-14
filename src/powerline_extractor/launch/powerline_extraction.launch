@@ -73,6 +73,7 @@
         args="0 0 0 0 0 0 $(arg target_frame) $(arg lidar_frame)" />   <!--args="0 0 0 0.4 -0.2 0 $(arg target_frame) $(arg lidar_frame)" />-->
   <node pkg="tf2_ros" type="static_transform_publisher" name="imu_to_map_broadcaster"
         args="0 0 0 0 0 0 $(arg target_frame) $(arg imu_frame)" />   <!--args="0 0 0 0 -1.5708 0 $(arg target_frame) $(arg lidar_frame)"-->
+  
   <!-- RViz可视化 -->
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find powerline_extractor)/rvizs/powerlines_extractor.rviz"  />

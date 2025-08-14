@@ -18,6 +18,10 @@ max_roll_angle: 1.57               # 最大滚转角限制 (弧度，90度)
 enable_debug_output: true          # 是否启用调试输出
 publish_gravity_vector: true       # 是否发布重力向量
 publish_orientation_angles: true   # 是否发布姿态角
+# 运动检测
+stability_threshold_accel: 0.3
+stability_threshold_angle_: 0.05
+stability_required_time_: 2.0
 
 preprocessor:    #1
   cube_size: 70.0          # 立方体边长（米）

@@ -113,6 +113,91 @@ void PowerLineReconstructor::reconstructPowerLines(const pcl::PointCloud<pcl::Po
     ROS_INFO("电力线重构 执行时间: %f 秒", duration.count());
     ROS_INFO("最终输出点云点数: %zu", output_cloud->size());
 }
+
+void PowerLineReconstructor::separateCompletePowerLines(const pcl::PointCloud<pcl::PointXYZI>::Ptr& complete_cloud,
+                                                       std::vector<ReconstructedPowerLine>& power_lines) {
+    auto start = std::chrono::high_resolution_clock::now();
+    
+    ROS_INFO("开始分离完整电力线，输入点云点数: %zu", complete_cloud->size());
+    
+    // 清空输出
+    power_lines.clear();
+    
+    if (complete_cloud->empty()) {
+        ROS_WARN("输入点云为空，跳过处理");
+        return;
+    }
+    
+    // 第一步：片段分离（实际上是电力线分离）
+    std::vector<PowerLineSegment> segments;
+    separateSegments(complete_cloud, segments);
+    ROS_INFO("分离得到 %zu 根电力线", segments.size());
+    
+    if (segments.empty()) {
+        ROS_WARN("未检测到有效电力线");
+        return;
+    }
+    
+    // 第二步：创建片段结构体（计算属性）
+    createSegmentStructures(segments);
+    
+    // 第三步：直接将每个有效片段转换为ReconstructedPowerLine
+    for (size_t i = 0; i < segments.size(); ++i) {
+        const auto& segment = segments[i];
+        
+        // 过滤掉无效片段（长度为0或太短）
+        if (segment.length <= 0.0 || segment.length < min_line_length_) {
+            continue;
+        }
+        
+        ReconstructedPowerLine power_line;
+        power_line.line_id = static_cast<int>(i);
+        power_line.segment_indices = {static_cast<int>(i)};  // 只包含自己
+        
+        // 复制点云
+        power_line.points = pcl::PointCloud<pcl::PointXYZI>::Ptr(new pcl::PointCloud<pcl::PointXYZI>);
+        *power_line.points = *segment.points;
+        
+        // 设置属性
+        power_line.total_length = segment.length;
+        power_line.main_direction = segment.overall_direction;
+        
+        // 密度过滤
+        pcl::PointCloud<pcl::PointXYZI>::Ptr filtered(new pcl::PointCloud<pcl::PointXYZI>);
+        pcl::search::KdTree<pcl::PointXYZI> kdtree;
+        kdtree.setInputCloud(power_line.points);
+
+        for (const auto& pt : power_line.points->points) {
+            std::vector<int> indices;
+            std::vector<float> distances;
+            pcl::PointXYZI query = pt;
+            if (kdtree.radiusSearch(query, density_radius, indices, distances) >= min_neighbors) {
+                filtered->points.push_back(pt);
+            }
+        }
+        filtered->width = filtered->points.size();
+        filtered->height = 1;
+        filtered->is_dense = true;
+        power_line.points = filtered;
+        
+        // 如果密度过滤后还有足够的点，则添加到结果中
+        if (power_line.points->size() >= min_segment_points_) {
+            // 拟合样条曲线
+            fitSplineCurve(power_line);
+            power_lines.push_back(power_line);
+        }
+    }
+    
+    // // 可视化结果（如果启用）
+    // if (enable_visualization_) {
+    //     visualizeResults(segments, power_lines);
+    // }
+    
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = end - start;
+    ROS_INFO("完整电力线分离完成，执行时间: %f 秒", duration.count());
+    ROS_INFO("最终分离出 %zu 根电力线", power_lines.size());
+}
 // 将输入的点云分离成独立的线性片段
 void PowerLineReconstructor::separateSegments(const pcl::PointCloud<pcl::PointXYZI>::Ptr& input_cloud,
                                              std::vector<PowerLineSegment>& segments) {

@@ -195,38 +195,10 @@ powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_probabilit
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/powerline_extractor.dir/src/power_line_probability_map.cpp.s"
 	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/powerline_extractor && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/src/power_line_probability_map.cpp -o CMakeFiles/powerline_extractor.dir/src/power_line_probability_map.cpp.s
 
-powerline_extractor/CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.o: powerline_extractor/CMakeFiles/powerline_extractor.dir/flags.make
-powerline_extractor/CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.o: /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/src/roi_manager.cpp
-powerline_extractor/CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.o: powerline_extractor/CMakeFiles/powerline_extractor.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object powerline_extractor/CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.o"
-	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/powerline_extractor && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT powerline_extractor/CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.o -MF CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.o.d -o CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.o -c /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/src/roi_manager.cpp
-
-powerline_extractor/CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.i"
-	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/powerline_extractor && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/src/roi_manager.cpp > CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.i
-
-powerline_extractor/CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.s"
-	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/powerline_extractor && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/src/roi_manager.cpp -o CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.s
-
-powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.o: powerline_extractor/CMakeFiles/powerline_extractor.dir/flags.make
-powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.o: /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/src/power_line_tracker.cpp
-powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.o: powerline_extractor/CMakeFiles/powerline_extractor.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.o"
-	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/powerline_extractor && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.o -MF CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.o.d -o CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.o -c /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/src/power_line_tracker.cpp
-
-powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.i"
-	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/powerline_extractor && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/src/power_line_tracker.cpp > CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.i
-
-powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.s"
-	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/powerline_extractor && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/src/power_line_tracker.cpp -o CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.s
-
 powerline_extractor/CMakeFiles/powerline_extractor.dir/src/enhanced_power_line_tracker.cpp.o: powerline_extractor/CMakeFiles/powerline_extractor.dir/flags.make
 powerline_extractor/CMakeFiles/powerline_extractor.dir/src/enhanced_power_line_tracker.cpp.o: /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/src/enhanced_power_line_tracker.cpp
 powerline_extractor/CMakeFiles/powerline_extractor.dir/src/enhanced_power_line_tracker.cpp.o: powerline_extractor/CMakeFiles/powerline_extractor.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object powerline_extractor/CMakeFiles/powerline_extractor.dir/src/enhanced_power_line_tracker.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object powerline_extractor/CMakeFiles/powerline_extractor.dir/src/enhanced_power_line_tracker.cpp.o"
 	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/powerline_extractor && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT powerline_extractor/CMakeFiles/powerline_extractor.dir/src/enhanced_power_line_tracker.cpp.o -MF CMakeFiles/powerline_extractor.dir/src/enhanced_power_line_tracker.cpp.o.d -o CMakeFiles/powerline_extractor.dir/src/enhanced_power_line_tracker.cpp.o -c /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/src/enhanced_power_line_tracker.cpp
 
 powerline_extractor/CMakeFiles/powerline_extractor.dir/src/enhanced_power_line_tracker.cpp.i: cmake_force
@@ -240,7 +212,7 @@ powerline_extractor/CMakeFiles/powerline_extractor.dir/src/enhanced_power_line_t
 powerline_extractor/CMakeFiles/powerline_extractor.dir/src/imu_orientation_estimator.cpp.o: powerline_extractor/CMakeFiles/powerline_extractor.dir/flags.make
 powerline_extractor/CMakeFiles/powerline_extractor.dir/src/imu_orientation_estimator.cpp.o: /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/src/imu_orientation_estimator.cpp
 powerline_extractor/CMakeFiles/powerline_extractor.dir/src/imu_orientation_estimator.cpp.o: powerline_extractor/CMakeFiles/powerline_extractor.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object powerline_extractor/CMakeFiles/powerline_extractor.dir/src/imu_orientation_estimator.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object powerline_extractor/CMakeFiles/powerline_extractor.dir/src/imu_orientation_estimator.cpp.o"
 	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/powerline_extractor && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT powerline_extractor/CMakeFiles/powerline_extractor.dir/src/imu_orientation_estimator.cpp.o -MF CMakeFiles/powerline_extractor.dir/src/imu_orientation_estimator.cpp.o.d -o CMakeFiles/powerline_extractor.dir/src/imu_orientation_estimator.cpp.o -c /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/src/imu_orientation_estimator.cpp
 
 powerline_extractor/CMakeFiles/powerline_extractor.dir/src/imu_orientation_estimator.cpp.i: cmake_force
@@ -254,7 +226,7 @@ powerline_extractor/CMakeFiles/powerline_extractor.dir/src/imu_orientation_estim
 powerline_extractor/CMakeFiles/powerline_extractor.dir/src/preprocessing/multilevel_preprocessor.cpp.o: powerline_extractor/CMakeFiles/powerline_extractor.dir/flags.make
 powerline_extractor/CMakeFiles/powerline_extractor.dir/src/preprocessing/multilevel_preprocessor.cpp.o: /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/src/preprocessing/multilevel_preprocessor.cpp
 powerline_extractor/CMakeFiles/powerline_extractor.dir/src/preprocessing/multilevel_preprocessor.cpp.o: powerline_extractor/CMakeFiles/powerline_extractor.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object powerline_extractor/CMakeFiles/powerline_extractor.dir/src/preprocessing/multilevel_preprocessor.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object powerline_extractor/CMakeFiles/powerline_extractor.dir/src/preprocessing/multilevel_preprocessor.cpp.o"
 	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/powerline_extractor && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT powerline_extractor/CMakeFiles/powerline_extractor.dir/src/preprocessing/multilevel_preprocessor.cpp.o -MF CMakeFiles/powerline_extractor.dir/src/preprocessing/multilevel_preprocessor.cpp.o.d -o CMakeFiles/powerline_extractor.dir/src/preprocessing/multilevel_preprocessor.cpp.o -c /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/src/powerline_extractor/src/preprocessing/multilevel_preprocessor.cpp
 
 powerline_extractor/CMakeFiles/powerline_extractor.dir/src/preprocessing/multilevel_preprocessor.cpp.i: cmake_force
@@ -276,8 +248,6 @@ powerline_extractor_OBJECTS = \
 "CMakeFiles/powerline_extractor.dir/src/building_edge_filter.cpp.o" \
 "CMakeFiles/powerline_extractor.dir/src/advanced_obstacle_analyzer.cpp.o" \
 "CMakeFiles/powerline_extractor.dir/src/power_line_probability_map.cpp.o" \
-"CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.o" \
-"CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.o" \
 "CMakeFiles/powerline_extractor.dir/src/enhanced_power_line_tracker.cpp.o" \
 "CMakeFiles/powerline_extractor.dir/src/imu_orientation_estimator.cpp.o" \
 "CMakeFiles/powerline_extractor.dir/src/preprocessing/multilevel_preprocessor.cpp.o"
@@ -294,8 +264,6 @@ powerline_extractor_EXTERNAL_OBJECTS =
 /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/devel/lib/libpowerline_extractor.so: powerline_extractor/CMakeFiles/powerline_extractor.dir/src/building_edge_filter.cpp.o
 /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/devel/lib/libpowerline_extractor.so: powerline_extractor/CMakeFiles/powerline_extractor.dir/src/advanced_obstacle_analyzer.cpp.o
 /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/devel/lib/libpowerline_extractor.so: powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_probability_map.cpp.o
-/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/devel/lib/libpowerline_extractor.so: powerline_extractor/CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.o
-/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/devel/lib/libpowerline_extractor.so: powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.o
 /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/devel/lib/libpowerline_extractor.so: powerline_extractor/CMakeFiles/powerline_extractor.dir/src/enhanced_power_line_tracker.cpp.o
 /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/devel/lib/libpowerline_extractor.so: powerline_extractor/CMakeFiles/powerline_extractor.dir/src/imu_orientation_estimator.cpp.o
 /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/devel/lib/libpowerline_extractor.so: powerline_extractor/CMakeFiles/powerline_extractor.dir/src/preprocessing/multilevel_preprocessor.cpp.o
@@ -664,7 +632,7 @@ powerline_extractor_EXTERNAL_OBJECTS =
 /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/devel/lib/libpowerline_extractor.so: /usr/lib/x86_64-linux-gnu/libopencv_imgproc.so.4.2.0
 /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/devel/lib/libpowerline_extractor.so: /usr/lib/x86_64-linux-gnu/libopencv_core.so.4.2.0
 /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/devel/lib/libpowerline_extractor.so: powerline_extractor/CMakeFiles/powerline_extractor.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Linking CXX shared library /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/devel/lib/libpowerline_extractor.so"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Linking CXX shared library /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/devel/lib/libpowerline_extractor.so"
 	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build/powerline_extractor && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/powerline_extractor.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

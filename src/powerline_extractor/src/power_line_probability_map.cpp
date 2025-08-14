@@ -33,6 +33,11 @@ PowerLineProbabilityMap::PowerLineProbabilityMap(ros::NodeHandle& nh) : nh_(nh) 
     cropped_cloud_pub_ = nh_.advertise<sensor_msgs::PointCloud2>(
     "power_line_probability_map/cropped_pointcloud", 1); // 裁剪点云发布器 <-- 添加这行
 
+    probability_cloud_pub_ = nh_.advertise<sensor_msgs::PointCloud2>(
+    "power_line_probability_map/probability_pointcloud", 1); // 概率点云发布器
+
+    probability_cloud_.reset(new pcl::PointCloud<pcl::PointXYZI>);
+
 
     
     ROS_INFO("PowerLineProbabilityMap 初始化完成"); // 输出初始化信息
@@ -102,6 +107,9 @@ void PowerLineProbabilityMap::loadParameters() { // 读取参数
     nh_.param("probability_map/merge_overlap_threshold", merge_overlap_threshold_, 0.1f); // 30%重叠
     nh_.param("probability_map/merge_check_interval", merge_check_interval_, 5); // 每5帧检查
     nh_.param("probability_map/merge_distance_threshold", merge_distance_threshold_, 10.0f); // 10米
+
+    // 概率点云参数
+    nh_.param("probability_map/probability_cloud_threshold", probability_cloud_threshold_, 0.6f); // 概率点云阈值
 }
 
 bool PowerLineProbabilityMap::initializeProbabilityMap(
@@ -156,7 +164,8 @@ bool PowerLineProbabilityMap::initializeProbabilityMap(
             markLineRegionForSpecificLine(line.line_id, spline_point, local_direction, initial_probability_center_); //将该样条加入到每条线的概率地图
         }
     }
-    
+    // 更新概率点云
+    updateProbabilityPointCloud(probability_cloud_threshold_);
     auto end = std::chrono::high_resolution_clock::now(); // 记录结束时间
     std::chrono::duration<double> duration = end - start; // 计算耗时
     
@@ -199,14 +208,14 @@ bool PowerLineProbabilityMap::updateProbabilityMap(
     }
     
     // // 贝叶斯更新
-    // bayesianUpdate(power_lines); // 执行贝叶斯概率更新
+    bayesianUpdate(power_lines); // 执行贝叶斯概率更新
 
     // 更新分线概率地图
     updateLineSpecificMaps(power_lines);
 
     
-    // 管理电力线生命周期
-    manageLineLifecycles();
+    // // 管理电力线生命周期
+    // manageLineLifecycles();
 
     // 检查并执行合并（每隔一定帧数）
     frame_count_since_last_merge_check_++;
@@ -217,6 +226,9 @@ bool PowerLineProbabilityMap::updateProbabilityMap(
 
     // // 衰减长期未观测区域
     // decayUnobservedRegions(); // 衰减未观测体素
+
+    // 更新概率点云
+    updateProbabilityPointCloud(probability_cloud_threshold_);
     
     auto end = std::chrono::high_resolution_clock::now(); // 记录结束时间
     std::chrono::duration<double> duration = end - start; // 计算耗时
@@ -438,6 +450,8 @@ void PowerLineProbabilityMap::decayUnobservedRegions() { // 衰减未观测区�
             voxel.confidence *= decay_rate_;
         }
     }
+
+    
 }
 
 std::vector<Eigen::Vector3f> PowerLineProbabilityMap::clusterAdjacentRegions(
@@ -572,6 +586,7 @@ void PowerLineProbabilityMap::visualizeProbabilityMap() { // 可视化概率地�
     publishProbabilityMarkers(); // 发布体素可视化
     publishMapStatistics(); // 发布统计信息
     publishLineSpecificMarkers(); // 发布分线可视化
+    publishProbabilityPointCloud(); // 发布概率点云
 
     // 更新并发布包围盒
     std::vector<AABB> line_boxes = calculateLineBoundingBoxes();
@@ -592,9 +607,9 @@ void PowerLineProbabilityMap::publishProbabilityMarkers() { // 发布体素可�
             continue;
         }
         
-        if (published_markers >= max_visualization_markers_) {
-            break;
-        }
+        // if (published_markers >= max_visualization_markers_) {
+        //     break;
+        // }
         
         visualization_msgs::Marker marker = createVoxelMarker(voxel_key, voxel, marker_id++);
         marker_array.markers.push_back(marker);
@@ -1816,4 +1831,135 @@ std::vector<PowerLineProbabilityMap::DetectionLineMatch> PowerLineProbabilityMap
     
     ROS_DEBUG("完成 %zu 个检测的line_id分配", power_lines.size());
     return matches;
+}
+
+
+void PowerLineProbabilityMap::updateProbabilityPointCloud(float threshold) {
+    probability_cloud_->clear();
+    probability_cloud_->header.frame_id = frame_id_;
+    probability_cloud_->header.stamp = pcl_conversions::toPCL(ros::Time::now());
+    
+    for (const auto& [voxel_key, voxel] : voxel_map_) {
+        if (voxel.line_probability >= threshold) {
+            pcl::PointXYZI point;
+            Eigen::Vector3f world_pos = voxelToPoint(voxel_key);
+            
+            point.x = world_pos.x();
+            point.y = world_pos.y();
+            point.z = world_pos.z();
+            // 将概率值映射到强度 [0, 1] -> [0, 255]
+            point.intensity = voxel.line_probability * 255.0f;
+            
+            probability_cloud_->push_back(point);
+        }
+    }
+    
+    ROS_DEBUG("概率点云更新完成，点数: %zu (阈值: %.2f)", probability_cloud_->size(), threshold);
+}
+
+pcl::PointCloud<pcl::PointXYZI>::Ptr PowerLineProbabilityMap::getProbabilityPointCloud(float threshold) {
+    if (threshold != probability_cloud_threshold_) {
+        // 如果阈值不同，重新生成
+        pcl::PointCloud<pcl::PointXYZI>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZI>);
+        temp_cloud->header.frame_id = frame_id_;
+        temp_cloud->header.stamp = pcl_conversions::toPCL(ros::Time::now());
+        
+        for (const auto& [voxel_key, voxel] : voxel_map_) {
+            if (voxel.line_probability >= threshold) {
+                pcl::PointXYZI point;
+                Eigen::Vector3f world_pos = voxelToPoint(voxel_key);
+                
+                point.x = world_pos.x();
+                point.y = world_pos.y();
+                point.z = world_pos.z();
+                point.intensity = voxel.line_probability * 255.0f;
+                
+                temp_cloud->push_back(point);
+            }
+        }
+        return temp_cloud;
+    }
+    
+    return probability_cloud_;
+}
+
+void PowerLineProbabilityMap::publishProbabilityPointCloud() {
+    if (!enable_visualization_ || !probability_cloud_ || probability_cloud_->empty()) {
+        return;
+    }
+    
+    sensor_msgs::PointCloud2 cloud_msg;
+    pcl::toROSMsg(*probability_cloud_, cloud_msg);
+    cloud_msg.header.frame_id = frame_id_;
+    cloud_msg.header.stamp = ros::Time::now();
+    
+    probability_cloud_pub_.publish(cloud_msg);
+    ROS_DEBUG("发布概率点云，点数: %zu", probability_cloud_->size());
+}
+bool PowerLineProbabilityMap::resetProbabilityMap(const std::vector<ReconstructedPowerLine>& power_lines) {
+    ROS_INFO("开始重置概率地图...");
+    
+    // 1. 清空所有数据结构
+    clearMap(); // 这个已经清空了 voxel_map_, line_specific_maps_, line_regions_
+    
+    // 2. 重置ID计数器
+    next_available_line_id_ = 0;
+    
+    // 3. 清空合并相关数据
+    recent_merges_.clear();
+    frame_count_since_last_merge_check_ = 0;
+    
+    // 4. 清空包围盒数据
+    merged_bounding_boxes_.clear();
+    
+    // 5. 清空概率点云
+    if (probability_cloud_) {
+        probability_cloud_->clear();
+    }
+    
+    // 6. 发布清空的可视化（删除所有旧的marker）
+    if (enable_visualization_) {
+        // 发布删除所有marker的消息
+        visualization_msgs::MarkerArray delete_array;
+        
+        // 删除概率体素marker
+        visualization_msgs::Marker delete_marker;
+        delete_marker.header.frame_id = frame_id_;
+        delete_marker.header.stamp = ros::Time::now();
+        delete_marker.ns = "probability_voxels";
+        delete_marker.action = visualization_msgs::Marker::DELETEALL;
+        delete_array.markers.push_back(delete_marker);
+        
+        // 删除分线marker
+        delete_marker.ns = "line_text";
+        delete_array.markers.push_back(delete_marker);
+        
+        // 删除包围盒marker
+        delete_marker.ns = "bounding_boxes";
+        delete_array.markers.push_back(delete_marker);
+        delete_marker.ns = "box_labels";
+        delete_array.markers.push_back(delete_marker);
+        
+        prob_map_pub_.publish(delete_array);
+        line_specific_pub_.publish(delete_array);
+        bounding_box_pub_.publish(delete_array);
+        
+        // 发布空的概率点云
+        if (probability_cloud_) {
+            sensor_msgs::PointCloud2 empty_cloud_msg;
+            empty_cloud_msg.header.frame_id = frame_id_;
+            empty_cloud_msg.header.stamp = ros::Time::now();
+            probability_cloud_pub_.publish(empty_cloud_msg);
+        }
+    }
+    
+    ROS_INFO("概率地图重置完成");
+    
+    // 7. 如果提供了新的电力线数据，则重新初始化
+    if (!power_lines.empty()) {
+        ROS_INFO("使用新数据重新初始化概率地图...");
+        return initializeProbabilityMap(power_lines);
+    }
+    
+    return true;
 }

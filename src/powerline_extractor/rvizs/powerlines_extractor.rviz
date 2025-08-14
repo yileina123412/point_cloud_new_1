@@ -6,11 +6,6 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /概率地图1
-        - /智能补全的电力线部分1
-        - /当前帧实际检测到的电力线部分1
-        - /完整的轨迹骨架1
-        - /IMU矫正1
       Splitter Ratio: 0.5647059082984924
     Tree Height: 549
   - Class: rviz/Selection
@@ -30,7 +25,7 @@ Panels:
   - Class: rviz/Time
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: 概率地图点云
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -601,13 +596,14 @@ Visualization Manager:
       Use rainbow: true
       Value: false
     - Class: rviz/MarkerArray
-      Enabled: false
+      Enabled: true
       Marker Topic: /advanced_obstacle/warning_radius
       Name: 预警范围
       Namespaces:
-        {}
+        warning_box_level1: true
+        warning_box_level2: true
       Queue Size: 100
-      Value: false
+      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -620,7 +616,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: RGB8
       Decay Time: 0
-      Enabled: false
+      Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Min Color: 0; 0; 0
@@ -635,7 +631,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: false
+      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -820,7 +816,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: ""
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Min Color: 0; 0; 0
@@ -832,6 +828,34 @@ Visualization Manager:
       Size (m): 0.009999999776482582
       Style: Points
       Topic: /powerline_extractor/corrected_cloud
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Min Color: 0; 0; 0
+      Name: 概率地图点云
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Points
+      Topic: /power_line_probability_map/probability_pointcloud
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -864,7 +888,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 41.406517028808594
+      Distance: 28.500581741333008
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -880,9 +904,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.3597965240478516
+      Pitch: 0.45479708909988403
       Target Frame: <Fixed Frame>
-      Yaw: 2.5577433109283447
+      Yaw: 4.147740364074707
     Saved: ~
 Window Geometry:
   Displays:

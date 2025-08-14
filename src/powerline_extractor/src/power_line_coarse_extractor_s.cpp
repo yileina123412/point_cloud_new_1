@@ -105,7 +105,7 @@ void PowerLineCoarseExtractor::extractPowerLinesByPoints(const pcl::PointCloud<p
     normal_estimation_.setSearchMethod(kdtree_);
     normal_estimation_.setRadiusSearch(search_radius_);
     normal_estimation_.compute(*normals);
-
+    // env_without_powerline_cloud_->clear();
     // 遍历每个点，筛选电力线点
     pcl::PointCloud<pcl::PointXYZI>::Ptr power_lines(new pcl::PointCloud<pcl::PointXYZI>);
     for (size_t i = 0; i < cloud->points.size(); ++i) {

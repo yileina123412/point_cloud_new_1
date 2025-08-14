@@ -21,14 +21,10 @@ file(REMOVE_RECURSE
   "CMakeFiles/powerline_extractor.dir/src/power_line_probability_map.cpp.o.d"
   "CMakeFiles/powerline_extractor.dir/src/power_line_reconstruction.cpp.o"
   "CMakeFiles/powerline_extractor.dir/src/power_line_reconstruction.cpp.o.d"
-  "CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.o"
-  "CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.o.d"
   "CMakeFiles/powerline_extractor.dir/src/powerline_extractor.cpp.o"
   "CMakeFiles/powerline_extractor.dir/src/powerline_extractor.cpp.o.d"
   "CMakeFiles/powerline_extractor.dir/src/preprocessing/multilevel_preprocessor.cpp.o"
   "CMakeFiles/powerline_extractor.dir/src/preprocessing/multilevel_preprocessor.cpp.o.d"
-  "CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.o"
-  "CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.o.d"
 )
 
 # Per-language clean rules from dependency scanning.

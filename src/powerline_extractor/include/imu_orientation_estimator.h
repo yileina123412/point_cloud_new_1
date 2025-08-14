@@ -9,6 +9,7 @@
 #include <geometry_msgs/Vector3Stamped.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
+#include <std_msgs/Bool.h>
 
 #include <Eigen/Dense>
 #include <memory>
@@ -35,6 +36,12 @@ public:
     
     // 强制更新一次姿态估计（可选的手动触发）
     void forceUpdate();
+
+    // 在public部分添加
+    bool isDeviceStable() const { return is_device_stable_; }
+    bool hasRecentMovement() const { return has_recent_movement_; }
+
+
 
 private:
     // 回调函数
@@ -65,6 +72,10 @@ private:
     
     // 发布调试信息
     void publishDebugInfo(const std_msgs::Header& header);
+
+    // 监察设备是否稳定
+    void checkDeviceStability(const Eigen::Vector3f& current_accel, const ros::Time& current_time);
+
 
 private:
     // ROS相关
@@ -105,6 +116,22 @@ private:
     // 调试发布器（可选）
     ros::Publisher gravity_vector_pub_;
     ros::Publisher orientation_pub_;
+
+    // 稳定性检测相关
+    bool is_device_stable_;
+    bool has_recent_movement_;
+    double stability_threshold_accel_;     // 加速度变化阈值
+    double stability_threshold_angle_;     // 角度变化率阈值  
+    double stability_required_time_;       // 要求的稳定时间
+    ros::Time last_stable_time_;          // 上次稳定的时间
+    ros::Time last_movement_time_;        // 上次检测到移动的时间
+
+    // 历史数据用于变化率计算
+    double prev_pitch_;
+    double prev_roll_;
+    Eigen::Vector3f prev_accel_;
+    ros::Time prev_time_;
+
 };
 
 #endif // IMU_ORIENTATION_ESTIMATOR_H

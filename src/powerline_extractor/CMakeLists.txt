@@ -183,8 +183,6 @@ add_library(${PROJECT_NAME}
   src/advanced_obstacle_analyzer.cpp
   # src/power_line_probability_map.cpp
   src/power_line_probability_map.cpp
-  src/roi_manager.cpp
-  src/power_line_tracker.cpp
   src/enhanced_power_line_tracker.cpp
   src/imu_orientation_estimator.cpp
   ${SOURCES}

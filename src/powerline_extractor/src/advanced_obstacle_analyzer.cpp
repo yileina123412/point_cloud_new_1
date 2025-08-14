@@ -26,6 +26,13 @@ AdvancedObstacleAnalyzer::AdvancedObstacleAnalyzer(ros::NodeHandle& nh, const st
         "advanced_obstacle/end_obstacle_cloud", 1);
     warning_radius_pub_ = nh_.advertise<visualization_msgs::MarkerArray>(
         "advanced_obstacle/warning_radius", 1);
+
+    red_zone_alert_pub_ = nh_.advertise<std_msgs::Bool>(
+    "advanced_obstacle/red_zone_alert", 1);
+    yellow_zone_alert_pub_ = nh_.advertise<std_msgs::Bool>(
+        "advanced_obstacle/yellow_zone_alert", 1);
+    proximity_info_pub_ = nh_.advertise<std_msgs::String>(
+        "advanced_obstacle/proximity_info", 1);
     
     ROS_INFO("[AdvancedObstacleAnalyzer] Initialized with parameters:");
     ROS_INFO("  Cluster: tolerance=%.2f, min_size=%d, max_size=%d", 
@@ -62,6 +69,11 @@ void AdvancedObstacleAnalyzer::loadParameters() {
 
     nh_.param("advanced_obstacle/min_warning_cloud_size", min_warning_cloud_size_, 10);
     nh_.param("advanced_obstacle/warning_corridor_width", warning_corridor_width_, 100.0);   // 100米宽度
+
+    // 接近度分析参数
+    nh_.param("advanced_obstacle/proximity_cluster_tolerance", proximity_cluster_tolerance_, 0.5);
+    nh_.param("advanced_obstacle/proximity_min_cluster_size", proximity_min_cluster_size_, 20);
+    nh_.param("advanced_obstacle/proximity_max_cluster_size", proximity_max_cluster_size_, 10000);
 }
 
 void AdvancedObstacleAnalyzer::analyzeObstacles(
@@ -111,6 +123,9 @@ void AdvancedObstacleAnalyzer::analyzeObstacles(
 
     // 在函数最后添加自动可视化发布
     publishAllVisualization(power_lines, obstacle_results, warning_cloud);
+    // 执行接近度分析并发布预警
+    ProximityAlert proximity_alert = analyzeProximityAlert(warning_cloud);
+    publishProximityAlert(proximity_alert);
 }
 
 void AdvancedObstacleAnalyzer::cleanEnvironmentCloud(
@@ -284,11 +299,11 @@ void AdvancedObstacleAnalyzer::computeLayeredWarning(
             continue;  // 跳过，不加入预警点云
         }
         
-        // 检查点是否在电力线通道内
-        float min_distance_to_axis;
-        if (!isPointInPowerlineCorridor(point, power_lines, min_distance_to_axis)) {
-            continue;  // 不在通道内，跳过
-        }
+        // // 检查点是否在电力线通道内
+        // float min_distance_to_axis;
+        // if (!isPointInPowerlineCorridor(point, power_lines, min_distance_to_axis)) {
+        //     continue;  // 不在通道内，跳过
+        // }
         
         corridor_points++;
         
@@ -299,16 +314,22 @@ void AdvancedObstacleAnalyzer::computeLayeredWarning(
         colored_pt.z = pt.z;
 
         
-        // 根据到电力线轴线的距离分层并设置颜色
-        if (min_distance_to_axis <= warning_level1_radius_) {
-            // 红色：危险
-            colored_pt.r = 255; colored_pt.g = 0; colored_pt.b = 0;
-        } else if (min_distance_to_axis <= warning_level2_radius_) {
-            // 黄色：警告
-            colored_pt.r = 255; colored_pt.g = 255; colored_pt.b = 0;
+        // 使用增强的电力线列表检查通道
+        float min_distance_to_axis;
+        bool in_corridor = isPointInPowerlineCorridor(point, power_lines, min_distance_to_axis);
+        
+        if (in_corridor) {
+            corridor_points++;
+            // 根据到电力线轴线的距离分层并设置颜色
+            if (min_distance_to_axis <= warning_level1_radius_) {
+                colored_pt.r = 255; colored_pt.g = 0; colored_pt.b = 0;    // 红色：危险
+            } else if (min_distance_to_axis <= warning_level2_radius_) {
+                colored_pt.r = 255; colored_pt.g = 255; colored_pt.b = 0;  // 黄色：警告
+            } else {
+                colored_pt.r = 0; colored_pt.g = 255; colored_pt.b = 0;    // 绿色：安全
+            }
         } else {
-            // 绿色：安全
-            colored_pt.r = 0; colored_pt.g = 255; colored_pt.b = 0;
+            colored_pt.r = 128; colored_pt.g = 128; colored_pt.b = 255;    // 浅蓝色：框架外
         }
         
         warning_cloud.merged_warning_cloud->push_back(colored_pt);
@@ -598,28 +619,7 @@ void AdvancedObstacleAnalyzer::publishAllVisualization(
 }
 
 
-// bool AdvancedObstacleAnalyzer::isNearPowerlineEnd(
-//     const Eigen::Vector3f& point,
-//     const std::vector<ReconstructedPowerLine>& power_lines,
-//     double end_threshold) {
 
-//     for (const auto& line : power_lines) {
-//         if (line.fitted_curve_points.size() < 2) continue;
-        
-//         // 检查到起点和终点的距离
-//         Eigen::Vector3f start_point = line.fitted_curve_points.front();
-//         Eigen::Vector3f end_point = line.fitted_curve_points.back();
-        
-//         float dist_to_start = (point - start_point).norm();
-//         float dist_to_end = (point - end_point).norm();
-        
-//         if (dist_to_start < end_threshold || dist_to_end < end_threshold) {
-//             return true;
-//         }
-//     }
-
-//     return false;
-// }
 bool AdvancedObstacleAnalyzer::isNearPowerlineEnd(
     const Eigen::Vector3f& point,
     const std::vector<ReconstructedPowerLine>& power_lines,
@@ -671,6 +671,7 @@ bool AdvancedObstacleAnalyzer::isNearPowerlineEnd(
     return false;
 }
    
+
 void AdvancedObstacleAnalyzer::publishWarningRadius(
     const std::vector<ReconstructedPowerLine>& power_lines,
     ros::Publisher& marker_pub,
@@ -678,24 +679,25 @@ void AdvancedObstacleAnalyzer::publishWarningRadius(
     
     visualization_msgs::MarkerArray marker_array;
     
+    // 首先为每条电力线创建原始框架
+    std::vector<WarningBox> level1_boxes, level2_boxes;
+    
     for (size_t line_idx = 0; line_idx < power_lines.size(); ++line_idx) {
         const auto& line = power_lines[line_idx];
         
         if (line.fitted_curve_points.size() < 2) continue;
         
-        // 计算电力线的中心点
+        // 计算电力线的中心点和方向
         Eigen::Vector3f start_pt = line.fitted_curve_points.front();
         Eigen::Vector3f end_pt = line.fitted_curve_points.back();
         Eigen::Vector3f center = (start_pt + end_pt) / 2.0f;
-        
-        // 计算电力线的主方向和长度
         Eigen::Vector3f direction = (end_pt - start_pt).normalized();
         float line_length = (end_pt - start_pt).norm();
         
-        // 计算旋转矩阵（将Z轴对齐到电力线方向）
+        // 计算旋转
         Eigen::Vector3f z_axis = direction;
         Eigen::Vector3f x_axis = z_axis.cross(Eigen::Vector3f::UnitZ()).normalized();
-        if (x_axis.norm() < 0.1) {  // 如果电力线垂直，选择其他轴
+        if (x_axis.norm() < 0.1) {
             x_axis = z_axis.cross(Eigen::Vector3f::UnitX()).normalized();
         }
         Eigen::Vector3f y_axis = z_axis.cross(x_axis).normalized();
@@ -704,112 +706,97 @@ void AdvancedObstacleAnalyzer::publishWarningRadius(
         rotation.col(0) = x_axis;
         rotation.col(1) = y_axis;
         rotation.col(2) = z_axis;
-        
         Eigen::Quaternionf q(rotation);
         
-        // 第一层预警框架（红色，3米半径）
-        visualization_msgs::Marker box1;
-        box1.header.frame_id = frame_id;
-        box1.header.stamp = ros::Time::now();
-        box1.ns = "warning_box_level1";
-        box1.id = line_idx;
-        box1.type = visualization_msgs::Marker::CUBE;
-        box1.action = visualization_msgs::Marker::ADD;
+        // 创建level1框架
+        WarningBox box1;
+        box1.center = center;
+        box1.size = Eigen::Vector3f(warning_level1_radius_ * 2, warning_level1_radius_ * 2, line_length);
+        box1.rotation = q;
+        box1.line_length = line_length;
+        box1.level = 1;
+        box1.merged_line_indices.push_back(line_idx);
+        level1_boxes.push_back(box1);
         
-        box1.pose.position.x = center.x();
-        box1.pose.position.y = center.y();
-        box1.pose.position.z = center.z();
-        box1.pose.orientation.x = q.x();
-        box1.pose.orientation.y = q.y();
-        box1.pose.orientation.z = q.z();
-        box1.pose.orientation.w = q.w();
-        
-        // 尺寸：长度=电力线长度，宽高=预警半径*2
-        box1.scale.x = warning_level1_radius_ * 2;  // 宽度
-        box1.scale.y = warning_level1_radius_ * 2;  // 高度
-        box1.scale.z = line_length;                 // 长度（沿电力线方向）
-        
-        box1.color.r = 1.0; box1.color.g = 0.0; box1.color.b = 0.0;
-        box1.color.a = 0.15;  // 更低的透明度，只显示框架
-        
-        marker_array.markers.push_back(box1);
-        
-        // 第二层预警框架（黄色，8米半径）
-        visualization_msgs::Marker box2 = box1;
-        box2.ns = "warning_box_level2";
-        box2.id = line_idx + 100;  // 不同的ID
-        
-        box2.scale.x = warning_level2_radius_ * 2;  // 宽度
-        box2.scale.y = warning_level2_radius_ * 2;  // 高度
-        box2.scale.z = line_length;                 // 长度
-        
-        box2.color.r = 1.0; box2.color.g = 1.0; box2.color.b = 0.0;
-        box2.color.a = 0.1;   // 外层更透明
-        
-        marker_array.markers.push_back(box2);
-        
-        // 添加框架边线（使框架更明显）
-        for (int level = 1; level <= 2; ++level) {
-            float radius = (level == 1) ? warning_level1_radius_ : warning_level2_radius_;
-            
-            visualization_msgs::Marker frame_lines;
-            frame_lines.header.frame_id = frame_id;
-            frame_lines.header.stamp = ros::Time::now();
-            frame_lines.ns = (level == 1) ? "warning_frame_level1" : "warning_frame_level2";
-            frame_lines.id = line_idx;
-            frame_lines.type = visualization_msgs::Marker::LINE_LIST;
-            frame_lines.action = visualization_msgs::Marker::ADD;
-            
-            frame_lines.scale.x = 0.05;  // 线宽
-            
-            if (level == 1) {
-                frame_lines.color.r = 1.0; frame_lines.color.g = 0.0; frame_lines.color.b = 0.0;
-            } else {
-                frame_lines.color.r = 1.0; frame_lines.color.g = 1.0; frame_lines.color.b = 0.0;
-            }
-            frame_lines.color.a = 0.8;
-            
-            // 计算框架的8个顶点
-            std::vector<Eigen::Vector3f> corners;
-            for (int i = 0; i < 8; ++i) {
-                float x = (i & 1) ? radius : -radius;
-                float y = (i & 2) ? radius : -radius;
-                float z = (i & 4) ? line_length/2 : -line_length/2;
-                
-                Eigen::Vector3f local_corner(x, y, z);
-                Eigen::Vector3f world_corner = rotation * local_corner + center;
-                corners.push_back(world_corner);
-            }
-            
-            // 添加12条边线
-            int edges[12][2] = {
-                {0,1}, {1,3}, {3,2}, {2,0},  // 底面
-                {4,5}, {5,7}, {7,6}, {6,4},  // 顶面
-                {0,4}, {1,5}, {2,6}, {3,7}   // 竖直边
-            };
-            
-            for (int e = 0; e < 12; ++e) {
-                geometry_msgs::Point p1, p2;
-                p1.x = corners[edges[e][0]].x();
-                p1.y = corners[edges[e][0]].y();
-                p1.z = corners[edges[e][0]].z();
-                p2.x = corners[edges[e][1]].x();
-                p2.y = corners[edges[e][1]].y();
-                p2.z = corners[edges[e][1]].z();
-                
-                frame_lines.points.push_back(p1);
-                frame_lines.points.push_back(p2);
-            }
-            
-            marker_array.markers.push_back(frame_lines);
-        }
+        // 创建level2框架
+        WarningBox box2;
+        box2.center = center;
+        box2.size = Eigen::Vector3f(warning_level2_radius_ * 2, warning_level2_radius_ * 2, line_length);
+        box2.rotation = q;
+        box2.line_length = line_length;
+        box2.level = 2;
+        box2.merged_line_indices.push_back(line_idx);
+        level2_boxes.push_back(box2);
     }
     
-    // 清理旧的标记
-    for (size_t j = power_lines.size(); j < last_num_powerlines_; ++j) {
-        // 清理旧的盒子和线框
-        for (const auto& ns : {"warning_box_level1", "warning_box_level2", 
-                              "warning_frame_level1", "warning_frame_level2"}) {
+    // 合并重叠的框架
+    std::vector<WarningBox> merged_level1 = mergeOverlappingBoxes(level1_boxes, 0.3f);
+    std::vector<WarningBox> merged_level2 = mergeOverlappingBoxes(level2_boxes, 0.3f);
+    
+    // 发布合并后的level1框架
+    for (size_t i = 0; i < merged_level1.size(); ++i) {
+        const auto& box = merged_level1[i];
+        
+        visualization_msgs::Marker box_marker;
+        box_marker.header.frame_id = frame_id;
+        box_marker.header.stamp = ros::Time::now();
+        box_marker.ns = "warning_box_level1";
+        box_marker.id = i;
+        box_marker.type = visualization_msgs::Marker::CUBE;
+        box_marker.action = visualization_msgs::Marker::ADD;
+        
+        box_marker.pose.position.x = box.center.x();
+        box_marker.pose.position.y = box.center.y();
+        box_marker.pose.position.z = box.center.z();
+        box_marker.pose.orientation.x = box.rotation.x();
+        box_marker.pose.orientation.y = box.rotation.y();
+        box_marker.pose.orientation.z = box.rotation.z();
+        box_marker.pose.orientation.w = box.rotation.w();
+        
+        box_marker.scale.x = box.size.x();
+        box_marker.scale.y = box.size.y();
+        box_marker.scale.z = box.size.z();
+        
+        box_marker.color.r = 1.0; box_marker.color.g = 0.0; box_marker.color.b = 0.0;
+        box_marker.color.a = 0.15;
+        
+        marker_array.markers.push_back(box_marker);
+    }
+    
+    // 发布合并后的level2框架
+    for (size_t i = 0; i < merged_level2.size(); ++i) {
+        const auto& box = merged_level2[i];
+        
+        visualization_msgs::Marker box_marker;
+        box_marker.header.frame_id = frame_id;
+        box_marker.header.stamp = ros::Time::now();
+        box_marker.ns = "warning_box_level2";
+        box_marker.id = i + 100;
+        box_marker.type = visualization_msgs::Marker::CUBE;
+        box_marker.action = visualization_msgs::Marker::ADD;
+        
+        box_marker.pose.position.x = box.center.x();
+        box_marker.pose.position.y = box.center.y();
+        box_marker.pose.position.z = box.center.z();
+        box_marker.pose.orientation.x = box.rotation.x();
+        box_marker.pose.orientation.y = box.rotation.y();
+        box_marker.pose.orientation.z = box.rotation.z();
+        box_marker.pose.orientation.w = box.rotation.w();
+        
+        box_marker.scale.x = box.size.x();
+        box_marker.scale.y = box.size.y();
+        box_marker.scale.z = box.size.z();
+        
+        box_marker.color.r = 1.0; box_marker.color.g = 1.0; box_marker.color.b = 0.0;
+        box_marker.color.a = 0.1;
+        
+        marker_array.markers.push_back(box_marker);
+    }
+    
+    // 清理旧的标记（删除多余的marker）
+    size_t max_markers = std::max(merged_level1.size(), merged_level2.size());
+    for (size_t j = max_markers; j < last_num_powerlines_ + 10; ++j) {
+        for (const auto& ns : {"warning_box_level1", "warning_box_level2"}) {
             visualization_msgs::Marker del_marker;
             del_marker.header.frame_id = frame_id;
             del_marker.header.stamp = ros::Time::now();
@@ -821,8 +808,10 @@ void AdvancedObstacleAnalyzer::publishWarningRadius(
     }
     
     marker_pub.publish(marker_array);
+    
+    ROS_INFO("[AdvancedObstacleAnalyzer] Published merged warning boxes: L1=%zu, L2=%zu (from %zu powerlines)", 
+             merged_level1.size(), merged_level2.size(), power_lines.size());
 }
-
 
 bool AdvancedObstacleAnalyzer::isPointInPowerlineCorridor(
     const Eigen::Vector3f& point,
@@ -880,4 +869,283 @@ float AdvancedObstacleAnalyzer::pointToLineSegmentDistance(
     Eigen::Vector3f projection = line_start + t * line_vec;
     
     return (point - projection).norm();
+}
+
+float AdvancedObstacleAnalyzer::calculateBoxOverlapRatio(const WarningBox& box1, const WarningBox& box2) {
+    // 如果等级不同，不合并
+    if (box1.level != box2.level) {
+        return 0.0f;
+    }
+    
+    // 简化计算：使用中心点距离和框架尺寸来估算重叠度
+    Eigen::Vector3f center_dist = box1.center - box2.center;
+    float distance = center_dist.norm();
+    
+    // 计算两个框架的平均半径
+    float radius1 = (box1.size.x() + box1.size.y()) / 4.0f;  // 取xy平面的平均半径
+    float radius2 = (box2.size.x() + box2.size.y()) / 4.0f;
+    
+    // 计算重叠比例
+    float overlap_distance = radius1 + radius2 - distance;
+    if (overlap_distance <= 0) {
+        return 0.0f;  // 没有重叠
+    }
+    
+    // 重叠度 = 重叠距离 / 较小框架的直径
+    float smaller_diameter = std::min(radius1, radius2) * 2;
+    float overlap_ratio = overlap_distance / smaller_diameter;
+    
+    return std::min(1.0f, overlap_ratio);
+}
+
+std::vector<AdvancedObstacleAnalyzer::WarningBox> AdvancedObstacleAnalyzer::mergeOverlappingBoxes(
+    const std::vector<WarningBox>& boxes, float overlap_threshold) {
+    
+    std::vector<WarningBox> result;
+    std::vector<bool> merged(boxes.size(), false);
+    
+    for (size_t i = 0; i < boxes.size(); ++i) {
+        if (merged[i]) continue;
+        
+        std::vector<WarningBox> boxes_to_merge;
+        boxes_to_merge.push_back(boxes[i]);
+        merged[i] = true;
+        
+        // 查找需要与当前框架合并的其他框架
+        for (size_t j = i + 1; j < boxes.size(); ++j) {
+            if (merged[j]) continue;
+            
+            bool should_merge = false;
+            // 检查是否与当前合并组中的任何框架重叠
+            for (const auto& merged_box : boxes_to_merge) {
+                float overlap = calculateBoxOverlapRatio(merged_box, boxes[j]);
+                if (overlap > overlap_threshold) {
+                    should_merge = true;
+                    break;
+                }
+            }
+            
+            if (should_merge) {
+                boxes_to_merge.push_back(boxes[j]);
+                merged[j] = true;
+            }
+        }
+        
+        // 如果只有一个框架，直接添加；否则创建合并框架
+        if (boxes_to_merge.size() == 1) {
+            result.push_back(boxes_to_merge[0]);
+        } else {
+            result.push_back(createMergedBox(boxes_to_merge));
+        }
+    }
+    
+    return result;
+}
+
+AdvancedObstacleAnalyzer::WarningBox AdvancedObstacleAnalyzer::createMergedBox(
+    const std::vector<WarningBox>& boxes_to_merge) {
+    
+    if (boxes_to_merge.empty()) {
+        return WarningBox();
+    }
+    
+    WarningBox merged_box;
+    merged_box.level = boxes_to_merge[0].level;
+    
+    // 收集所有合并的电力线索引
+    for (const auto& box : boxes_to_merge) {
+        merged_box.merged_line_indices.insert(
+            merged_box.merged_line_indices.end(),
+            box.merged_line_indices.begin(),
+            box.merged_line_indices.end()
+        );
+    }
+    
+    // 计算所有框架中心点的重心
+    Eigen::Vector3f center_sum = Eigen::Vector3f::Zero();
+    for (const auto& box : boxes_to_merge) {
+        center_sum += box.center;
+    }
+    merged_box.center = center_sum / static_cast<float>(boxes_to_merge.size());
+    
+    // 计算主方向：选择最长的电力线的方向作为主方向
+    float max_length = 0;
+    Eigen::Quaternionf main_rotation = boxes_to_merge[0].rotation;
+    for (const auto& box : boxes_to_merge) {
+        if (box.line_length > max_length) {
+            max_length = box.line_length;
+            main_rotation = box.rotation;
+        }
+    }
+    merged_box.rotation = main_rotation;
+    
+    // 将所有框架的顶点变换到合并框架的局部坐标系
+    Eigen::Matrix3f inv_rotation = main_rotation.toRotationMatrix().transpose();
+    
+    Eigen::Vector3f local_min(1e9, 1e9, 1e9);
+    Eigen::Vector3f local_max(-1e9, -1e9, -1e9);
+    
+    for (const auto& box : boxes_to_merge) {
+        // 计算当前框架的8个顶点
+        std::vector<Eigen::Vector3f> corners;
+        for (int i = 0; i < 8; ++i) {
+            float x = (i & 1) ? box.size.x()/2 : -box.size.x()/2;
+            float y = (i & 2) ? box.size.y()/2 : -box.size.y()/2;
+            float z = (i & 4) ? box.size.z()/2 : -box.size.z()/2;
+            
+            Eigen::Vector3f local_corner(x, y, z);
+            Eigen::Matrix3f box_rotation = box.rotation.toRotationMatrix();
+            Eigen::Vector3f world_corner = box_rotation * local_corner + box.center;
+            
+            // 变换到合并框架的局部坐标系
+            Eigen::Vector3f relative_pos = world_corner - merged_box.center;
+            Eigen::Vector3f local_pos = inv_rotation * relative_pos;
+            
+            local_min = local_min.cwiseMin(local_pos);
+            local_max = local_max.cwiseMax(local_pos);
+        }
+    }
+    
+    // 设置合并框架的尺寸
+    merged_box.size = local_max - local_min;
+    
+    // 调整中心点到实际的几何中心
+    Eigen::Vector3f local_center = (local_min + local_max) / 2.0f;
+    Eigen::Matrix3f rotation_matrix = main_rotation.toRotationMatrix();
+    merged_box.center += rotation_matrix * local_center;
+    
+    merged_box.line_length = merged_box.size.z();  // z方向为电力线方向
+    
+    return merged_box;
+}
+
+ProximityAlert AdvancedObstacleAnalyzer::analyzeProximityAlert(
+    const LayeredWarningCloud& warning_cloud) {
+    
+    ProximityAlert alert;
+    alert.red_zone_alert = false;
+    alert.yellow_zone_alert = false;
+    alert.red_zone_clusters = 0;
+    alert.yellow_zone_clusters = 0;
+    
+    if (!warning_cloud.merged_warning_cloud || warning_cloud.merged_warning_cloud->empty()) {
+        return alert;
+    }
+    
+    // 对红色区域进行聚类分析
+    std::vector<pcl::PointIndices> red_cluster_indices;
+    performColorBasedClustering(warning_cloud.merged_warning_cloud, 
+                               255, 0, 0,  // 红色
+                               red_cluster_indices, 
+                               alert.red_zone_centers);
+    
+    // 对黄色区域进行聚类分析  
+    std::vector<pcl::PointIndices> yellow_cluster_indices;
+    performColorBasedClustering(warning_cloud.merged_warning_cloud,
+                               255, 255, 0,  // 黄色
+                               yellow_cluster_indices,
+                               alert.yellow_zone_centers);
+    
+    // 设置预警状态
+    alert.red_zone_clusters = red_cluster_indices.size();
+    alert.yellow_zone_clusters = yellow_cluster_indices.size();
+    alert.red_zone_alert = (alert.red_zone_clusters > 0);
+    alert.yellow_zone_alert = (alert.yellow_zone_clusters > 0);
+    
+    ROS_INFO("[ProximityAlert] Red zone: %d clusters, Yellow zone: %d clusters", 
+             alert.red_zone_clusters, alert.yellow_zone_clusters);
+    
+    return alert;
+}
+
+void AdvancedObstacleAnalyzer::performColorBasedClustering(
+    const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& colored_cloud,
+    int target_r, int target_g, int target_b,
+    std::vector<pcl::PointIndices>& cluster_indices,
+    std::vector<Eigen::Vector3f>& cluster_centers) {
+    
+    // 提取指定颜色的点
+    pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    
+    for (const auto& pt : colored_cloud->points) {
+        // 检查颜色是否匹配（允许一定误差）
+        if (abs(pt.r - target_r) < 10 && 
+            abs(pt.g - target_g) < 10 && 
+            abs(pt.b - target_b) < 10) {
+            
+            pcl::PointXYZ xyz_pt;
+            xyz_pt.x = pt.x;
+            xyz_pt.y = pt.y;
+            xyz_pt.z = pt.z;
+            filtered_cloud->push_back(xyz_pt);
+        }
+    }
+    
+    if (filtered_cloud->size() < proximity_min_cluster_size_) {
+        return;
+    }
+    
+    // 欧式聚类
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
+    tree->setInputCloud(filtered_cloud);
+    
+    pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
+    ec.setClusterTolerance(proximity_cluster_tolerance_);
+    ec.setMinClusterSize(proximity_min_cluster_size_);
+    ec.setMaxClusterSize(proximity_max_cluster_size_);
+    ec.setSearchMethod(tree);
+    ec.setInputCloud(filtered_cloud);
+    ec.extract(cluster_indices);
+    
+    // 计算聚类中心
+    cluster_centers.clear();
+    for (const auto& indices : cluster_indices) {
+        Eigen::Vector3f center = Eigen::Vector3f::Zero();
+        for (int idx : indices.indices) {
+            const auto& pt = filtered_cloud->points[idx];
+            center += Eigen::Vector3f(pt.x, pt.y, pt.z);
+        }
+        center /= static_cast<float>(indices.indices.size());
+        cluster_centers.push_back(center);
+    }
+}
+
+void AdvancedObstacleAnalyzer::publishProximityAlert(const ProximityAlert& alert) {
+    // 发布红色区域预警
+    std_msgs::Bool red_msg;
+    red_msg.data = alert.red_zone_alert;
+    red_zone_alert_pub_.publish(red_msg);
+    
+    // 发布黄色区域预警
+    std_msgs::Bool yellow_msg;
+    yellow_msg.data = alert.yellow_zone_alert;
+    yellow_zone_alert_pub_.publish(yellow_msg);
+    
+    // 发布详细信息
+    std_msgs::String info_msg;
+    std::ostringstream oss;
+    oss << "PROXIMITY_ALERT|";
+    oss << "RED:" << (alert.red_zone_alert ? "TRUE" : "FALSE") << "|";
+    oss << "YELLOW:" << (alert.yellow_zone_alert ? "TRUE" : "FALSE") << "|";
+    oss << "RED_CLUSTERS:" << alert.red_zone_clusters << "|";
+    oss << "YELLOW_CLUSTERS:" << alert.yellow_zone_clusters;
+    
+    if (!alert.red_zone_centers.empty()) {
+        oss << "|RED_CENTERS:";
+        for (const auto& center : alert.red_zone_centers) {
+            oss << "(" << std::fixed << std::setprecision(2) 
+                << center.x() << "," << center.y() << "," << center.z() << ")";
+        }
+    }
+    
+    if (!alert.yellow_zone_centers.empty()) {
+        oss << "|YELLOW_CENTERS:";
+        for (const auto& center : alert.yellow_zone_centers) {
+            oss << "(" << std::fixed << std::setprecision(2)
+                << center.x() << "," << center.y() << "," << center.z() << ")";
+        }
+    }
+    
+    info_msg.data = oss.str();
+    proximity_info_pub_.publish(info_msg);
 }

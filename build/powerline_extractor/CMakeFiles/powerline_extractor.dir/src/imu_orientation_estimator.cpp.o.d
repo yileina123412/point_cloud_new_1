@@ -1539,7 +1539,8 @@ powerline_extractor/CMakeFiles/powerline_extractor.dir/src/imu_orientation_estim
  /usr/include/kdl/utilities/utility.h \
  /usr/include/kdl/utilities/kdl-config.h /usr/include/kdl/frames.inl \
  /opt/ros/noetic/include/tf2/LinearMath/Matrix3x3.h \
- /usr/include/eigen3/Eigen/Dense /usr/include/eigen3/Eigen/Core \
+ /opt/ros/noetic/include/std_msgs/Bool.h /usr/include/eigen3/Eigen/Dense \
+ /usr/include/eigen3/Eigen/Core \
  /usr/include/eigen3/Eigen/src/Core/util/DisableStupidWarnings.h \
  /usr/include/eigen3/Eigen/src/Core/util/Macros.h \
  /usr/include/eigen3/Eigen/src/Core/util/MKL_support.h \

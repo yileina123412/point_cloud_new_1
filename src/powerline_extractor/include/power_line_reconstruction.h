@@ -54,6 +54,9 @@ public:
     void reconstructPowerLines(const pcl::PointCloud<pcl::PointXYZI>::Ptr& input_cloud,
                               pcl::PointCloud<pcl::PointXYZI>::Ptr& output_cloud,
                               std::vector<ReconstructedPowerLine>& power_lines);
+    // 分离完整的电力线点云
+    void separateCompletePowerLines(const pcl::PointCloud<pcl::PointXYZI>::Ptr& complete_cloud,
+                               std::vector<ReconstructedPowerLine>& power_lines);
 
 private:
     // ROS相关

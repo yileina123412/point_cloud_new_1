@@ -29,7 +29,6 @@
 #include "advanced_obstacle_analyzer.h"
 // #include "power_line_probability_map.h"
 #include "power_line_probability_map.h"
-#include "power_line_tracker.h"
 #include "enhanced_power_line_tracker.h"
 #include "imu_orientation_estimator.h"
 
@@ -148,14 +147,12 @@ private:
     //概率地图
     // std::unique_ptr<PowerLineProbabilityMap> prob_map_;
     std::unique_ptr<PowerLineProbabilityMap> prob_map_;
-    std::vector<LineROIInfo> line_rois_;  // 2. 获取概率地图的ROI信息
+    pcl::PointCloud<pcl::PointXYZI>::Ptr prob_map_output_cloud_;
 
     //ROI管理器
 
     pcl::PointCloud<pcl::PointXYZI>::Ptr roi_output_cloud_;
-    // 跟踪
-    std::unique_ptr<PowerLineTracker> tracker_;
-    std::vector<ReconstructedPowerLine> complete_result;
+
 
     std::unique_ptr<EnhancedPowerLineTracker> enhanced_tracker_;  //增强版跟踪器
     std::vector<ReconstructedPowerLine> enhanced_complete_result;
@@ -199,6 +196,9 @@ private:
     bool first_cloud_received_;
     ros::Time last_process_time_;
     double process_frequency_;
+
+    // imu重置
+    bool need_reset_detection_;  // 是否需要重置检测
     // 状态变量
     bool is_first_frame_;
     int frame_count_;

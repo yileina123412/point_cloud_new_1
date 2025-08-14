@@ -1685,30 +1685,6 @@ src/power_line_reconstruction.cpp.s:
 	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_reconstruction.cpp.s
 .PHONY : src/power_line_reconstruction.cpp.s
 
-src/power_line_tracker.o: src/power_line_tracker.cpp.o
-.PHONY : src/power_line_tracker.o
-
-# target to build an object file
-src/power_line_tracker.cpp.o:
-	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.o
-.PHONY : src/power_line_tracker.cpp.o
-
-src/power_line_tracker.i: src/power_line_tracker.cpp.i
-.PHONY : src/power_line_tracker.i
-
-# target to preprocess a source file
-src/power_line_tracker.cpp.i:
-	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.i
-.PHONY : src/power_line_tracker.cpp.i
-
-src/power_line_tracker.s: src/power_line_tracker.cpp.s
-.PHONY : src/power_line_tracker.s
-
-# target to generate assembly for a file
-src/power_line_tracker.cpp.s:
-	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/power_line_tracker.cpp.s
-.PHONY : src/power_line_tracker.cpp.s
-
 src/powerline_extractor.o: src/powerline_extractor.cpp.o
 .PHONY : src/powerline_extractor.o
 
@@ -1780,30 +1756,6 @@ src/preprocessing/multilevel_preprocessor.s: src/preprocessing/multilevel_prepro
 src/preprocessing/multilevel_preprocessor.cpp.s:
 	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/preprocessing/multilevel_preprocessor.cpp.s
 .PHONY : src/preprocessing/multilevel_preprocessor.cpp.s
-
-src/roi_manager.o: src/roi_manager.cpp.o
-.PHONY : src/roi_manager.o
-
-# target to build an object file
-src/roi_manager.cpp.o:
-	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.o
-.PHONY : src/roi_manager.cpp.o
-
-src/roi_manager.i: src/roi_manager.cpp.i
-.PHONY : src/roi_manager.i
-
-# target to preprocess a source file
-src/roi_manager.cpp.i:
-	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.i
-.PHONY : src/roi_manager.cpp.i
-
-src/roi_manager.s: src/roi_manager.cpp.s
-.PHONY : src/roi_manager.s
-
-# target to generate assembly for a file
-src/roi_manager.cpp.s:
-	cd /home/furina/powerline_extraction/point_cloud_history01/point_cloud_new_1/build && $(MAKE) $(MAKESILENT) -f powerline_extractor/CMakeFiles/powerline_extractor.dir/build.make powerline_extractor/CMakeFiles/powerline_extractor.dir/src/roi_manager.cpp.s
-.PHONY : src/roi_manager.cpp.s
 
 src/web_pub/data_republisher.o: src/web_pub/data_republisher.cpp.o
 .PHONY : src/web_pub/data_republisher.o
@@ -1987,9 +1939,6 @@ help:
 	@echo "... src/power_line_reconstruction.o"
 	@echo "... src/power_line_reconstruction.i"
 	@echo "... src/power_line_reconstruction.s"
-	@echo "... src/power_line_tracker.o"
-	@echo "... src/power_line_tracker.i"
-	@echo "... src/power_line_tracker.s"
 	@echo "... src/powerline_extractor.o"
 	@echo "... src/powerline_extractor.i"
 	@echo "... src/powerline_extractor.s"
@@ -1999,9 +1948,6 @@ help:
 	@echo "... src/preprocessing/multilevel_preprocessor.o"
 	@echo "... src/preprocessing/multilevel_preprocessor.i"
 	@echo "... src/preprocessing/multilevel_preprocessor.s"
-	@echo "... src/roi_manager.o"
-	@echo "... src/roi_manager.i"
-	@echo "... src/roi_manager.s"
 	@echo "... src/web_pub/data_republisher.o"
 	@echo "... src/web_pub/data_republisher.i"
 	@echo "... src/web_pub/data_republisher.s"

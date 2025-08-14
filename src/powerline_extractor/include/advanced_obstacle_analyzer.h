@@ -1,3 +1,4 @@
+
 #ifndef ADVANCED_OBSTACLE_ANALYZER_H_
 #define ADVANCED_OBSTACLE_ANALYZER_H_
 
@@ -13,6 +14,9 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <Eigen/Geometry>
 #include <iomanip>
+#include <std_msgs/Bool.h>
+#include <geometry_msgs/Point.h>
+#include <std_msgs/String.h>
 #include "power_line_reconstruction.h"
 
 // 障碍物包围盒数据结构
@@ -36,7 +40,15 @@ struct LayeredWarningCloud {
         end_obstacle_cloud.reset(new pcl::PointCloud<pcl::PointXYZI>);
     }
 };
-
+// 预警信号结构
+struct ProximityAlert {
+    bool red_zone_alert;        // 红色区域预警
+    bool yellow_zone_alert;     // 黄色区域预警
+    int red_zone_clusters;      // 红色区域聚类数量
+    int yellow_zone_clusters;   // 黄色区域聚类数量
+    std::vector<Eigen::Vector3f> red_zone_centers;    // 红色区域聚类中心
+    std::vector<Eigen::Vector3f> yellow_zone_centers; // 黄色区域聚类中心
+};
 class AdvancedObstacleAnalyzer {
 public:
     AdvancedObstacleAnalyzer(ros::NodeHandle& nh, const std::string& frame_id = "map");
@@ -82,6 +94,15 @@ private:
     ros::Publisher merged_warning_pub_;
     ros::Publisher end_obstacle_pub_;
     ros::Publisher warning_radius_pub_;  // 预警半径框架发布器
+
+    // 预警发布器
+    ros::Publisher red_zone_alert_pub_;
+    ros::Publisher yellow_zone_alert_pub_;
+    ros::Publisher proximity_info_pub_;
+    // 预警聚类参数
+    double proximity_cluster_tolerance_;    // 接近度聚类容差
+    int proximity_min_cluster_size_;       // 最小聚类点数
+    int proximity_max_cluster_size_;       // 最大聚类点数
     
     // 聚类参数
     double cluster_tolerance_;           // 欧式聚类距离
@@ -190,6 +211,34 @@ private:
         const Eigen::Vector3f& line_start,
         const Eigen::Vector3f& line_end
     );
+
+    // 在现有私有函数后添加
+    struct WarningBox {
+        Eigen::Vector3f center;
+        Eigen::Vector3f size;
+        Eigen::Quaternionf rotation;
+        float line_length;
+        int level;  // 1 or 2
+        std::vector<int> merged_line_indices;  // 合并的电力线索引
+        
+        WarningBox() : level(1) {}
+    };
+
+    // 框架重叠和合并相关函数
+    float calculateBoxOverlapRatio(const WarningBox& box1, const WarningBox& box2);
+    std::vector<WarningBox> mergeOverlappingBoxes(const std::vector<WarningBox>& boxes, float overlap_threshold = 0.3f);
+    WarningBox createMergedBox(const std::vector<WarningBox>& boxes_to_merge);
+
+    // 接近度分析函数
+    ProximityAlert analyzeProximityAlert(const LayeredWarningCloud& warning_cloud);
+    void performColorBasedClustering(
+        const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& colored_cloud,
+        int target_r, int target_g, int target_b,
+        std::vector<pcl::PointIndices>& cluster_indices,
+        std::vector<Eigen::Vector3f>& cluster_centers
+    );
+    void publishProximityAlert(const ProximityAlert& alert);
+
 };
 
 #endif // ADVANCED_OBSTACLE_ANALYZER_H_
